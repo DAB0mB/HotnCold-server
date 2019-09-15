@@ -11,6 +11,7 @@ export default gql`
     lastName: String!
     gender: String!
     birthDate: String!
+    age: String!
     occupation: String
     bio: String
     pictures: [String]
