@@ -1,10 +1,10 @@
-import bcrypt from 'bcrypt';
+import sequelize from '../sequelize';
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
     firstName: {
       type: DataTypes.STRING,
-      unique: true,
+      unique: false,
       allowNull: false,
       validate: {
         notEmpty: true,
@@ -12,55 +12,53 @@ const user = (sequelize, DataTypes) => {
     },
     lastName: {
       type: DataTypes.STRING,
-      unique: true,
+      unique: false,
       allowNull: false,
       validate: {
         notEmpty: true,
       },
     },
-    age: {
-      type: DataTypes.INTEGER,
-      unique: true,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
-    },
-    job: {
+    gender: {
       type: DataTypes.STRING,
-      unique: true,
+      unique: false,
       allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
+    birthDate: {
+      type: DataTypes.STRING,
+      unique: false,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
+    occupation: {
+      type: DataTypes.STRING,
+      unique: false,
+      allowNull: true,
       validate: {
         notEmpty: true,
       },
     },
     bio: {
       type: DataTypes.STRING,
-      unique: true,
-      allowNull: false,
+      unique: false,
+      allowNull: true,
       validate: {
         notEmpty: true,
       },
     },
     pictures: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      unique: true,
-      allowNull: false,
+      unique: false,
+      allowNull: true,
       validate: {
         notEmpty: true,
       },
     }
   });
-
-  User.findLatest = async function () {
-    const users = await User.findAll({
-      limit: 1,
-      where: {},
-      order: [[ 'createdAt', 'DESC' ]],
-    });
-
-    return users[0];
-  };
 
   return User;
 };

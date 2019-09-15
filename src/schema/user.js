@@ -9,8 +9,9 @@ export default gql`
     id: ID!
     firstName: String!
     lastName: String!
-    age: Int!
-    job: String
+    gender: String!
+    birthDate: String!
+    occupation: String
     bio: String
     pictures: [String]
   }
