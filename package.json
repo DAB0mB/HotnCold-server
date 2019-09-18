@@ -1,5 +1,5 @@
 {
-  "name": "SocioChat-server",
+  "name": "HotnCold-server",
   "version": "1.0.0",
   "main": "index.js",
   "engines": {
@@ -7,9 +7,7 @@
   },
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
-    "test:run-server": "TEST_DATABASE=socio_chat_test yarn start",
-    "test:execute-test": "mocha --require @babel/register 'src/**/*.spec.js'",
-    "test": "echo \"No test specified\" && exit 0",
+    "test": "jest",
     "create-dummy-users": "babel-node src/migrations/create-dummy-users.js"
   },
   "devDependencies": {

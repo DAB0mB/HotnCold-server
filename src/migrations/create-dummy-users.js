@@ -1,4 +1,5 @@
 import 'dotenv/config';
+
 import models from '../models';
 import sequelize from '../sequelize';
 
