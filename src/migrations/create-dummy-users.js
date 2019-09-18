@@ -1,12 +1,33 @@
 import 'dotenv/config';
 
+import * as mapbox from '../mapbox';
 import models from '../models';
 import sequelize from '../sequelize';
 
 const { User } = models;
 
+async function resetActiveUsersDataset() {
+  const features = await mapbox.datasets.listFeatures({
+    datasetId: process.env.ACTIVE_USERS_DATASET_ID
+  }).send().then(res => res.body.features);
+
+  const users = await User.findAll({
+    attributes: ['id'],
+  });
+
+  await Promise.all(users.map(user =>
+    mapbox.datasets.deleteFeature({
+      datasetId: process.env.ACTIVE_USERS_DATASET_ID,
+      featureId: `user_${user.id}`,
+    }).send()
+  ))
+}
+
 async function createDummyUsers() {
-  await sequelize.sync({ force: true }),
+  await Promise.all([
+    resetActiveUsersDataset(),
+    sequelize.sync({ force: true }),
+  ]);
 
   await User.bulkCreate([
     {
@@ -88,6 +109,23 @@ async function createDummyUsers() {
       ],
     },
   ]);
+
+  const users = await User.findAll();
+
+  await Promise.all(users.map((user) => (
+    mapbox.datasets.putFeature({
+      datasetId: process.env.ACTIVE_USERS_DATASET_ID,
+      featureId: `user_${user.id}`,
+      feature: {
+        type: 'Feature',
+        properties: user,
+        geometry: {
+          type: 'Point',
+          coordinates: user.location,
+        },
+      },
+    }).send()
+  )));
 
   process.exit(0);
 }

@@ -1,3 +1,4 @@
+.env
 logfile
 node_modules
-.env
+yarn-error.log

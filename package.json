@@ -21,6 +21,7 @@
     "nodemon": "^1.18.7"
   },
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.7.0",
     "apollo-server": "^2.2.3",
     "apollo-server-express": "^2.2.3",
     "bcrypt": "^3.0.2",

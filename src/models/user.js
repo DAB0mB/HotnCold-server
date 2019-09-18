@@ -58,7 +58,7 @@ const user = (sequelize, DataTypes) => {
         notEmpty: true,
         is2D(value) {
           if (value.length != 2) {
-            throw Error('A location vector must container 2 values');
+            throw Error('A location vector must contain 2 coordinates');
           }
         }
       },
