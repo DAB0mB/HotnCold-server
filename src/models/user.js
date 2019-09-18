@@ -50,6 +50,19 @@ const user = (sequelize, DataTypes) => {
         notEmpty: true,
       },
     },
+    location: {
+      type: DataTypes.ARRAY(DataTypes.FLOAT),
+      unique: false,
+      allowNull: true,
+      validate: {
+        notEmpty: true,
+        is2D(value) {
+          if (value.length != 2) {
+            throw Error('A location vector must container 2 values');
+          }
+        }
+      },
+    },
     pictures: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       unique: false,

@@ -14,6 +14,7 @@ export default gql`
     age: String!
     occupation: String
     bio: String
+    location: [Float, Float]
     pictures: [String]
   }
 `;

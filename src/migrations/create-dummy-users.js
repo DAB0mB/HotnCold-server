@@ -16,7 +16,11 @@ async function createDummyUsers() {
       birthDate: '7/28/1994',
       occupation: 'Software Engineer',
       bio: "Love sports, computers, and into self development.",
-      pictures: [],
+      location: [-73.984101, 40.725647],
+      pictures: [
+        'https://avatarfiles.alphacoders.com/833/83315.png',
+        'https://a.ltrbxd.com/avatar/twitter/4/3/8/3/8/2/shard/http___pbs.twimg.com_profile_images_959679433505497089__0ShmWMC.jpg',
+      ],
     },
     {
       firstName: 'Laura',
@@ -25,7 +29,11 @@ async function createDummyUsers() {
       birthDate: '10/26/1993',
       occupation: 'Copy Writer',
       bio: "Amateur tv practitioner. Zombie fanatic. Infuriatingly humble twitter fan. Evil travelaholic.",
-      pictures: [],
+      location: [-73.984023, 40.725610],
+      pictures: [
+        'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
+        'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
+      ],
     },
     {
       firstName: 'Crystal',
@@ -34,7 +42,11 @@ async function createDummyUsers() {
       birthDate: '9/3/1991',
       occupation: 'Insurance Policy Processing Clerk',
       bio: "Social media expert. Devoted beer maven. Music ninja. Evil gamer. Award-winning analyst.",
-      pictures: [],
+      location: [-73.983721, 40.726267],
+      pictures: [
+        'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
+        'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
+      ],
     },
     {
       firstName: 'Dorothy',
@@ -43,7 +55,11 @@ async function createDummyUsers() {
       birthDate: '7/25/1983',
       occupation: 'Demonstrator and Product Promoter',
       bio: "Evil coffee nerd. Analyst. Incurable bacon practitioner. Total twitter fan. Typical food aficionado.",
-      pictures: [],
+      location: [-73.984566, 40.726633],
+      pictures: [
+        'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
+        'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
+      ],
     },
     {
       firstName: 'Gary',
@@ -52,7 +68,11 @@ async function createDummyUsers() {
       birthDate: '6/2/1989',
       occupation: 'Social Science Research Assistant',
       bio: "Travel maven. Professional alcoholaholic. Infuriatingly humble music specialist. Gamer. Coffee ninja. General internet advocate.",
-      pictures: [],
+      location: [-73.983348, 40.725352],
+      pictures: [
+        'https://i.imgur.com/I3ysYRt.png',
+        'https://pbs.twimg.com/profile_images/588433110703865856/JgMKUdlE_400x400.jpg',
+      ],
     },
     {
       firstName: 'Ken',
@@ -61,7 +81,11 @@ async function createDummyUsers() {
       birthDate: '12/2/1991',
       occupation: 'Physical Therapist Assistant',
       bio: "Amateur social media fan. Professional bacon trailblazer. Hardcore explorer. Award-winning tv expert. Friendly pop culture maven.",
-      pictures: [],
+      location: [-73.984448, 40.725141],
+      pictures: [
+        'https://i.imgur.com/I3ysYRt.png',
+        'https://pbs.twimg.com/profile_images/588433110703865856/JgMKUdlE_400x400.jpg',
+      ],
     },
   ]);
 
