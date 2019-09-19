@@ -7,9 +7,9 @@ export const omit = (obj, ...blacklist) => {
 };
 
 export const pick = (obj, ...whitelist) => {
-  newObj = {};
+  const newObj = {};
 
-  whitelist.forEach(k => newObj = obj[k]);
+  whitelist.forEach(k => newObj[k] = obj[k]);
 
   return newObj;
 };

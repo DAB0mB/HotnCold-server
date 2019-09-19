@@ -3,6 +3,12 @@ export default {
     me: (query, args, { me }) => {
       return me;
     },
+
+    usersLocationsInArea: (query, { bounds }) => {
+      return mapbox.geocoding.reverseGeocode({
+        bbox: bounds
+      });
+    },
   },
 
   User: {

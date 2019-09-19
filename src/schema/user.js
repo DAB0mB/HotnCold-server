@@ -3,6 +3,8 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     me: User
+    # usersLocationsInMyVenue: [Point!]!
+    usersLocationsInArea(bounds: BBox!): [Point!]!
   }
 
   type User {
@@ -14,7 +16,7 @@ export default gql`
     age: String!
     occupation: String
     bio: String
-    location: [Float, Float]
+    location: Point
     pictures: [String]
   }
 `;

@@ -2700,6 +2700,11 @@ generic-pool@3.5.0:
   resolved "https://registry.yarnpkg.com/generic-pool/-/generic-pool-3.5.0.tgz#acac4fd743a175ff20574f380910036464cb61f7"
   integrity sha512-dEkxmX+egB2o4NR80c/q+xzLLzLX+k68/K8xv81XprD+Sk7ZtP14VugeCz+fUwv5FzpWq40pPtAkzPRqT8ka9w==
 
+geojson-validation@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/geojson-validation/-/geojson-validation-0.2.1.tgz#7f9c9a3f7f967ae8e267940fda14478943342f2f"
+  integrity sha512-vcWNJ0HKF4XN5GjyCnDImeuVFwI20iBrbMYaTeS7KJqjN+UjULpi8wbRBp+8UCiy9ofetKhxKC9rH/9RdFiaJQ==
+
 get-caller-file@^2.0.1:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
@@ -2814,6 +2819,13 @@ graphql-extensions@^0.10.3:
     "@apollographql/apollo-tools" "^0.4.0"
     apollo-server-env "^2.4.3"
     apollo-server-types "^0.2.4"
+
+graphql-geojson-scalar-types@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/graphql-geojson-scalar-types/-/graphql-geojson-scalar-types-0.0.5.tgz#819f77668cc332fe2360788d69a4dd20ce7fdc11"
+  integrity sha512-evdQuWvDfzv8gRMCXsgg9H2zRBWVjnb4fqVfqZODrC+/JTvxLwqnKgDA8HjfjXQR28j+b8e/5UOvpF7JjgJ/iQ==
+  dependencies:
+    geojson-validation "^0.2.1"
 
 graphql-iso-date@^3.6.1:
   version "3.6.1"
