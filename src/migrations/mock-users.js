@@ -1,33 +1,15 @@
 import 'dotenv/config';
 
-import * as mapbox from '../mapbox';
 import models from '../models';
 import sequelize from '../sequelize';
-import { pick } from '../utils';
+import syncRegions from './sync-regions';
 
 const { User } = models;
 
-async function resetActiveUsersDataset() {
-  const features = await mapbox.datasets.listFeatures({
-    datasetId: process.env.ACTIVE_USERS_DATASET_ID
-  }).send().then(res => res.body.features);
-
-  const users = await User.findAll({
-    attributes: ['id'],
-  });
-
-  await Promise.all(users.map(user =>
-    mapbox.datasets.deleteFeature({
-      datasetId: process.env.ACTIVE_USERS_DATASET_ID,
-      featureId: `user_${user.id}`,
-    }).send()
-  ))
-}
-
-async function createDummyUsers() {
+async function mockUsers() {
   await Promise.all([
-    resetActiveUsersDataset(),
-    sequelize.sync({ force: true }),
+    await syncRegions(),
+    await User.sync({ force: true }),
   ]);
 
   await User.bulkCreate([
@@ -107,33 +89,26 @@ async function createDummyUsers() {
 
   const users = await User.findAll();
 
-  users[0].location = [-73.984101, 40.725647];
-  users[1].location = [-73.984023, 40.725610];
-  users[2].location = [-73.983721, 40.726267];
-  users[3].location = [-73.984566, 40.726633];
-  users[4].location = [-73.983348, 40.725352];
-  users[5].location = [-73.984448, 40.725141];
-
-  await Promise.all(users.map((user) => (
-    mapbox.datasets.putFeature({
-      datasetId: process.env.ACTIVE_USERS_DATASET_ID,
-      featureId: `user_${user.id}`,
-      feature: {
-        type: 'Feature',
-        properties: pick(user, 'id'),
-        geometry: {
-          type: 'Point',
-          coordinates: user.location,
-        },
-      },
-    }).send()
-  )));
-
-  process.exit(0);
+  await Promise.all([
+    users[0].setLocation([-73.984101, 40.725647]),
+    users[1].setLocation([-73.984023, 40.725610]),
+    users[2].setLocation([-73.983721, 40.726267]),
+    users[3].setLocation([-73.984566, 40.726633]),
+    users[4].setLocation([-73.983348, 40.725352]),
+    users[5].setLocation([-73.984448, 40.725141]),
+  ]);
 }
 
-createDummyUsers().catch((e) => {
-  console.error(e);
+if (require.main === module) {
+  mockUsers()
+    .then(() => {
+      console.log('Successfully created dummy users!');
 
-  process.exit(1);
-});
+      process.exit(0);
+    })
+    .catch((e) => {
+      console.error(e);
+
+      process.exit(1);
+    });
+}

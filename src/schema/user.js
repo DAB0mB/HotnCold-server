@@ -3,7 +3,11 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     me: User
-    usersLocationsInArea(center: Vector2D!, bounds: Box2D!): FeatureCollection
+    usersLocationsInMyArea: FeatureCollection
+  }
+
+  extend type Mutation {
+    updateUserLocation(userId: String, location: Vector2D): User
   }
 
   type User {
@@ -15,6 +19,7 @@ export default gql`
     age: String!
     occupation: String
     bio: String
+    dataset: String
     location: Vector2D
     pictures: [String]
   }

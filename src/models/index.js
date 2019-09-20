@@ -1,6 +1,7 @@
 import sequelize from '../sequelize';
 
 const models = {
+  Region: sequelize.import('./region'),
   User: sequelize.import('./user'),
 };
 

@@ -1,4 +1,6 @@
-import * as mapbox from '../mapbox';
+import models from '../models';
+
+const { User } = models;
 
 export default {
   Query: {
@@ -6,12 +8,20 @@ export default {
       return me;
     },
 
-    usersLocationsInArea: (query, { center, bounds }) => {
-      return mapbox.geocoding.reverseGeocode({
-        query: center,
-        bbox: [...bounds[0], ...bounds[1]],
-        limit: 200,
+    usersLocationsInMyArea: async (query, args, { me }) => {
+      return mapbox.listFeatures({
+        datasetId: me.locationDataset,
       }).send().then(({ body }) => body);
+    },
+  },
+
+  Mutation: {
+    updateUserLocation: async (mutation, { userId, location }, { me }) => {
+      const user = await User.update({ location }, {
+        where: { id: userId }
+      });
+
+      return user && user.toJSON();
     },
   },
 
@@ -21,13 +31,6 @@ export default {
       const currentYear = new Date().getYear() + 1900;
 
       return currentYear - birthYear;
-    },
-
-    location: (user, args) => {
-      return mapbox.datasets.getFeature({
-        datasetId: process.env.ACTIVE_USERS_DATASET_ID,
-        featureId: `user_${user.id}`,
-      }).send().then(({ body }) => body && body.geometry.coordinates);
     },
   },
 };

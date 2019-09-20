@@ -8,7 +8,8 @@
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
     "test": "jest",
-    "create-dummy-users": "babel-node src/migrations/create-dummy-users.js"
+    "mock-users": "babel-node src/migrations/mock-users.js",
+    "sync-regions": "babel-node src/migrations/sync-regions.js"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
@@ -35,6 +36,6 @@
     "graphql-resolvers": "^0.2.2",
     "pg": "^7.6.1",
     "sequelize": "^4.41.2",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.3"
   }
 }
