@@ -2,11 +2,13 @@ import { GraphQLDateTime } from 'graphql-iso-date';
 import * as GraphQLGeo from 'graphql-geojson-scalar-types';
 
 import userResolvers from './user';
+import { Vector2D, Box2D } from '../scalars';
 
 const customScalarResolver = {
   Date: GraphQLDateTime,
-  Point: GraphQLGeo.Point,
-  BBox: GraphQLGeo.Bbox,
+  FeatureCollection: GraphQLGeo.FeatureCollection,
+  Vector2D,
+  Box2D,
 };
 
 export default [

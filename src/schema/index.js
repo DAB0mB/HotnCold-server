@@ -4,8 +4,9 @@ import userSchema from './user';
 
 const linkSchema = gql`
   scalar Date
-  scalar Point
-  scalar BBox
+  scalar FeatureCollection
+  scalar Vector2D
+  scalar Box2D
 
   type Query {
     _: Boolean
