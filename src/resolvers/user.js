@@ -14,23 +14,40 @@ export default {
     updateMyLocation: async (mutation, { location }, { me }) => {
       if (!me) return null;
 
-      await me.updateLocation(location);
+      await me.setLocation(location);
+
+      const myArea = await me.getArea();
+
+      if (!myArea) {
+        return {
+          type: 'FeatureCollection',
+          features: [],
+        };
+      };
 
       // Mapbox API seems to have a throttle - it will keep returning the same results
       // until a certain time has passed from recent request. If features don't seem like
       // they've been updated, don't panic
       return mapbox.datasets.listFeatures({
-        datasetId: me.regionId,
+        datasetId: myArea.datasetId,
       }).send().then(({ body }) => body);
     },
   },
 
   User: {
-    age: (user, args) => {
+    age: (user) => {
       const birthYear = Number(user.birthDate.split('/').pop());
       const currentYear = new Date().getYear() + 1900;
 
       return currentYear - birthYear;
+    },
+
+    area: (user) => {
+      const area = await user.getArea();
+
+      if (!area) return null;
+
+      return area;
     },
   },
 };

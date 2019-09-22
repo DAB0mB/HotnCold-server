@@ -9,7 +9,7 @@
     "start": "nodemon --exec babel-node src/index.js",
     "test": "jest",
     "mock-users": "babel-node src/migrations/mock-users.js",
-    "sync-regions": "babel-node src/migrations/sync-regions.js"
+    "sync-areas": "babel-node src/migrations/sync-areas.js"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",

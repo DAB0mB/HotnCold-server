@@ -1,13 +1,11 @@
 import uuid from 'uuid';
 
 import * as mapbox from '../mapbox';
-import { Mutex } from '../utils';
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
     id: {
       primaryKey: true,
-      allowNull: false,
       type: DataTypes.UUID,
       defaultValue: () => uuid(),
     },
@@ -54,13 +52,6 @@ const user = (sequelize, DataTypes) => {
         len: 2,
       },
     },
-    region: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      set() {
-        throw Error('Use User.updateLocation() instead');
-      },
-    },
     location: {
       type: DataTypes.ARRAY(DataTypes.FLOAT),
       allowNull: true,
@@ -68,15 +59,33 @@ const user = (sequelize, DataTypes) => {
         len: 2,
       },
       set() {
-        throw Error('Use User.updateLocation() instead');
+        throw Error('Use User.setLocation() instead');
+      },
+    },
+  }, {
+    hooks: {
+      beforeDestroy: async (instance) => {
+        // Will be performed in background
+        const area = await instance.getArea();
+
+        if (area) {
+          await mapbox.datasets.deleteFeature({
+            datasetId: area.datasetId,
+            featureId: `user.${instance.id}`,
+          }).send();
+        }
       },
     },
   });
 
+  User.associate = (models) => {
+    User.belongsTo(models.Area);
+  };
+
   // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
-  User.prototype.updateLocation = async function updateLocation(location) {
+  User.prototype.setLocation = async function setLocation(location) {
     const selfLocation = this.getDataValue('location');
-    const Region = sequelize.models.region;
+    const Area = sequelize.models.area;
 
     if (location) {
       if (
@@ -87,74 +96,52 @@ const user = (sequelize, DataTypes) => {
         return;
       }
 
-      const place = await mapbox.geocoding.reverseGeocode({
+      const placeNames = await mapbox.geocoding.reverseGeocode({
         query: location,
-        types: ['place'],
-        limit: 1,
-      }).send().then(({ body }) => body.features[0]);
+        types: ['region', 'district', 'locality', 'place'],
+      }).send().then(({ body }) => body.features.map(f => f.place_name));
 
-      if (!place) return;
-
-      let region = await Region.findOne({
-        where: { name: place.place_name }
+      const area = await Area.findOne({
+        where: { name: placeNames }
       });
 
-      if (!region) {
-        const mutex = new Mutex(place.place_name);
+      if (area) {
+        await mapbox.datasets.putFeature({
+          datasetId: area.datasetId,
+          featureId: `user.${this.id}`,
+          feature: {
+            type: 'Feature',
+            properties: this.toJSON(),
+            geometry: {
+              type: 'Point',
+              coordinates: location,
+            }
+          },
+        }).send();
 
-        if (mutex.opened) {
-          mutex.lock();
-
-          const dataset = await mapbox.datasets.createDataset({
-            name: `Users in ${place.place_name}`,
-          }).send().then(({ body }) => body);
-
-          region = await Region.create({
-            id: dataset.id,
-            name: place.place_name,
-          });
-
-          mutex.open();
-        } else {
-          await mutex.opening;
-
-          region = await Region.findOne({
-            where: { name: place.place_name }
-          });
-        }
+        await this.setArea(area);
+      } else {
+        await this.setArea(null);
       }
 
       this.setDataValue('location', location);
-      this.setDataValue('regionId', region.id);
-
-      const puttingFeature = mapbox.datasets.putFeature({
-        datasetId: region.id,
-        featureId: this.id,
-        feature: {
-          type: 'Feature',
-          properties: {
-            entity: 'user',
-            user: this.id,
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: location,
-          }
-        },
-      }).send();
-
-      await Promise.all([
-        puttingFeature,
-        this.save(),
-      ]);
     } else {
       if (!selfLocation) return;
 
-      this.setDataValue('location', null);
-      this.setDataValue('regionId', null);
+      const area = await this.getArea();
 
-      await this.save();
+      if (area) {
+        await mapbox.datasets.deleteFeature({
+          datasetId: area.datasetId,
+          featureId: `user.${this.userid}`,
+        }).send();
+      }
+
+      this.setDataValue('areaId', null);
+      this.setDataValue('location', null);
     }
+
+    await this.save();
   };
 
   return User;
