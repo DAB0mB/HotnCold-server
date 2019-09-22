@@ -64,16 +64,8 @@ const user = (sequelize, DataTypes) => {
     },
   }, {
     hooks: {
-      beforeDestroy: async (instance) => {
-        // Will be performed in background
-        const area = await instance.getArea();
-
-        if (area) {
-          await mapbox.datasets.deleteFeature({
-            datasetId: area.datasetId,
-            featureId: `user.${instance.id}`,
-          }).send();
-        }
+      beforeDestroy: (instance) => {
+        instance.setLocation(null, true);
       },
     },
   });
@@ -83,7 +75,7 @@ const user = (sequelize, DataTypes) => {
   };
 
   // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
-  User.prototype.setLocation = async function setLocation(location) {
+  User.prototype.setLocation = async function setLocation(location, useStage) {
     const selfLocation = this.getDataValue('location');
     const Area = sequelize.models.area;
 
@@ -95,6 +87,7 @@ const user = (sequelize, DataTypes) => {
       ) {
         return;
       }
+      await this.setLocation(null, true);
 
       const placeNames = await mapbox.geocoding.reverseGeocode({
         query: location,
@@ -111,7 +104,11 @@ const user = (sequelize, DataTypes) => {
           featureId: `user.${this.id}`,
           feature: {
             type: 'Feature',
-            properties: this.toJSON(),
+            properties: {
+              ...this.toJSON(),
+              areaId: area.id,
+              location,
+            },
             geometry: {
               type: 'Point',
               coordinates: location,
@@ -119,9 +116,9 @@ const user = (sequelize, DataTypes) => {
           },
         }).send();
 
-        await this.setArea(area);
+        this.setDataValue('areaId', area.id);
       } else {
-        await this.setArea(null);
+        this.setDataValue('areaId', null);
       }
 
       this.setDataValue('location', location);
@@ -133,15 +130,21 @@ const user = (sequelize, DataTypes) => {
       if (area) {
         await mapbox.datasets.deleteFeature({
           datasetId: area.datasetId,
-          featureId: `user.${this.userid}`,
-        }).send();
+          featureId: `user.${this.id}`,
+        }).send().catch((e) => {
+          if (e.statusCode !== 404) {
+            return Promise.reject(e);
+          }
+        });
       }
 
       this.setDataValue('areaId', null);
       this.setDataValue('location', null);
     }
 
-    await this.save();
+    if (!useStage) {
+      await this.save();
+    }
   };
 
   return User;
