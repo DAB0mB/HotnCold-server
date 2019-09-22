@@ -19,7 +19,7 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 
-const getMe = async req => {
+const getMe = (req) => {
   return models.User.findOne({
     where: {
       firstName: 'Eytan',

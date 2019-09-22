@@ -58,7 +58,7 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
       set() {
-        throw Error('Use User.setLocation() instead');
+        throw Error('Use User.updateLocation() instead');
       },
     },
     location: {
@@ -68,13 +68,13 @@ const user = (sequelize, DataTypes) => {
         len: 2,
       },
       set() {
-        throw Error('Use User.setLocation() instead');
+        throw Error('Use User.updateLocation() instead');
       },
     },
   });
 
   // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
-  User.prototype.setLocation = async function setLocation(location) {
+  User.prototype.updateLocation = async function updateLocation(location) {
     const selfLocation = this.getDataValue('location');
     const Region = sequelize.models.region;
 
@@ -92,6 +92,8 @@ const user = (sequelize, DataTypes) => {
         types: ['place'],
         limit: 1,
       }).send().then(({ body }) => body.features[0]);
+
+      if (!place) return;
 
       let region = await Region.findOne({
         where: { name: place.place_name }
@@ -123,7 +125,7 @@ const user = (sequelize, DataTypes) => {
       }
 
       this.setDataValue('location', location);
-      this.setDataValue('region', region.id);
+      this.setDataValue('regionId', region.id);
 
       const puttingFeature = mapbox.datasets.putFeature({
         datasetId: region.id,
@@ -149,7 +151,7 @@ const user = (sequelize, DataTypes) => {
       if (!selfLocation) return;
 
       this.setDataValue('location', null);
-      this.setDataValue('region', null);
+      this.setDataValue('regionId', null);
 
       await this.save();
     }

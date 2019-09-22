@@ -90,12 +90,12 @@ async function mockUsers() {
   const users = await User.findAll();
 
   await Promise.all([
-    users[0].setLocation([-73.984101, 40.725647]),
-    users[1].setLocation([-73.984023, 40.725610]),
-    users[2].setLocation([-73.983721, 40.726267]),
-    users[3].setLocation([-73.984566, 40.726633]),
-    users[4].setLocation([-73.983348, 40.725352]),
-    users[5].setLocation([-73.984448, 40.725141]),
+    users[0].updateLocation([-73.984101, 40.725647]),
+    users[1].updateLocation([-73.984023, 40.725610]),
+    users[2].updateLocation([-73.983721, 40.726267]),
+    users[3].updateLocation([-73.984566, 40.726633]),
+    users[4].updateLocation([-73.983348, 40.725352]),
+    users[5].updateLocation([-73.984448, 40.725141]),
   ]);
 }
 
