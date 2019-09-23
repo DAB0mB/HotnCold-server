@@ -89,17 +89,21 @@ const user = (sequelize, DataTypes) => {
       }
       await this.setLocation(null, true);
 
-      const placeNames = await mapbox.geocoding.reverseGeocode({
+      const geoFeaturesIds = await mapbox.geocoding.reverseGeocode({
         query: location,
         types: ['region', 'district', 'locality', 'place'],
-      }).send().then(({ body }) => body.features.map(f => f.place_name));
+      }).send().then(({ body }) => body.features.map(f => f.id));
 
       const area = await Area.findOne({
-        where: { name: placeNames }
+        where: {
+          geoFeaturesIds: {
+            [sequelize.Op.overlap]: geoFeaturesIds,
+          },
+        },
       });
 
       if (area) {
-        await mapbox.datasets.putFeature({
+        location = await mapbox.datasets.putFeature({
           datasetId: area.datasetId,
           featureId: `user.${this.id}`,
           feature: {
@@ -114,11 +118,11 @@ const user = (sequelize, DataTypes) => {
               coordinates: location,
             }
           },
-        }).send();
+        }).send().then(({ body }) => body.geometry.coordinates);
 
-        this.setDataValue('areaId', area.id);
+        await this.setArea(area);
       } else {
-        this.setDataValue('areaId', null);
+        await this.setArea(null);
       }
 
       this.setDataValue('location', location);
@@ -138,7 +142,8 @@ const user = (sequelize, DataTypes) => {
         });
       }
 
-      this.setDataValue('areaId', null);
+      await this.setArea(null);
+
       this.setDataValue('location', null);
     }
 

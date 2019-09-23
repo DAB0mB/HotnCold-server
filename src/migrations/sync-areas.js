@@ -13,14 +13,17 @@ export default async function syncAreas() {
     {
       name: 'HaMerkaz, Israel',
       datasetId: 'ck0v9rtty01uu2it8pzf9et4u',
+      geoFeaturesIds: ['region.8593132391633450', 'region.12549636937738800'],
     },
     {
       name: 'Manhattan, New York, New York, United States',
       datasetId: 'ck0va0ovx027m2pky3f05u9yf',
+      geoFeaturesIds: ['locality.12696928000137850'],
     },
     {
       name: 'San Francisco, California, United States',
       datasetId: 'ck0vayndd02fb2qky6qgbjka5',
+      geoFeaturesIds: ['place.15734669613361910'],
     },
   ]);
 }

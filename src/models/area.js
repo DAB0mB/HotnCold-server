@@ -7,14 +7,20 @@ const area = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       defaultValue: () => uuid(),
     },
+    name: {
+      type: DataTypes.STRING,
+      validate: {
+        notEmpty: true,
+      },
+    },
     datasetId: {
       type: DataTypes.STRING,
       validate: {
         notEmpty: true,
       },
     },
-    name: {
-      type: DataTypes.STRING,
+    geoFeaturesIds: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
       validate: {
         notEmpty: true,
       },

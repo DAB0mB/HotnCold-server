@@ -16,7 +16,7 @@ export const validate = (value) => {
 };
 
 export default new GraphQLScalarType({
-  name: 'Box2DScalar',
+  name: 'Box2D',
   serialize: validate,
   parseValue: validate,
   parseLiteral: ast => validate(parseLiteral(ast)),

@@ -28,7 +28,7 @@ export default {
       // Mapbox API seems to have a throttle - it will keep returning the same results
       // until a certain time has passed from recent request. If features don't seem like
       // they've been updated, don't panic
-      return mapbox.datasets.listFeatures({
+      return await mapbox.datasets.listFeatures({
         datasetId: myArea.datasetId,
       }).send().then(({ body }) => body);
     },
@@ -43,11 +43,7 @@ export default {
     },
 
     area: (user) => {
-      const area = await user.getArea();
-
-      if (!area) return null;
-
-      return area;
+      return user.getArea();
     },
   },
 };

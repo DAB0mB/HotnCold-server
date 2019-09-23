@@ -8,6 +8,7 @@ const linkSchema = gql`
   scalar FeatureCollection
   scalar Vector2D
   scalar Box2D
+  scalar BBox
 
   type Query {
     _: Boolean

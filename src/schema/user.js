@@ -18,8 +18,8 @@ export default gql`
     age: String!
     occupation: String
     bio: String
-    dataset: String
     location: Vector2D
     pictures: [String]
+    area: Area
   }
 `;
