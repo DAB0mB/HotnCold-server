@@ -109,9 +109,8 @@ const user = (sequelize, DataTypes) => {
           feature: {
             type: 'Feature',
             properties: {
-              ...this.toJSON(),
-              areaId: area.id,
-              location,
+              entity: 'user',
+              userId: this.id,
             },
             geometry: {
               type: 'Point',
