@@ -1,3 +1,5 @@
+import turfDistance from '@turf/distance';
+
 import * as mapbox from '../mapbox';
 import models from '../models';
 
@@ -7,6 +9,32 @@ export default {
   Query: {
     me: (query, args, { me }) => {
       return me;
+    },
+
+    user: async (query, { userId, userIds }, { me }) => {
+      if (!userId && !userIds) {
+        throw TypeError('One of "userId" or "userIds" must be specified')
+      }
+
+      if (userId) {
+        userIds = [userId];
+      }
+
+      if (!me) return null;
+
+
+      const user = await User.findOne({
+        where: { id: userIds }
+      });
+
+      if (!user) return null;
+
+      const distance = turfDistance(me.location, user.location, { units: 'kilometers' });
+
+      // Users have to be at a certain proximity
+      if (distance < 0.1) return null;
+
+      return user;
     },
   },
 
