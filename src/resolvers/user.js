@@ -11,20 +11,11 @@ export default {
       return me;
     },
 
-    user: async (query, { userId, userIds }, { me }) => {
-      if (!userId && !userIds) {
-        throw TypeError('One of "userId" or "userIds" must be specified')
-      }
-
-      if (userId) {
-        userIds = [userId];
-      }
-
+    user: async (query, { userId }, { me }) => {
       if (!me) return null;
 
-
       const user = await User.findOne({
-        where: { id: userIds }
+        where: { id: userId }
       });
 
       if (!user) return null;
