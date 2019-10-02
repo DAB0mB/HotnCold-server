@@ -13,13 +13,13 @@ export default gql`
   type User {
     id: ID!
     firstName: String!
-    lastName: String!
+    lastName: String @mine
     gender: String!
-    birthDate: String!
+    birthDate: Date @mine
     age: String!
     occupation: String
     bio: String
-    location: Vector2D
+    location: Vector2D @mine
     pictures: [String]
     area: Area
   }

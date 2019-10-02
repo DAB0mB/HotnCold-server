@@ -10,6 +10,7 @@ import {
 } from 'apollo-server-express';
 
 import schema from './schema';
+import schemaDirectives from './directives';
 import resolvers from './resolvers';
 import models from './models';
 import loaders from './loaders';
@@ -33,6 +34,7 @@ const server = new ApolloServer({
   playground: true,
   typeDefs: schema,
   resolvers,
+  schemaDirectives,
   formatError: error => {
     // remove the internal sequelize error message
     // leave only the important validation error

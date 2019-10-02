@@ -10,6 +10,8 @@ const linkSchema = gql`
   scalar Box2D
   scalar BBox
 
+  directive @mine on FIELD_DEFINITION
+
   type Query {
     _: Boolean
   }

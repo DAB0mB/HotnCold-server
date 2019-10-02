@@ -28,7 +28,7 @@ const user = (sequelize, DataTypes) => {
       },
     },
     birthDate: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       validate: {
         notEmpty: true,
       },

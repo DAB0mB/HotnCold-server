@@ -1,4 +1,5 @@
 import turfDistance from '@turf/distance';
+import moment from 'moment';
 
 import * as mapbox from '../mapbox';
 import models from '../models';
@@ -55,10 +56,7 @@ export default {
 
   User: {
     age: (user) => {
-      const birthYear = Number(user.birthDate.split('/').pop());
-      const currentYear = new Date().getYear() + 1900;
-
-      return currentYear - birthYear;
+      return moment().year() - moment(user.birthDate).year();
     },
 
     area: (user) => {

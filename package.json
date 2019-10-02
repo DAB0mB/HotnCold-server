@@ -35,6 +35,8 @@
     "graphql-geojson-scalar-types": "^0.0.5",
     "graphql-iso-date": "^3.6.1",
     "graphql-resolvers": "^0.2.2",
+    "graphql-tools": "^4.0.5",
+    "moment": "^2.24.0",
     "pg": "^7.6.1",
     "sequelize": "^4.41.2",
     "uuid": "^3.3.3"
