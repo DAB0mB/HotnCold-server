@@ -8,7 +8,7 @@ class MineDirective extends SchemaDirectiveVisitor {
       const { me } = context;
 
       if (!me) return null;
-      if (user.id !== me.id) return null;
+      if (user && user.id !== me.id) return null;
 
       return resolve.call(this, user, args, context, info);
     };

@@ -4,7 +4,7 @@ import areaSchema from './area';
 import userSchema from './user';
 
 const linkSchema = gql`
-  scalar Date
+  scalar DateTime
   scalar FeatureCollection
   scalar Vector2D
   scalar Box2D

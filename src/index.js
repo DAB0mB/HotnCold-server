@@ -9,11 +9,12 @@ import {
   AuthenticationError,
 } from 'apollo-server-express';
 
-import schema from './schema';
 import schemaDirectives from './directives';
-import resolvers from './resolvers';
-import models from './models';
 import loaders from './loaders';
+import * as mapbox from './mapbox';
+import models from './models';
+import resolvers from './resolvers';
+import schema from './schema';
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.use(cors());
 app.use(morgan('dev'));
 
 const getMe = (req) => {
+  // TODO: Get from req
+
   return models.User.findOne({
     where: {
       firstName: 'Eytan',
@@ -48,31 +51,20 @@ const server = new ApolloServer({
     };
   },
   context: async ({ req, connection }) => {
-    if (connection) {
-      return {
-        models,
-        loaders: {
-          user: new DataLoader(keys =>
-            loaders.user.batchUsers(keys, models),
-          ),
-        },
-      };
-    }
+    if (!connection && !req) return;
 
-    if (req) {
-      const me = await getMe(req);
+    const me = await getMe(req);
 
-      return {
-        models,
-        me,
-        secret: process.env.SECRET,
-        loaders: {
-          user: new DataLoader(keys =>
-            loaders.user.batchUsers(keys, models),
-          ),
-        },
-      };
-    }
+    return {
+      me,
+      models,
+      mapbox,
+      loaders: {
+        user: new DataLoader(keys =>
+          loaders.user.batchUsers(keys, models),
+        ),
+      },
+    };
   },
 });
 

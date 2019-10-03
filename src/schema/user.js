@@ -7,7 +7,8 @@ export default gql`
   }
 
   extend type Mutation {
-    updateMyLocation(location: Vector2D!): FeatureCollection
+    updateMyProfile(name: String!, bio: String!, occupation: String!, birthDate: DateTime!): User @mine
+    updateMyLocation(location: Vector2D!): FeatureCollection @mine
   }
 
   type User {
@@ -15,7 +16,7 @@ export default gql`
     firstName: String!
     lastName: String @mine
     gender: String!
-    birthDate: Date @mine
+    birthDate: DateTime @mine
     age: String!
     occupation: String
     bio: String
