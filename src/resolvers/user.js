@@ -26,11 +26,10 @@ export default {
   },
 
   Mutation: {
-    updateMyProfile(mutation, { name, birthDate, occupation, bio }, { me, models }) {
-      return models.User.update(
-        { name, birthDate, occupation, bio },
-        { where: { id: me.id } },
-      );
+    async updateMyProfile(mutation, { name, birthDate, occupation, bio }, { me, models }) {
+      await me.update({ name, birthDate, occupation, bio });
+
+      return me;
     },
 
     async updateMyLocation(mutation, { location }, { me, mapbox }) {

@@ -38,7 +38,7 @@ const user = (sequelize, DataTypes) => {
       allowNull: true,
     },
     bio: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(511),
       allowNull: true,
     },
     pictures: {
