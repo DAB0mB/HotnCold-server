@@ -4,8 +4,6 @@ import moment from 'moment';
 export default {
   Query: {
     me(query, args, { me }) {
-      console.log(me);
-
       return me;
     },
 

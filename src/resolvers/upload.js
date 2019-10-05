@@ -1,15 +1,19 @@
 export default {
   Mutation: {
-    async uploadPicture(mutation, { blob }, { me, cloudinary }) {
+    async uploadPicture(mutation, { data }, { me, cloudinary }) {
+      data = await data;
+
       return new Promise((resolve, reject) => {
-        cloudinary.v2.uploader.upload(blob, (error, result) => {
+        const uploadStream = cloudinary.v2.uploader.upload_stream({}, (error, image) => {
           if (error) {
-            reject(error)
+            reject(error);
           } else {
-            resolve(result)
+            resolve(image.url);
           }
-        })
-      })
+        });
+        const readStream = data.createReadStream();
+        readStream.pipe(uploadStream);
+      });
     },
   },
 };
