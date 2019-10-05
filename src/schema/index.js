@@ -1,17 +1,12 @@
 import { gql } from 'apollo-server-express';
 
 import areaSchema from './area';
+import directivesSchema from './directives';
+import scalarsSchema from './scalars';
+import uploadSchema from './upload';
 import userSchema from './user';
 
 const linkSchema = gql`
-  scalar DateTime
-  scalar FeatureCollection
-  scalar Vector2D
-  scalar Box2D
-  scalar BBox
-
-  directive @mine on FIELD_DEFINITION
-
   type Query {
     _: Boolean
   }
@@ -25,4 +20,4 @@ const linkSchema = gql`
   }
 `;
 
-export default [linkSchema, userSchema, areaSchema];
+export default [linkSchema, uploadSchema, userSchema, areaSchema, scalarsSchema, directivesSchema];

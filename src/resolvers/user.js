@@ -4,6 +4,8 @@ import moment from 'moment';
 export default {
   Query: {
     me(query, args, { me }) {
+      console.log(me);
+
       return me;
     },
 
@@ -26,8 +28,8 @@ export default {
   },
 
   Mutation: {
-    async updateMyProfile(mutation, { name, birthDate, occupation, bio }, { me, models }) {
-      await me.update({ name, birthDate, occupation, bio });
+    async updateMyProfile(mutation, { firstName, lastName, birthDate, occupation, bio }, { me, models }) {
+      await me.update({ firstName, lastName, birthDate, occupation, bio });
 
       return me;
     },

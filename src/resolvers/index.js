@@ -3,6 +3,7 @@ import * as GraphQLGeo from 'graphql-geojson-scalar-types';
 
 import areaResolvers from './area';
 import userResolvers from './user';
+import uploadResolvers from './upload';
 import { Vector2D, Box2D } from '../scalars';
 
 const customScalarResolver = {
@@ -15,4 +16,5 @@ const customScalarResolver = {
 export default [
   customScalarResolver,
   userResolvers,
+  uploadResolvers,
 ];
