@@ -26,8 +26,8 @@ export default {
   },
 
   Mutation: {
-    async updateMyProfile(mutation, { firstName, lastName, birthDate, occupation, bio }, { me, models }) {
-      await me.update({ firstName, lastName, birthDate, occupation, bio });
+    async updateMyProfile(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { me, models }) {
+      await me.update({ firstName, lastName, birthDate, occupation, bio, pictures });
 
       return me;
     },
