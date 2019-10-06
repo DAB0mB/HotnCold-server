@@ -44,12 +44,8 @@ const user = (sequelize, DataTypes) => {
     pictures: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
-    },
-    pictures: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
       validate: {
-        len: 2,
+        len: [0, 6],
       },
     },
     location: {
