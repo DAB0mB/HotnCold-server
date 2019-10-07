@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-express';
 
 import areaSchema from './area';
+import authSchema from './auth';
 import directivesSchema from './directives';
 import scalarsSchema from './scalars';
 import uploadSchema from './upload';
@@ -20,4 +21,4 @@ const linkSchema = gql`
   }
 `;
 
-export default [linkSchema, uploadSchema, userSchema, areaSchema, scalarsSchema, directivesSchema];
+export default [linkSchema, uploadSchema, userSchema, areaSchema, scalarsSchema, directivesSchema, authSchema];

@@ -1,6 +1,7 @@
 import { GraphQLDateTime } from 'graphql-iso-date';
 import * as GraphQLGeo from 'graphql-geojson-scalar-types';
 
+import authResolvers from './auth';
 import areaResolvers from './area';
 import userResolvers from './user';
 import uploadResolvers from './upload';

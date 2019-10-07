@@ -1,10 +1,12 @@
 import 'dotenv/config';
 import cloudinary from 'cloudinary';
+import { parse as parseCookie } from 'cookie';
 import cors from 'cors';
 import morgan from 'morgan';
 import http from 'http';
 import DataLoader from 'dataloader';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import {
   ApolloServer,
   AuthenticationError,
@@ -31,13 +33,28 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 
-const getMe = (req) => {
-  // TODO: Get from req
+const getMe = async (req) => {
+  if (!req) return;
+
+  const cookie = req.headers.cookie;
+
+  if (!cookie) return;
+
+  const { authToken } = parseCookie(cookie);
+
+  const userId = await new Promise((resolve, reject) => {
+    jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'RS256' }, (err, id) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(id);
+      }
+    });
+  });
 
   return models.User.findOne({
     where: {
-      firstName: 'Eytan',
-      lastName: 'Manor',
+      id: userId,
     }
   });
 };
@@ -60,16 +77,19 @@ const server = new ApolloServer({
       message,
     };
   },
-  context: async ({ req, connection }) => {
-    if (!connection && !req) return;
-
-    const me = await getMe(req);
+  context: async ({ req, res }) => {
+    const [me] = await Promise.all([
+      getMe(req),
+      // Other async tasks...
+    ]);
 
     return {
       me,
       models,
       mapbox,
       cloudinary,
+      req,
+      res,
       loaders: {
         user: new DataLoader(keys =>
           loaders.user.batchUsers(keys, models),
@@ -79,7 +99,11 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app, path: '/graphql' });
+server.applyMiddleware({
+  app,
+  path: '/graphql',
+  cors: { credentials: true },
+});
 
 const port = process.env.PORT || 8000;
 const httpServer = http.createServer(app);
