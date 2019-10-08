@@ -18,4 +18,6 @@ export default [
   customScalarResolver,
   userResolvers,
   uploadResolvers,
+  areaResolvers,
+  authResolvers,
 ];

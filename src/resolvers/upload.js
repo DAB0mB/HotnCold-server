@@ -1,6 +1,6 @@
 export default {
   Mutation: {
-    async uploadPicture(mutation, { data }, { me, cloudinary }) {
+    async uploadPicture(mutation, { data }, { cloudinary }) {
       data = await data;
 
       return new Promise((resolve, reject) => {

@@ -7,7 +7,9 @@ class AuthDirective extends SchemaDirectiveVisitor {
     field.resolve = async function (parent, args, context, info) {
       const { me } = context;
 
-      if (!me) return null;
+      if (!me) {
+        throw Error('User must be logged in');
+      }
 
       return resolve.call(this, parent, args, context, info);
     };

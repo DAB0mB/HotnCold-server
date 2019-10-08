@@ -7,8 +7,13 @@ class MineDirective extends SchemaDirectiveVisitor {
     field.resolve = async function (user, args, context, info) {
       const { me } = context;
 
-      if (!me) return null;
-      if (user.id !== me.id) return null;
+      if (!me) {
+        throw Error('User must be logged in');
+      }
+
+      if (user.id !== me.id) {
+        throw Error('Unauthorized');
+      }
 
       return resolve.call(this, user, args, context, info);
     };

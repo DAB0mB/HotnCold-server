@@ -45,7 +45,15 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
       validate: {
-        len: [0, 6],
+        len(value) {
+          if (value.length < 1) {
+            throw Error('User must have at least a single picture');
+          }
+
+          if (value.length > 6) {
+            throw Error('User must have 6 pictures at most');
+          }
+        },
       },
     },
     location: {

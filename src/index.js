@@ -33,24 +33,27 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 
-const getMe = async (req) => {
-  if (!req) return;
+const getMe = async ({ req, res }) => {
+  if (!req) return null;
 
   const cookie = req.headers.cookie;
 
-  if (!cookie) return;
+  if (!cookie) return null;
 
   const { authToken } = parseCookie(cookie);
 
   const userId = await new Promise((resolve, reject) => {
     jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'RS256' }, (err, id) => {
       if (err) {
-        reject(err);
+        res.cookie('authToken', { maxAge: Date.now() });
+        resolve();
       } else {
         resolve(id);
       }
     });
   });
+
+  if (!userId) return null;
 
   return models.User.findOne({
     where: {
@@ -77,9 +80,11 @@ const server = new ApolloServer({
       message,
     };
   },
-  context: async ({ req, res }) => {
+  context: async (context) => {
+    const { req, res } = context;
+
     const [me] = await Promise.all([
-      getMe(req),
+      getMe(context),
       // Other async tasks...
     ]);
 
