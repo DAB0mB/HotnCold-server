@@ -24,7 +24,7 @@ async function mockUsers() {
     {
       firstName: 'Eytan',
       lastName: 'Manor',
-      gender: 'M',
+      // gender: 'M',
       birthDate: new Date('7/28/1994'),
       occupation: 'Software Engineer',
       bio: "Love sports, computers, and into self development.",
@@ -36,7 +36,7 @@ async function mockUsers() {
     {
       firstName: 'Laura',
       lastName: 'J Stinnett',
-      gender: 'F',
+      // gender: 'F',
       birthDate: new Date('10/26/1993'),
       occupation: 'Copy Writer',
       bio: "Amateur tv practitioner. Zombie fanatic. Infuriatingly humble twitter fan. Evil travelaholic.",
@@ -48,7 +48,7 @@ async function mockUsers() {
     {
       firstName: 'Crystal',
       lastName: 'E Walker',
-      gender: 'F',
+      // gender: 'F',
       birthDate: new Date('9/3/1991'),
       occupation: 'Insurance Policy Processing Clerk',
       bio: "Social media expert. Devoted beer maven. Music ninja. Evil gamer. Award-winning analyst.",
@@ -60,7 +60,7 @@ async function mockUsers() {
     {
       firstName: 'Dorothy',
       lastName: 'Funk',
-      gender: 'F',
+      // gender: 'F',
       birthDate: new Date('7/25/1983'),
       occupation: 'Demonstrator and Product Promoter',
       bio: "Evil coffee nerd. Analyst. Incurable bacon practitioner. Total twitter fan. Typical food aficionado.",
@@ -72,7 +72,7 @@ async function mockUsers() {
     {
       firstName: 'Gary',
       lastName: 'Rodriguez',
-      gender: 'M',
+      // gender: 'M',
       birthDate: new Date('6/2/1989'),
       occupation: 'Social Science Research Assistant',
       bio: "Travel maven. Professional alcoholaholic. Infuriatingly humble music specialist. Gamer. Coffee ninja. General internet advocate.",
@@ -84,7 +84,7 @@ async function mockUsers() {
     {
       firstName: 'Ken',
       lastName: 'Lea',
-      gender: 'M',
+      // gender: 'M',
       birthDate: new Date('12/2/1991'),
       occupation: 'Physical Therapist Assistant',
       bio: "Amateur social media fan. Professional bacon trailblazer. Hardcore explorer. Award-winning tv expert. Friendly pop culture maven.",

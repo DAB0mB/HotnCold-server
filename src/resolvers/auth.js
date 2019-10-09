@@ -12,8 +12,8 @@ export default {
         pictures,
       });
 
-      const authToken = new Promise((resolve, reject) => {
-        jwt.sign(user.id, process.env.AUTH_SECRET, { algorithm: 'RS256' }, (err, token) => {
+      const authToken = await new Promise((resolve, reject) => {
+        jwt.sign(user.id, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {
           if (err) {
             reject(err);
           } else {

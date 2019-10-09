@@ -43,9 +43,9 @@ const getMe = async ({ req, res }) => {
   const { authToken } = parseCookie(cookie);
 
   const userId = await new Promise((resolve, reject) => {
-    jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'RS256' }, (err, id) => {
+    jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, id) => {
       if (err) {
-        res.cookie('authToken', { maxAge: Date.now() });
+        res.clearCookie('authToken');
         resolve();
       } else {
         resolve(id);

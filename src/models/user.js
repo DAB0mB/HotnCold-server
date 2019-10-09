@@ -21,12 +21,12 @@ const user = (sequelize, DataTypes) => {
         notEmpty: true,
       },
     },
-    gender: {
-      type: DataTypes.STRING,
-      validate: {
-        notEmpty: true,
-      },
-    },
+    // gender: {
+    //   type: DataTypes.STRING,
+    //   validate: {
+    //     notEmpty: true,
+    //   },
+    // },
     birthDate: {
       type: DataTypes.DATE,
       validate: {

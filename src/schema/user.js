@@ -15,7 +15,7 @@ export default gql`
     id: ID!
     firstName: String!
     lastName: String @mine
-    gender: String!
+    # gender: String!
     birthDate: DateTime @mine
     age: String!
     occupation: String
