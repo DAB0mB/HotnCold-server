@@ -18,6 +18,9 @@ import * as mapbox from './mapbox';
 import models from './models';
 import resolvers from './resolvers';
 import schema from './schema';
+import runTasks from './tasks';
+
+runTasks({ models, mapbox });
 
 const app = express();
 

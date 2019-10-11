@@ -42,7 +42,7 @@ export default {
           type: 'FeatureCollection',
           features: [],
         };
-      };
+      }
 
       // Mapbox API seems to have a throttle - it will keep returning the same results
       // until a certain time has passed from recent request. If features don't seem like

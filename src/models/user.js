@@ -62,9 +62,6 @@ const user = (sequelize, DataTypes) => {
       validate: {
         len: 2,
       },
-      set() {
-        throw Error('Use User.setLocation() instead');
-      },
     },
   }, {
     hooks: {
@@ -76,6 +73,47 @@ const user = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.belongsTo(models.Area);
+  };
+
+  User.disposeOutdatedLocations = async (dateLimit = new Date(Date.now() - 60 * 1000)) => {
+    const Area = sequelize.models.area;
+
+    const users = await User.findAll({
+      where: {
+        updatedAt: { $lt: dateLimit },
+        location: { $ne: null },
+        areaId: { $ne: null },
+      },
+      attributes: ['id', 'areaId'],
+      include: [Area],
+    });
+
+    if (!users.length) return;
+
+    await Promise.all([
+      User.update(
+        {
+          location: null,
+          areaId: null,
+        },
+        {
+          where: {
+            id: users.map(user => user.id),
+          },
+        },
+      ),
+
+      ...users.map((user) => {
+        return mapbox.datasets.deleteFeature({
+          datasetId: user.area.datasetId,
+          featureId: `user.${user.id}`,
+        }).send().catch((e) => {
+          if (e.statusCode !== 404) {
+            return Promise.reject(e);
+          }
+        });
+      }),
+    ]);
   };
 
   // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
@@ -98,7 +136,8 @@ const user = (sequelize, DataTypes) => {
         types: ['region', 'district', 'locality', 'place'],
       }).send().then(({ body }) => body.features.map(f => f.id));
 
-      const area = await Area.findOne({
+      // Area might be available from join op
+      const area = this.area || await Area.findOne({
         where: {
           geoFeaturesIds: {
             [sequelize.Op.overlap]: geoFeaturesIds,
