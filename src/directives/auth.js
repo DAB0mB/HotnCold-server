@@ -8,7 +8,7 @@ class AuthDirective extends SchemaDirectiveVisitor {
       const { me } = context;
 
       if (!me) {
-        throw Error('User must be logged in');
+        throw Error('Unauthorized');
       }
 
       return resolve.call(this, parent, args, context, info);
