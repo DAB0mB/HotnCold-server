@@ -75,45 +75,23 @@ const user = (sequelize, DataTypes) => {
     User.belongsTo(models.Area);
   };
 
-  User.disposeOutdatedLocations = async (dateLimit = new Date(Date.now() - 60 * 1000)) => {
-    const Area = sequelize.models.area;
-
-    const users = await User.findAll({
+  User.disposeOutdatedLocations = (dateLimit = new Date(Date.now())) => {
+    return User.update({
+      location: null,
+      areaId: null,
+    }, {
       where: {
         updatedAt: { $lt: dateLimit },
-        location: { $ne: null },
-        areaId: { $ne: null },
-      },
-      attributes: ['id', 'areaId'],
-      include: [Area],
-    });
-
-    if (!users.length) return;
-
-    await Promise.all([
-      User.update(
-        {
-          location: null,
-          areaId: null,
-        },
-        {
-          where: {
-            id: users.map(user => user.id),
+        $or: [
+          {
+            location: { $ne: null },
           },
-        },
-      ),
-
-      ...users.map((user) => {
-        return mapbox.datasets.deleteFeature({
-          datasetId: user.area.datasetId,
-          featureId: `user.${user.id}`,
-        }).send().catch((e) => {
-          if (e.statusCode !== 404) {
-            return Promise.reject(e);
-          }
-        });
-      }),
-    ]);
+          {
+            areaId: { $ne: null },
+          },
+        ],
+      },
+    });
   };
 
   // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
@@ -137,7 +115,7 @@ const user = (sequelize, DataTypes) => {
       }).send().then(({ body }) => body.features.map(f => f.id));
 
       // Area might be available from join op
-      const area = this.area || await Area.findOne({
+      const area = await Area.findOne({
         where: {
           geoFeaturesIds: {
             [sequelize.Op.overlap]: geoFeaturesIds,
@@ -146,22 +124,6 @@ const user = (sequelize, DataTypes) => {
       });
 
       if (area) {
-        location = await mapbox.datasets.putFeature({
-          datasetId: area.datasetId,
-          featureId: `user.${this.id}`,
-          feature: {
-            type: 'Feature',
-            properties: {
-              entity: 'user',
-              userId: this.id,
-            },
-            geometry: {
-              type: 'Point',
-              coordinates: location,
-            }
-          },
-        }).send().then(({ body }) => body.geometry.coordinates);
-
         await this.setArea(area);
       } else {
         await this.setArea(null);
@@ -170,19 +132,6 @@ const user = (sequelize, DataTypes) => {
       this.setDataValue('location', location);
     } else {
       if (!selfLocation) return;
-
-      const area = await this.getArea();
-
-      if (area) {
-        await mapbox.datasets.deleteFeature({
-          datasetId: area.datasetId,
-          featureId: `user.${this.id}`,
-        }).send().catch((e) => {
-          if (e.statusCode !== 404) {
-            return Promise.reject(e);
-          }
-        });
-      }
 
       await this.setArea(null);
 

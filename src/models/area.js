@@ -13,25 +13,12 @@ const area = (sequelize, DataTypes) => {
         notEmpty: true,
       },
     },
-    datasetId: {
-      type: DataTypes.STRING,
-      validate: {
-        notEmpty: true,
-      },
-    },
     geoFeaturesIds: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       validate: {
         notEmpty: true,
       },
     },
-  }, {
-    indexes: [
-      {
-        unique: true,
-        fields: ['name', 'datasetId'],
-      }
-    ]
   });
 
   Area.associate = (models) => {

@@ -32,7 +32,7 @@ export default {
       return me;
     },
 
-    async updateMyLocation(mutation, { location }, { me, mapbox }) {
+    async updateMyLocation(mutation, { location }, { me, mapbox, models }) {
       await me.setLocation(location);
 
       const myArea = await me.getArea();
@@ -44,12 +44,29 @@ export default {
         };
       }
 
-      // Mapbox API seems to have a throttle - it will keep returning the same results
-      // until a certain time has passed from recent request. If features don't seem like
-      // they've been updated, don't panic
-      return await mapbox.datasets.listFeatures({
-        datasetId: myArea.datasetId,
-      }).send().then(({ body }) => body);
+      const nearbyUsers = await models.User.findAll({
+        where: {
+          id: { $ne: me.id },
+          areaId: myArea.id,
+        },
+        attributes: ['location'],
+      });
+
+      const features = nearbyUsers.map(user => ({
+        type: 'Feature',
+        properties: {
+          userId: user.id,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: user.location,
+        },
+      }));
+
+      return {
+        type: 'FeatureCollection',
+        features,
+      };
     },
   },
 
