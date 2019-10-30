@@ -16,10 +16,13 @@ export default {
 
       if (!user) return null;
 
+      // TODO: Allow querying only with a certain proximity
+      /*
       const distance = turfDistance(me.location, user.location, { units: 'kilometers' });
 
       // Users have to be at a certain proximity
       if (distance < 0.1) return null;
+      */
 
       return user;
     },
