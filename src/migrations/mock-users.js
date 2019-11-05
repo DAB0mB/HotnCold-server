@@ -6,19 +6,9 @@ import syncAreas from './sync-areas';
 
 const { User } = models;
 
-async function deleteFeatures() {
-  const users = await User.findAll();
-
-  await Promise.all(users.map(u => u.setLocation(null, true)));
-}
-
 async function mockUsers() {
-  await deleteFeatures();
-
-  await Promise.all([
-    await syncAreas(),
-    await User.sync({ force: true }),
-  ]);
+  await User.sync({ force: true }),
+  await syncAreas();
 
   await User.bulkCreate([
     {
