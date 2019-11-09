@@ -6,10 +6,11 @@
     "node": ">=10.11.0"
   },
   "scripts": {
+    "build": "yarn sync-areas",
     "start": "nodemon --exec babel-node src/index.js",
-    "test": "jest",
     "mock-users": "babel-node src/migrations/mock-users.js",
-    "sync-areas": "babel-node src/migrations/sync-areas.js"
+    "sync-areas": "babel-node src/migrations/sync-areas.js",
+    "test": "jest"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
