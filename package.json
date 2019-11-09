@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "engines": {
-    "node": ">=10.11.0"
+    "node": "12.13.0"
   },
   "scripts": {
     "build": "yarn sync-areas",
