@@ -6,7 +6,7 @@
     "node": "12.13.0"
   },
   "scripts": {
-    "build": "yarn sync-areas",
+    "build": "babel-node ./src/scripts/build.js",
     "start": "nodemon --exec babel-node ./src/index.js",
     "mock-users": "babel-node ./src/migrations/mock-users.js",
     "sync-areas": "babel-node ./src/migrations/sync-areas.js",
