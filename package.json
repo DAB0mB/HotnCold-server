@@ -8,8 +8,8 @@
   "scripts": {
     "build": "babel-node ./src/scripts/build.js",
     "start": "nodemon --exec babel-node ./src/index.js",
-    "mock-users": "babel-node ./src/migrations/mock-users.js",
-    "sync-areas": "babel-node ./src/migrations/sync-areas.js",
+    "mock-users": "babel-node ./src/seeders/mock-users.js",
+    "sync-areas": "babel-node ./src/seeders/sync-areas.js",
     "test": "jest"
   },
   "devDependencies": {
@@ -43,6 +43,7 @@
     "nodemon": "^1.19.4",
     "pg": "^7.6.1",
     "sequelize": "^4.41.2",
+    "sequelize-cli": "^5.5.1",
     "uuid": "^3.3.3"
   }
 }

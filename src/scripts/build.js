@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-import syncAreas from '../migrations/sync-areas';
-import models from '../models';
+import 'dotenv/config';
+
+import syncAreas from '../seeders/sync-areas';
+import sequelize from '../sequelize';
 
 async function build() {
-  Object.keys(models).forEach(key => {
-    models[key].sync();
-  });
-
+  await sequelize.sync();
   await syncAreas();
 }
 
