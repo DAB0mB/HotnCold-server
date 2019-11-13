@@ -8,8 +8,9 @@
   "scripts": {
     "build": "babel-node ./src/scripts/build.js",
     "start": "nodemon --exec babel-node ./src/index.js",
-    "mock-users": "babel-node ./src/seeders/mock-users.js",
-    "sync-areas": "babel-node ./src/seeders/sync-areas.js",
+    "job:garbage-collect": "nodemon --exec babel-node ./src/jobs/garbage-collect.js",
+    "seed:mock-users": "babel-node ./src/seeders/mock-users.js",
+    "seed:sync-areas": "babel-node ./src/seeders/sync-areas.js",
     "test": "jest"
   },
   "devDependencies": {
