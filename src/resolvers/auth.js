@@ -24,7 +24,7 @@ export default {
 
       res.cookie('authToken', authToken);
 
-      return user;
+      return user.id;
     },
   },
 };
