@@ -2,7 +2,7 @@ import 'dotenv/config';
 
 import models from '../models';
 
-const INTERVAL = 5 * 60 * 1000
+const INTERVAL = 10 * 60 * 1000
 
 const disposeOutdatedLocations = async ({ models }) => {
   return models.User.disposeOutdatedLocations().catch(e => console.error(e));

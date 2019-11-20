@@ -1,12 +1,10 @@
 import 'dotenv/config';
 import cloudinary from 'cloudinary';
-import { parse as parseCookie } from 'cookie';
 import cors from 'cors';
 import morgan from 'morgan';
 import http from 'http';
 import DataLoader from 'dataloader';
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import {
   ApolloServer,
   AuthenticationError,
@@ -15,11 +13,14 @@ import {
 import schemaDirectives from './directives';
 import loaders from './loaders';
 import * as mapbox from './mapbox';
+import * as middlewares from './middlewares';
 import models from './models';
 import resolvers from './resolvers';
+import rest from './rest';
 import schema from './schema';
 
 const app = express();
+const getMe = middlewares.getMe();
 
 {
   const match = process.env.CLOUDINARY_URL.match(/cloudinary:\/\/(\d+):(\w+)@(\.+)/)
@@ -32,35 +33,7 @@ const app = express();
 
 app.use(cors());
 app.use(morgan('dev'));
-
-const getMe = async ({ req, res }) => {
-  if (!req) return null;
-
-  const cookie = req.headers.cookie;
-
-  if (!cookie) return null;
-
-  const { authToken } = parseCookie(cookie);
-
-  const userId = await new Promise((resolve, reject) => {
-    jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, id) => {
-      if (err) {
-        res.clearCookie('authToken');
-        resolve();
-      } else {
-        resolve(id);
-      }
-    });
-  });
-
-  if (!userId) return null;
-
-  return models.User.findOne({
-    where: {
-      id: userId,
-    }
-  });
-};
+app.use(rest);
 
 const server = new ApolloServer({
   introspection: true,
@@ -83,13 +56,13 @@ const server = new ApolloServer({
   context: async (context) => {
     const { req, res } = context;
 
-    const [me] = await Promise.all([
-      getMe(context),
+    await Promise.all([
+      getMe(req, res),
       // Other async tasks...
     ]);
 
     return {
-      me,
+      me: req.me,
       models,
       mapbox,
       cloudinary,
