@@ -73,6 +73,8 @@ const user = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.belongsTo(models.Area);
+    User.hasMany(models.Message);
+    User.belongsToMany(models.Chat, { through: 'chats_users' });
   };
 
   User.disposeOutdatedLocations = (dateLimit = new Date(Date.now())) => {

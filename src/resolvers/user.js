@@ -78,6 +78,10 @@ export default {
       return moment().year() - moment(user.birthDate).year();
     },
 
+    avatar(user) {
+      return user.pictures[0];
+    },
+
     area(user) {
       return user.getArea();
     },

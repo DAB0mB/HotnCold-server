@@ -23,5 +23,6 @@ export default gql`
     location: Vector2D @mine
     pictures: [String]
     area: Area
+    avatar: String
   }
 `;
