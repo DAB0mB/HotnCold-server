@@ -1,19 +1,19 @@
 'use strict';
 
 module.exports = {
-  up(queryInterface, sequelize) {
+  up(queryInterface, Sequelize) {
     return queryInterface.createTable('chats_messages', {
       id: {
         primaryKey: true,
-        type: sequelize.UUID,
+        type: Sequelize.UUID,
       },
       chatId: {
         foreignKey: true,
-        type: sequelize.UUID,
+        type: Sequelize.UUID,
       },
       messageId: {
         foreignKey: true,
-        type: sequelize.UUID,
+        type: Sequelize.UUID,
       },
     });
   },

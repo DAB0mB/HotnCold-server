@@ -1,14 +1,14 @@
 import uuid from 'uuid';
 
-const message = (sequelize) => {
+const message = (sequelize, DataTypes) => {
   const Message = sequelize.define('message', {
     id: {
       primaryKey: true,
-      type: sequelize.UUID,
+      type: DataTypes.UUID,
       defaultValue: () => uuid(),
     },
     text: {
-      type: sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
   });

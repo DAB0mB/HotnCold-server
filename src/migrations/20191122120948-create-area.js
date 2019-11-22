@@ -1,18 +1,18 @@
 'use strict';
 
 module.exports = {
-  up(queryInterface, sequelize) {
+  up(queryInterface, Sequelize) {
     return queryInterface.createTable('areas', {
       id: {
         primaryKey: true,
-        type: sequelize.UUID,
+        type: Sequelize.UUID,
       },
       name: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       pictures: {
-        type: sequelize.ARRAY(sequelize.STRING),
+        type: Sequelize.ARRAY(Sequelize.STRING),
         allowNull: false,
       },
     });

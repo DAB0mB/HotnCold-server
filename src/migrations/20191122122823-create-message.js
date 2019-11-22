@@ -1,14 +1,14 @@
 'use strict';
 
 module.exports = {
-  up(queryInterface, sequelize) {
+  up(queryInterface, Sequelize) {
     return queryInterface.createTable('messages', {
       id: {
         primaryKey: true,
-        type: sequelize.UUID,
+        type: Sequelize.UUID,
       },
       text: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
     });

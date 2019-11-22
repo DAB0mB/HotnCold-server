@@ -1,2 +1,3 @@
+release:            yarn migrate
 web:                yarn start
-garbage-collection: yarn job:garbage-collect
+garbage-collection: yarn garbage-collect

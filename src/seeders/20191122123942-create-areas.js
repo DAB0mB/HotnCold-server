@@ -3,7 +3,7 @@
 const MOCK = '__MOCK__';
 
 module.exports = {
-  up(queryInterface, sequelize) {
+  up(queryInterface, Sequelize) {
     return queryInterface.bulkInsert('areas', [
       {
         name: 'HaMerkaz, Israel',

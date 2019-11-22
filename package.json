@@ -6,8 +6,9 @@
     "node": "12.13.0"
   },
   "scripts": {
+    "migrate": "sequelize db:migrate",
     "start": "nodemon --exec babel-node ./src/index.js",
-    "job:garbage-collect": "nodemon --exec babel-node ./src/jobs/garbage-collect.js",
+    "garbage-collect": "nodemon --exec babel-node ./src/jobs/garbage-collect.js",
     "test": "jest"
   },
   "devDependencies": {

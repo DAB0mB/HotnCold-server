@@ -3,7 +3,7 @@
 const MOCK = '__MOCK__';
 
 module.exports = {
-  async up(queryInterface, sequelize) {
+  async up(queryInterface, Sequelize) {
     const ny = await queryInterface.rawSelect('areas', {
       where: {
         name: 'Manhattan, New York, New York, United States',

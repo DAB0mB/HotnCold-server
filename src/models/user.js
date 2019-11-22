@@ -2,41 +2,41 @@ import uuid from 'uuid';
 
 import * as mapbox from '../mapbox';
 
-const user = (sequelize) => {
+const user = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
     id: {
       primaryKey: true,
-      type: sequelize.UUID,
+      type: DataTypes.UUID,
       defaultValue: () => uuid(),
     },
     firstName: {
-      type: sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     lastName: {
-      type: sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     // gender: {
-    //   type: sequelize.STRING,
+    //   type: DataTypes.STRING,
     //   validate: {
     //     notEmpty: true,
     //   },
     // },
     birthDate: {
-      type: sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     occupation: {
-      type: sequelize.STRING,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     bio: {
-      type: sequelize.STRING(511),
+      type: DataTypes.STRING(511),
       allowNull: false,
     },
     pictures: {
-      type: sequelize.ARRAY(sequelize.STRING),
+      type: DataTypes.ARRAY(DataTypes.STRING),
       validate: {
         len(value) {
           if (value.length < 1) {
@@ -50,7 +50,7 @@ const user = (sequelize) => {
       },
     },
     location: {
-      type: sequelize.ARRAY(sequelize.FLOAT),
+      type: DataTypes.ARRAY(DataTypes.FLOAT),
       validate: {
         len: 2,
       },
