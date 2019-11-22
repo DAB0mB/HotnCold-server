@@ -1,10 +1,10 @@
 import uuid from 'uuid';
 
-const chat = (sequelize, DataTypes) => {
+const chat = (sequelize) => {
   const Chat = sequelize.define('chat', {
     id: {
       primaryKey: true,
-      type: DataTypes.UUID,
+      type: sequelize.UUID,
       defaultValue: () => uuid(),
     },
   });

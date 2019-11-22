@@ -1,23 +1,19 @@
 import uuid from 'uuid';
 
-const area = (sequelize, DataTypes) => {
+const area = (sequelize) => {
   const Area = sequelize.define('area', {
     id: {
       primaryKey: true,
-      type: DataTypes.UUID,
+      type: sequelize.UUID,
       defaultValue: () => uuid(),
     },
     name: {
-      type: DataTypes.STRING,
-      validate: {
-        notEmpty: true,
-      },
+      type: sequelize.STRING,
+      allowNull: false,
     },
     geoFeaturesIds: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      validate: {
-        notEmpty: true,
-      },
+      type: sequelize.ARRAY(sequelize.STRING),
+      allowNull: false,
     },
   });
 

@@ -2,48 +2,41 @@ import uuid from 'uuid';
 
 import * as mapbox from '../mapbox';
 
-const user = (sequelize, DataTypes) => {
+const user = (sequelize) => {
   const User = sequelize.define('user', {
     id: {
       primaryKey: true,
-      type: DataTypes.UUID,
+      type: sequelize.UUID,
       defaultValue: () => uuid(),
     },
     firstName: {
-      type: DataTypes.STRING,
-      validate: {
-        notEmpty: true,
-      },
+      type: sequelize.STRING,
+      allowNull: false,
     },
     lastName: {
-      type: DataTypes.STRING,
-      validate: {
-        notEmpty: true,
-      },
+      type: sequelize.STRING,
+      allowNull: false,
     },
     // gender: {
-    //   type: DataTypes.STRING,
+    //   type: sequelize.STRING,
     //   validate: {
     //     notEmpty: true,
     //   },
     // },
     birthDate: {
-      type: DataTypes.DATE,
-      validate: {
-        notEmpty: true,
-      },
+      type: sequelize.DATE,
+      allowNull: false,
     },
     occupation: {
-      type: DataTypes.STRING,
-      allowNull: true,
+      type: sequelize.STRING,
+      allowNull: false,
     },
     bio: {
-      type: DataTypes.STRING(511),
-      allowNull: true,
+      type: sequelize.STRING(511),
+      allowNull: false,
     },
     pictures: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: true,
+      type: sequelize.ARRAY(sequelize.STRING),
       validate: {
         len(value) {
           if (value.length < 1) {
@@ -57,8 +50,7 @@ const user = (sequelize, DataTypes) => {
       },
     },
     location: {
-      type: DataTypes.ARRAY(DataTypes.FLOAT),
-      allowNull: true,
+      type: sequelize.ARRAY(sequelize.FLOAT),
       validate: {
         len: 2,
       },
