@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import cloudinary from 'cloudinary';
 import cors from 'cors';
 import morgan from 'morgan';
 import http from 'http';
@@ -10,26 +9,16 @@ import {
   AuthenticationError,
 } from 'apollo-server-express';
 
+import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
 import loaders from './loaders';
-import * as mapbox from './mapbox';
 import * as middlewares from './middlewares';
-import models from './models';
 import resolvers from './resolvers';
 import rest from './rest';
 import schema from './schema';
 
 const app = express();
 const getMe = middlewares.getMe();
-
-{
-  const match = process.env.CLOUDINARY_URL.match(/cloudinary:\/\/(\d+):(\w+)@(\.+)/)
-
-  if (match) {
-    const [api_key, api_secret, cloud_name] = match.slice(1)
-    cloudinary.config({ api_key, api_secret, cloud_name })
-  }
-}
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -63,14 +52,11 @@ const server = new ApolloServer({
 
     return {
       me: req.me,
-      models,
-      mapbox,
-      cloudinary,
       req,
       res,
       loaders: {
         user: new DataLoader(keys =>
-          loaders.user.batchUsers(keys, models),
+          loaders.user.batchUsers(keys),
         ),
       },
     };
@@ -88,6 +74,12 @@ const host = process.env.HOST || '0.0.0.0';
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-httpServer.listen({ port, host }, () => {
-  console.log(`Apollo Server on http://${host}:${port}/graphql`);
+bootstrap().then(() => {
+  httpServer.listen({ port, host }, () => {
+    console.log(`Apollo Server on http://${host}:${port}/graphql`);
+  });
+}).catch((e) => {
+  console.error('Failed to bootstrap.');
+
+  process.exit(1);
 });

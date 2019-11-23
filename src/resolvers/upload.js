@@ -1,6 +1,10 @@
+import { useCloudinary } from '../providers';
+
 export default {
   Mutation: {
-    async uploadPicture(mutation, { data }, { cloudinary }) {
+    async uploadPicture(mutation, { data }) {
+      const cloudinary = useCloudinary();
+
       data = await data;
 
       return new Promise((resolve, reject) => {

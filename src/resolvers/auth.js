@@ -1,9 +1,13 @@
 import jwt from 'jsonwebtoken';
 
+import { useModels } from '../providers';
+
 export default {
   Mutation: {
-    async register(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { models, res }) {
-      const user = await models.User.create({
+    async register(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { res }) {
+      const { User } = useModels();
+
+      const user = await User.create({
         firstName,
         lastName,
         birthDate,

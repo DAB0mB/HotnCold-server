@@ -1,9 +1,11 @@
 import { parse as parseCookie } from 'cookie';
 import jwt from 'jsonwebtoken';
 
-import models from '../models';
+import { useModels } from '../providers';
 
 const getMe = () => async (req, res, next = Function) => {
+  const { User } = useModels();
+
   if (!req) {
     next();
 
@@ -37,7 +39,7 @@ const getMe = () => async (req, res, next = Function) => {
     return;
   }
 
-  req.me = await models.User.findOne({
+  req.me = await User.findOne({
     where: {
       id: userId,
     }

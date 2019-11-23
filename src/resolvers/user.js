@@ -1,16 +1,20 @@
 import turfDistance from '@turf/distance';
 import moment from 'moment';
 
+import { useModels, useMapbox } from '../providers';
+
 export default {
   Query: {
     me(query, args, { me }) {
       return me;
     },
 
-    async user(query, { userId }, { me, models }) {
+    async user(query, { userId }, { me }) {
+      const { User } = useModels();
+
       if (!me) return null;
 
-      const user = await models.User.findOne({
+      const user = await User.findOne({
         where: { id: userId }
       });
 
@@ -29,13 +33,16 @@ export default {
   },
 
   Mutation: {
-    async updateMyProfile(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { me, models }) {
+    async updateMyProfile(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { me }) {
       await me.update({ firstName, lastName, birthDate, occupation, bio, pictures });
 
       return me;
     },
 
-    async updateMyLocation(mutation, { location }, { me, mapbox, models }) {
+    async updateMyLocation(mutation, { location }, { me }) {
+      const { User } = useModels();
+      const mapbox = useMapbox();
+
       await me.setLocation(location);
 
       const myArea = await me.getArea();

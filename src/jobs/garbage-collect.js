@@ -1,23 +1,25 @@
 import 'dotenv/config';
 
-import models from '../models';
+import { useModels } from '../providers';
 
 const INTERVAL = 10 * 60 * 1000
 
-const disposeOutdatedLocations = async ({ models }) => {
+const disposeOutdatedLocations = async () => {
+  const { User } = useModels();
+
   return models.User.disposeOutdatedLocations().catch(e => console.error(e));
 };
 
-const startGarbageCollecting = (context) => {
+const startGarbageCollecting = () => {
   setInterval(() => {
-    disposeOutdatedLocations(context);
+    disposeOutdatedLocations();
   }, INTERVAL);
 
-  disposeOutdatedLocations(context);
+  disposeOutdatedLocations();
 };
 
 if (require.main === module) {
-  startGarbageCollecting({ models });
+  startGarbageCollecting();
 
   console.log('Started garbage collection...');
 }

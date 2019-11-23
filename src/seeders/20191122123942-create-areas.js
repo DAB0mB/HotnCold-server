@@ -1,7 +1,5 @@
 'use strict';
 
-const MOCK = '__MOCK__';
-
 module.exports = {
   up(queryInterface, Sequelize) {
     return queryInterface.bulkInsert('areas', [
@@ -16,6 +14,14 @@ module.exports = {
       {
         name: 'San Francisco, California, United States',
         geoFeaturesIds: ['place.15734669613361910'],
+      },
+      {
+        name: 'Seoul, South Korea',
+        geoFeaturesIds: ['place.15016829751699340'],
+      },
+      {
+        name: 'Los Angeles, California, United States',
+        geoFeaturesIds: ['region.11319063928738010'],
       },
     ]);
   },
