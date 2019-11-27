@@ -6,7 +6,7 @@ export default gql`
   }
 
   extend type Mutation {
-    sendMessage(chatId: ID, recipientId: ID, text: String!): Message @auth
+    sendMessage(chatId: ID!, text: String!): Message! @auth
   }
 
   type Message {

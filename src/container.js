@@ -3,14 +3,14 @@ const containersStack = [];
 
 export const get = (key) => {
   if (!has(key)) {
-    throw Error(`"${key}" was not provided!`);
+    throw Error(`"${key.toString()}" was not provided!`);
   }
 
   return container.get(key);
 };
 
 export const set = (key, value) => {
-  return container.set(key, value);
+  container.set(key, value);
 };
 
 export const has = (key) => {

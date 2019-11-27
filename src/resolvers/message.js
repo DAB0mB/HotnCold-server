@@ -35,25 +35,15 @@ export default {
   },
 
   Mutation: {
-    async sendMessage(mutation, { chatId, recipientId, text }, { me }) {
+    async sendMessage(mutation, { chatId, text }, { me }) {
       const { Chat, Message } = useModels();
 
-      let chat;
-      // Create chat if not specified
-      if (chatId) {
-        chat = await Chat.findOne({
-          where: { id: chatId }
-        });
+      const chat = await Chat.findOne({
+        where: { id: chatId }
+      });
 
-        if (!chat) return [];
-      }
-      else if (recipientId) {
-        chat = await Chat.build();
-
-        await chat.setUsers([me.id, recipientId]);
-      }
-      else {
-        throw Error('Either "chatId" or "recipientId" must be specified');
+      if (!chat) {
+        throw Error(`Provided chatId ${chatId} doesn't exist`);
       }
 
       // Create the message and associate it with me and target chat

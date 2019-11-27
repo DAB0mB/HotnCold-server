@@ -2,7 +2,7 @@ import { provideCloudinary } from '../providers';
 
 const bootstrapCloudinary = () => {
   const cloudinary = require('cloudinary');
-  const match = process.env.CLOUDINARY_URL.match(/cloudinary:\/\/(\d+):(\w+)@(\.+)/)
+  const match = process.env.CLOUDINARY_URL.match(/^cloudinary\:\/\/(\d+)\:(\w+)@(.+)$/);
 
   if (!match) return;
 

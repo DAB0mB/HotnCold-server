@@ -54,7 +54,7 @@ export default {
         };
       }
 
-      const nearbyUsers = await models.User.findAll({
+      const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
           areaId: myArea.id,
