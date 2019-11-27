@@ -1,4 +1,4 @@
-import { provideModels } from '../provides'
+import { provideModels } from '../providers'
 
 const bootstrapModels = () => {
   const Sequelize = require('sequelize');

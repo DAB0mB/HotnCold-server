@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 
-import * as mapbox from '../mapbox';
+import { useModels, useMapbox } from '../providers';
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
@@ -90,8 +90,9 @@ const user = (sequelize, DataTypes) => {
 
   // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
   User.prototype.setLocation = async function setLocation(location, useStage) {
+    const { Area } = useModels();
+    const mapbox = useMapbox();
     const selfLocation = this.getDataValue('location');
-    const Area = sequelize.models.area;
 
     if (location) {
       if (
@@ -112,7 +113,7 @@ const user = (sequelize, DataTypes) => {
       const area = await Area.findOne({
         where: {
           geoFeaturesIds: {
-            [sequelize.Op.overlap]: geoFeaturesIds,
+            $overlap: geoFeaturesIds,
           },
         },
       });
