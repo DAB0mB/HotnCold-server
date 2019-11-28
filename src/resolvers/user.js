@@ -81,16 +81,16 @@ export default {
   },
 
   User: {
+    name(user) {
+      return user.firstName + ' ' + user.lastName;
+    },
+
     age(user) {
       return moment().year() - moment(user.birthDate).year();
     },
 
     avatar(user) {
       return user.pictures[0];
-    },
-
-    area(user) {
-      return user.getArea();
     },
   },
 };

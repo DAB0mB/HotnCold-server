@@ -13,8 +13,9 @@ export default gql`
 
   type User {
     id: ID!
-    firstName: String!
+    firstName: String! @mine
     lastName: String @mine
+    name: String!
     # gender: String!
     birthDate: DateTime @mine
     age: String!
@@ -22,7 +23,6 @@ export default gql`
     bio: String
     location: Vector2D @mine
     pictures: [String]
-    area: Area
     avatar: String
   }
 `;
