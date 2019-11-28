@@ -7,7 +7,7 @@ export default gql`
 
   type Chat {
     id: ID!
-    recentMessage: [Message]!
+    recentMessage: Message
     users: [User]!
   }
 `;

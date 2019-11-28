@@ -4,7 +4,7 @@ import { SchemaDirectiveVisitor } from 'graphql-tools';
 class AuthDirective extends SchemaDirectiveVisitor {
   visitFieldDefinition(field) {
     const { resolve = defaultFieldResolver } = field;
-    field.resolve = async function (parent, args, context, info) {
+    field.resolve = function (parent, args, context, info) {
       const { me } = context;
 
       if (!me) {

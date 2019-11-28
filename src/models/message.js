@@ -14,7 +14,7 @@ const message = (sequelize, DataTypes) => {
   });
 
   Message.associate = (models) => {
-    Message.hasOne(models.Chat, { through: 'chat_messages' });
+    Message.belongsTo(models.Chat);
     Message.belongsTo(models.User);
   };
 

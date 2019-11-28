@@ -47,10 +47,11 @@ export default {
       }
 
       // Create the message and associate it with me and target chat
-      const message = await Message.build({
+      const message = new Message({
         text,
         userId: me.id,
       });
+      await message.save();
       await message.setChat(chat);
 
       return message;

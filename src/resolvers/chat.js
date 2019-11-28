@@ -1,3 +1,5 @@
+import { useModels } from '../providers';
+
 export default {
   Mutation: {
     async findOrCreateChat(mutation, { usersIds }, { me }) {
@@ -23,7 +25,8 @@ export default {
 
       // Build chat if not found
       if (!chat) {
-        chat = await Chat.build();
+        chat = new Chat();
+        await chat.save();
         await chat.addUsers([me, ...usersIds]);
       }
 
@@ -32,11 +35,13 @@ export default {
   },
 
   Chat: {
-    async recentMessage(chat, {}, { me }) {
-      return chat.getMessages({ order: [['createdAt', 'DESC']], limit: 1 });
+    async recentMessage(chat) {
+      const messages = await chat.getMessages({ order: [['createdAt', 'DESC']], limit: 1 });
+
+      return messages[0];
     },
 
-    async users(chat, {}, { me }) {
+    users(chat) {
       return chat.getUsers();
     },
   },

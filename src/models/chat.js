@@ -29,6 +29,10 @@ const chat = (sequelize, DataTypes) => {
       attributes: ['id']
     });
 
+    if (!chats) {
+      return [];
+    }
+
     for (let user of users.slice(1)) {
       chats = await user.getChats({
         where: {
@@ -51,7 +55,7 @@ const chat = (sequelize, DataTypes) => {
   };
 
   Chat.associate = (models) => {
-    Chat.belongsToMany(models.Message, { through: 'chats_messages' });
+    Chat.hasMany(models.Message);
     Chat.belongsToMany(models.User, { through: 'chats_users' });
   };
 
