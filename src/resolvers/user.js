@@ -9,7 +9,7 @@ export default {
       return me;
     },
 
-    async user(query, { userId }, { me }) {
+    async userProfile(query, { userId }, { me }) {
       const { User } = useModels();
 
       if (!me) return null;
