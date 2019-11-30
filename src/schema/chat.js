@@ -8,6 +8,7 @@ export default gql`
   type Chat {
     id: ID!
     recentMessage: Message
+    firstMessage: Message
     users: [User]!
   }
 `;

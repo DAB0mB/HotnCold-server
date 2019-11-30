@@ -9,6 +9,10 @@ export default gql`
     sendMessage(chatId: ID!, text: String!): Message! @auth
   }
 
+  extend type Subscription {
+    messageSent(chatId: ID!): Message! @auth
+  }
+
   type Message {
     id: ID!
     createdAt: DateTime!

@@ -41,6 +41,12 @@ export default {
       return messages[0];
     },
 
+    async firstMessage(chat) {
+      const messages = await chat.getMessages({ order: [['createdAt', 'ASC']], limit: 1 });
+
+      return messages[0];
+    },
+
     users(chat) {
       return chat.getUsers();
     },
