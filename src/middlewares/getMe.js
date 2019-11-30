@@ -1,17 +1,9 @@
 import { parse as parseCookie } from 'cookie';
-import jwt from 'jsonwebtoken';
 
-import { useModels } from '../providers';
+import { useServices } from '../providers';
 
-const getMe = () => async (req, res, next = Function) => {
-  const { User } = useModels();
-
-  if (!req) {
-    next();
-
-    return;
-  };
-
+const getMe = () => async (req, res, next) => {
+  const { auth } = useServices();
   const cookie = req.headers.cookie;
 
   if (!cookie) {
@@ -22,28 +14,11 @@ const getMe = () => async (req, res, next = Function) => {
 
   const { authToken } = parseCookie(cookie);
 
-  const userId = await new Promise((resolve, reject) => {
-    jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, id) => {
-      if (err) {
-        res.clearCookie('authToken');
-        resolve();
-      } else {
-        resolve(id);
-      }
-    });
-  });
+  req.me = await auth.getMe(authToken);
 
-  if (!userId) {
-    next();
-
-    return;
+  if (!req.me) {
+    res.clearCookie('authToken');
   }
-
-  req.me = await User.findOne({
-    where: {
-      id: userId,
-    }
-  });
 
   next();
 };

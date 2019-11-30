@@ -13,15 +13,17 @@ import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
 import loaders from './loaders';
 import * as middlewares from './middlewares';
+import { useServices } from './providers';
 import resolvers from './resolvers';
 import rest from './rest';
 import schema from './schema';
+import { get } from './utils';
 
 const app = express();
-const getMe = middlewares.getMe();
 
 app.use(cors());
 app.use(morgan('dev'));
+app.use(middlewares.getMe());
 app.use(rest);
 
 const server = new ApolloServer({
@@ -42,18 +44,19 @@ const server = new ApolloServer({
       message,
     };
   },
-  context: async (context) => {
-    const { req, res } = context;
+  context: async ({ req, res, connection }) => {
+    const { auth } = useServices();
 
-    await Promise.all([
-      getMe(req, res),
-      // Other async tasks...
-    ]);
+    const me = (
+      get(req, 'me') ||
+      await auth.getMe(get(connection, 'context.cookie'))
+    );
 
     return {
-      me: req.me,
+      me,
       req,
       res,
+      connection,
       loaders: {
         user: new DataLoader(keys =>
           loaders.user.batchUsers(keys),

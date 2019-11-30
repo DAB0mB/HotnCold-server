@@ -2,7 +2,7 @@ import * as container from '../container';
 
 const $pubsub = Symbol('pubsub');
 
-export const providerPubsub = (pubsub) => {
+export const providePubsub = (pubsub) => {
   container.set($pubsub, pubsub);
 };
 
