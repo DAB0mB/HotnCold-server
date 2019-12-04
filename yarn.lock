@@ -3116,6 +3116,16 @@ graphql-iso-date@^3.6.1:
   resolved "https://registry.yarnpkg.com/graphql-iso-date/-/graphql-iso-date-3.6.1.tgz#bd2d0dc886e0f954cbbbc496bbf1d480b57ffa96"
   integrity sha512-AwFGIuYMJQXOEAgRlJlFL4H1ncFM8n8XmoVDTNypNOZyQ8LFDG2ppMFlsS862BSTCDcSUfHp8PD3/uJhv7t59Q==
 
+graphql-postgres-subscriptions@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/graphql-postgres-subscriptions/-/graphql-postgres-subscriptions-1.0.5.tgz#1bf33bc34fb031025da86715524db23ea871f216"
+  integrity sha512-k6aoe/0lBU8JEM4BowAX5ojQ8ovphNyMYmSWJo4bFU6IzzfM0UmdvSnVXBlwxABrJUX3IQ+tXdnQsOmQKuhTAw==
+  dependencies:
+    graphql-subscriptions "^0.5.8"
+    iterall "^1.2.2"
+    pg "^7.4.1"
+    pg-ipc "^1.0.4"
+
 graphql-resolvers@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/graphql-resolvers/-/graphql-resolvers-0.2.2.tgz#911310367cf16a70b97b73da9f19d9598137851f"
@@ -3123,6 +3133,13 @@ graphql-resolvers@^0.2.2:
   dependencies:
     deep-equal "^1.0.1"
     object-path "^0.11.4"
+
+graphql-subscriptions@^0.5.8:
+  version "0.5.8"
+  resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-0.5.8.tgz#13a6143c546bce390404657dc73ca501def30aa7"
+  integrity sha512-0CaZnXKBw2pwnIbvmVckby5Ge5e2ecmjofhYCdyeACbCly2j3WXDP/pl+s+Dqd2GQFC7y99NB+53jrt55CKxYQ==
+  dependencies:
+    iterall "^1.2.1"
 
 graphql-subscriptions@^1.0.0:
   version "1.1.0"
@@ -5171,7 +5188,12 @@ pg-int8@1.0.1:
   resolved "https://registry.yarnpkg.com/pg-int8/-/pg-int8-1.0.1.tgz#943bd463bf5b71b4170115f80f8efc9a0c0eb78c"
   integrity sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==
 
-pg-pool@^2.0.4:
+pg-ipc@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/pg-ipc/-/pg-ipc-1.0.4.tgz#e018f5aae417ded8a917878e33c1fe911bcce45f"
+  integrity sha1-4Bj1quQX3tipF4eOM8H+kRvM5F8=
+
+pg-pool@^2.0.4, pg-pool@^2.0.7:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-2.0.7.tgz#f14ecab83507941062c313df23f6adcd9fd0ce54"
   integrity sha512-UiJyO5B9zZpu32GSlP0tXy8J2NsJ9EFGFfz5v6PSbdz/1hBLX1rNiiy5+mAm5iJJYwfCv4A0EBcQLGWwjbpzZw==
@@ -5186,6 +5208,19 @@ pg-types@^2.1.0:
     postgres-bytea "~1.0.0"
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
+
+pg@^7.4.1:
+  version "7.14.0"
+  resolved "https://registry.yarnpkg.com/pg/-/pg-7.14.0.tgz#f46727845ad19c2670a7e8151063a670338b6057"
+  integrity sha512-TLsdOWKFu44vHdejml4Uoo8h0EwCjdIj9Z9kpz7pA5i8iQxOTwVb1+Fy+X86kW5AXKxQpYpYDs4j/qPDbro/lg==
+  dependencies:
+    buffer-writer "2.0.0"
+    packet-reader "1.0.0"
+    pg-connection-string "0.1.3"
+    pg-pool "^2.0.7"
+    pg-types "^2.1.0"
+    pgpass "1.x"
+    semver "4.3.2"
 
 pg@^7.6.1:
   version "7.12.1"

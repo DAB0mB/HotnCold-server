@@ -69,6 +69,8 @@ export default {
       subscribe: withFilter(
         () => usePubsub().asyncIterator('messageSent'),
         async ({ messageSent }, { chatId }, { me }) => {
+          const { Chat } = useModels();
+
           if (messageSent.chatId !== chatId) return false;
 
           const chat = await Chat.findOne({

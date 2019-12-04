@@ -49,7 +49,7 @@ const server = new ApolloServer({
 
     const me = (
       get(req, 'me') ||
-      await auth.getMe(get(connection, 'context.cookie'))
+      await auth.getMe(get(connection, 'context.cookie.authToken'))
     );
 
     return {

@@ -36,6 +36,7 @@
     "graphql": "^14.0.2",
     "graphql-geojson-scalar-types": "^0.0.5",
     "graphql-iso-date": "^3.6.1",
+    "graphql-postgres-subscriptions": "^1.0.5",
     "graphql-resolvers": "^0.2.2",
     "graphql-tools": "^4.0.5",
     "jsonwebtoken": "^8.5.1",

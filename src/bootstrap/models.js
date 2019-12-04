@@ -1,12 +1,6 @@
 import { provideModels } from '../providers'
 
-const bootstrapModels = () => {
-  const Sequelize = require('sequelize');
-
-  const config = require('../../sequelize_config');
-
-  const sequelize = new Sequelize(process.env[config.use_env_variable], config);
-
+const bootstrapModels = (sequelize) => {
   const models = {
     Area: sequelize.import('../models/area'),
     Chat: sequelize.import('../models/chat'),
