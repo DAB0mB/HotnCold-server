@@ -4,7 +4,7 @@ import { useModels, usePubsub } from '../providers';
 
 export default {
   Query: {
-    async messages(query, { chatId, anchor }, { me }) {
+    async messages(query, { chatId, limit, anchor }, { me }) {
       const { Chat, Message } = useModels();
 
       const chat = await Chat.findOne({
@@ -15,7 +15,7 @@ export default {
         return [];
       }
 
-      let anchorCreatedAt = new Date(0);
+      let anchorCreatedAt = new Date();
       if (anchor) {
         const message = await Message.findOne({
           where: { id: anchor },
@@ -29,9 +29,10 @@ export default {
 
       return chat.getMessages({
         where: {
-          createdAt: { $gt: anchorCreatedAt }
+          createdAt: { $lt: anchorCreatedAt }
         },
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        limit,
       });
     },
   },
@@ -66,11 +67,17 @@ export default {
 
   Subscription: {
     messageSent: {
+      resolve(payload) {
+        const { Message } = useModels();
+
+        return new Message(payload.messageSent);
+      },
       subscribe: withFilter(
         () => usePubsub().asyncIterator('messageSent'),
         async ({ messageSent }, { chatId }, { me }) => {
           const { Chat } = useModels();
 
+          if (!me) return false;
           if (messageSent.chatId !== chatId) return false;
 
           const chat = await Chat.findOne({

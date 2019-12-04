@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-express';
 
 export default gql`
   extend type Query {
-    messages(chatId: ID!, anchor: ID): [Message]! @auth
+    messages(chatId: ID!, limit: Int!, anchor: ID): [Message]! @auth
   }
 
   extend type Mutation {
