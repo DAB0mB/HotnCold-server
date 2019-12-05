@@ -1,6 +1,6 @@
 import { useModels } from '../providers';
 
-export default {
+const resolvers = {
   Mutation: {
     async findOrCreateChat(mutation, { usersIds }, { me }) {
       const { Chat } = useModels();
@@ -52,3 +52,5 @@ export default {
     },
   },
 };
+
+export default resolvers;

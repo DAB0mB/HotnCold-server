@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import { useModels, useMapbox } from '../providers';
 
-export default {
+const resolvers = {
   Query: {
     me(query, args, { me }) {
       return me;
@@ -81,8 +81,12 @@ export default {
   },
 
   User: {
-    name(user) {
-      return user.firstName + ' ' + user.lastName;
+    name(user, {}, { me }) {
+      if (user.id === me.id) {
+        return user.firstName + ' ' + user.lastName;
+      }
+
+      return user.firstName;
     },
 
     age(user) {
@@ -94,3 +98,5 @@ export default {
     },
   },
 };
+
+export default resolvers

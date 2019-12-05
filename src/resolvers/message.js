@@ -2,7 +2,7 @@ import { withFilter } from 'apollo-server';
 
 import { useModels, usePubsub } from '../providers';
 
-export default {
+const resolvers = {
   Query: {
     async messages(query, { chatId, limit, anchor }, { me }) {
       const { Chat, Message } = useModels();
@@ -61,6 +61,30 @@ export default {
         messageSent: message
       });
 
+      // Run in background
+      // Send an echo message back
+      (async function () {
+        const recipients = await chat.getUsers({
+          where: {
+            id: { $ne: me.id },
+            lastName: '__MOCK__',
+          },
+        });
+
+        if (!recipients.length) return;
+
+        setTimeout(() => {
+          recipients.forEach((recipient) => {
+            resolvers.Mutation.sendMessage(mutation, {
+              chatId,
+              text: 'echo',
+            }, {
+              me: recipient,
+            });
+          });
+        }, 1000);
+      })();
+
       return message;
     },
   },
@@ -104,3 +128,5 @@ export default {
     },
   },
 };
+
+export default resolvers;

@@ -1,6 +1,6 @@
 import { useCloudinary } from '../providers';
 
-export default {
+const resolvers = {
   Mutation: {
     async uploadPicture(mutation, { data }) {
       const cloudinary = useCloudinary();
@@ -21,3 +21,5 @@ export default {
     },
   },
 };
+
+export default resolvers;

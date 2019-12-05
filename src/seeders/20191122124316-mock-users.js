@@ -1,5 +1,7 @@
 'use strict';
 
+const uuid = require('uuid');
+
 const MOCK = '__MOCK__';
 
 module.exports = {
@@ -14,8 +16,11 @@ module.exports = {
       throw Error('Run "create-areas" seed first!');
     }
 
+    await module.exports.down(queryInterface, Sequelize);
+
     return queryInterface.bulkInsert('users', [
       {
+        id: uuid(),
         firstName: 'Eytan',
         lastName: MOCK,
         // gender: 'M',
@@ -28,8 +33,11 @@ module.exports = {
           'https://avatarfiles.alphacoders.com/833/83315.png',
           'https://a.ltrbxd.com/avatar/twitter/4/3/8/3/8/2/shard/http___pbs.twimg.com_profile_images_959679433505497089__0ShmWMC.jpg',
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
+        id: uuid(),
         firstName: 'Laura',
         lastName: MOCK,
         // gender: 'F',
@@ -42,8 +50,11 @@ module.exports = {
           'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
           'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
+        id: uuid(),
         firstName: 'Crystal',
         lastName: MOCK,
         // gender: 'F',
@@ -56,8 +67,11 @@ module.exports = {
           'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
           'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
+        id: uuid(),
         firstName: 'Dorothy',
         lastName: MOCK,
         // gender: 'F',
@@ -70,8 +84,11 @@ module.exports = {
           'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
           'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
+        id: uuid(),
         firstName: 'Gary',
         lastName: MOCK,
         // gender: 'M',
@@ -84,8 +101,11 @@ module.exports = {
           'https://i.imgur.com/I3ysYRt.png',
           'https://pbs.twimg.com/profile_images/588433110703865856/JgMKUdlE_400x400.jpg',
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
+        id: uuid(),
         firstName: 'Ken',
         lastName: MOCK,
         // gender: 'M',
@@ -98,6 +118,8 @@ module.exports = {
           'https://i.imgur.com/I3ysYRt.png',
           'https://pbs.twimg.com/profile_images/588433110703865856/JgMKUdlE_400x400.jpg',
         ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ]);
   },

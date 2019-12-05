@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 import { useModels } from '../providers';
 
-export default {
+const resolvers = {
   Mutation: {
     async register(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { res }) {
       const { User } = useModels();
@@ -32,3 +32,5 @@ export default {
     },
   },
 };
+
+export default resolvers;

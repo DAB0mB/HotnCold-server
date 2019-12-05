@@ -1,3 +1,5 @@
-export default {
+const resolvers = {
   Area: {},
 };
+
+export default resolvers;
