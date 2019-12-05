@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { bootstrap } from '../bootstrap';
 import { useModels } from '../providers';
 
 const INTERVAL = 10 * 60 * 1000
@@ -19,9 +20,15 @@ const startGarbageCollecting = () => {
 };
 
 if (require.main === module) {
-  startGarbageCollecting();
+  bootstrap().then(() => {
+    startGarbageCollecting();
 
-  console.log('Started garbage collection...');
+    console.log('Started garbage collection...');
+  }).catch((e) => {
+    console.error('Failed to bootstrap.');
+
+    process.exit(1);
+  });
 }
 
 export default startGarbageCollecting;
