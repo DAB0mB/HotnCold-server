@@ -13,7 +13,7 @@ export default gql`
 
   type User {
     id: ID!
-    firstName: String! @mine
+    firstName: String!
     lastName: String @mine
     name: String!
     # gender: String!

@@ -76,6 +76,7 @@ const user = (sequelize, DataTypes) => {
     }, {
       where: {
         updatedAt: { $lt: dateLimit },
+        lastName: { $ne: '__MOCK__' },
         $or: [
           {
             location: { $ne: null },

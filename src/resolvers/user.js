@@ -14,6 +14,24 @@ const resolvers = {
 
       if (!me) return null;
 
+      // Return a random user mock if we're testing
+      if (userId == '__MOCK__' && me.lastName == '__TEST__') {
+        const myArea = await me.getArea();
+
+        if (!myArea) {
+          return null;
+        }
+
+        const user = await User.findOne({
+          where: {
+            areaId: myArea.id,
+            lastName: '__MOCK__',
+          },
+        });
+
+        return user;
+      }
+
       const user = await User.findOne({
         where: { id: userId }
       });
@@ -54,10 +72,18 @@ const resolvers = {
         };
       }
 
+      const testQuery = {};
+
+      // De-select users mock if we're not testing anything
+      if (me.lastName != '__TEST__') {
+        testQuery.lastName = { $ne: '__MOCK__' };
+      }
+
       const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
           areaId: myArea.id,
+          ...testQuery,
         },
         attributes: ['location'],
       });
