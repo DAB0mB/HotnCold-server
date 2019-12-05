@@ -29,14 +29,6 @@ module.exports = {
       location: {
         type: Sequelize.ARRAY(Sequelize.FLOAT),
       },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
     });
   },
 
