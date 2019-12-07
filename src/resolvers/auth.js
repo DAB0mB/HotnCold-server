@@ -4,12 +4,11 @@ import { useModels } from '../providers';
 
 const resolvers = {
   Mutation: {
-    async register(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { res }) {
+    async register(mutation, { name, birthDate, occupation, bio, pictures }, { res }) {
       const { User } = useModels();
 
       const user = await User.create({
-        firstName,
-        lastName,
+        name,
         birthDate,
         occupation,
         bio,

@@ -9,11 +9,7 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       defaultValue: () => uuid(),
     },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    lastName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -76,7 +72,7 @@ const user = (sequelize, DataTypes) => {
     }, {
       where: {
         updatedAt: { $lt: dateLimit },
-        lastName: { $ne: '__MOCK__' },
+        isMock: { $ne: true },
         $or: [
           {
             location: { $ne: null },

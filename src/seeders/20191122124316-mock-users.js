@@ -15,8 +15,7 @@ module.exports = {
     return queryInterface.bulkInsert('users', [
       {
         id: uuid(),
-        firstName: 'Patrick',
-        lastName: '__MOCK__',
+        name: 'Patrick Star',
         // gender: 'M',
         birthDate: new Date('6/2/1989'),
         occupation: 'Social Science Research Assistant',
@@ -29,11 +28,11 @@ module.exports = {
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        isMock: true,
       },
       {
         id: uuid(),
-        firstName: 'Laura',
-        lastName: '__MOCK__',
+        name: 'Laura Dern',
         // gender: 'F',
         birthDate: new Date('10/26/1993'),
         occupation: 'Copy Writer',
@@ -46,11 +45,11 @@ module.exports = {
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        isMock: true,
       },
       {
         id: uuid(),
-        firstName: 'Crystal',
-        lastName: '__MOCK__',
+        name: 'Crystal Reed',
         // gender: 'F',
         birthDate: new Date('9/3/1991'),
         occupation: 'Insurance Policy Processing Clerk',
@@ -63,11 +62,11 @@ module.exports = {
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        isMock: true,
       },
       {
         id: uuid(),
-        firstName: 'Dorothy',
-        lastName: '__MOCK__',
+        name: 'Dorothy Parker',
         // gender: 'F',
         birthDate: new Date('7/25/1983'),
         occupation: 'Demonstrator and Product Promoter',
@@ -80,11 +79,11 @@ module.exports = {
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        isMock: true,
       },
       {
         id: uuid(),
-        firstName: 'Ken',
-        lastName: '__MOCK__',
+        name: 'Ken Miles',
         // gender: 'M',
         birthDate: new Date('12/2/1991'),
         occupation: 'Physical Therapist Assistant',
@@ -97,13 +96,14 @@ module.exports = {
         ],
         createdAt: new Date(),
         updatedAt: new Date(),
+        isMock: true,
       },
     ]);
   },
 
   down(queryInterface, Sequelize) {
     return queryInterface.bulkDelete('users', {
-      lastName: '__MOCK__',
+      isMock: true,
     });
   },
 };

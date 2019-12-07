@@ -1,4 +1,5 @@
 import turfDistance from '@turf/distance';
+import { UserInputError } from 'apollo-server';
 import moment from 'moment';
 
 import { useModels, useMapbox } from '../providers';
@@ -9,13 +10,11 @@ const resolvers = {
       return me;
     },
 
-    async userProfile(query, { userId }, { me }) {
+    async userProfile(query, { userId, randomMock }, { me }) {
       const { User } = useModels();
 
-      if (!me) return null;
-
       // Return a random user mock if we're testing
-      if (userId == '__MOCK__' && me.lastName == '__TEST__') {
+      if (randomMock && me.name == '__TEST__') {
         const myArea = await me.getArea();
 
         if (!myArea) {
@@ -25,11 +24,15 @@ const resolvers = {
         const user = await User.findOne({
           where: {
             areaId: myArea.id,
-            lastName: '__MOCK__',
+            isMock: true,
           },
         });
 
         return user;
+      }
+
+      if (!userId) {
+        throw new UserInputError("Argument 'userId' on Field 'userProfile' has an invalid value (1). Expected type 'ID'.")
       }
 
       const user = await User.findOne({
@@ -51,8 +54,8 @@ const resolvers = {
   },
 
   Mutation: {
-    async updateMyProfile(mutation, { firstName, lastName, birthDate, occupation, bio, pictures }, { me }) {
-      await me.update({ firstName, lastName, birthDate, occupation, bio, pictures });
+    async updateMyProfile(mutation, { name, birthDate, occupation, bio, pictures }, { me }) {
+      await me.update({ name, birthDate, occupation, bio, pictures });
 
       return me;
     },
@@ -72,18 +75,11 @@ const resolvers = {
         };
       }
 
-      const testQuery = {};
-
-      // De-select users mock if we're not testing anything
-      if (me.lastName != '__TEST__') {
-        testQuery.lastName = { $ne: '__MOCK__' };
-      }
-
       const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
           areaId: myArea.id,
-          ...testQuery,
+          isMock: me.name == '__TEST__' ? true : { $ne: true },
         },
         attributes: ['location'],
       });
@@ -107,14 +103,6 @@ const resolvers = {
   },
 
   User: {
-    name(user, {}, { me }) {
-      if (user.id === me.id) {
-        return user.firstName + ' ' + user.lastName;
-      }
-
-      return user.firstName;
-    },
-
     age(user) {
       return moment().year() - moment(user.birthDate).year();
     },

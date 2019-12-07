@@ -67,7 +67,7 @@ const resolvers = {
         const recipients = await chat.getUsers({
           where: {
             id: { $ne: me.id },
-            lastName: '__MOCK__',
+            isMock: true,
           },
         });
 
