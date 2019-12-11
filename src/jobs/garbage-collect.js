@@ -3,8 +3,6 @@ import 'dotenv/config';
 import { bootstrap } from '../bootstrap';
 import { useModels } from '../providers';
 
-const INTERVAL = 10 * 60 * 1000
-
 const disposeOutdatedLocations = async () => {
   const { User } = useModels();
 
@@ -14,7 +12,7 @@ const disposeOutdatedLocations = async () => {
 const startGarbageCollecting = () => {
   setInterval(() => {
     disposeOutdatedLocations();
-  }, INTERVAL);
+  }, process.env.ACTIVE_TIME);
 
   disposeOutdatedLocations();
 };

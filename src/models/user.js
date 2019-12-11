@@ -23,6 +23,9 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    recentlyScannedAt: {
+      type: DataTypes.DATE,
+    },
     occupation: {
       type: DataTypes.STRING,
       allowNull: false,

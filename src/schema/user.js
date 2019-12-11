@@ -3,12 +3,13 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     me: User
-    userProfile(userId: ID, randomMock: Boolean): User @auth
+    userProfile(userId: ID, randomMock: Boolean, recentlyScanned: Boolean): User @auth
   }
 
   extend type Mutation {
     updateMyProfile(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): User @auth
     updateMyLocation(location: Vector2D!): FeatureCollection @auth
+    updateRecentScanTime(clear: Boolean): DateTime @auth
   }
 
   type User {

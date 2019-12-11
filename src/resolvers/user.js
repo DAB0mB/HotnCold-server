@@ -10,7 +10,7 @@ const resolvers = {
       return me;
     },
 
-    async userProfile(query, { userId, randomMock }, { me }) {
+    async userProfile(query, { userId, randomMock, recentlyScanned }, { me }) {
       const { User } = useModels();
 
       // Return a random user mock if we're testing
@@ -35,11 +35,25 @@ const resolvers = {
         throw new UserInputError("Argument 'userId' on Field 'userProfile' has an invalid value (1). Expected type 'ID'.")
       }
 
+      if (userId == me.id) {
+        return me;
+      }
+
+      const userQuery = {
+        id: userId,
+      };
+
+      if (recentlyScanned) {
+        userQuery.recentlyScannedAt = {
+          $gt: new Date(Date.now() - process.env.ACTIVE_TIME)
+        };
+      }
+
       const user = await User.findOne({
-        where: { id: userId }
+        where: userQuery,
       });
 
-      if (!user) return null;
+      if (!user || !user.recentlyScannedAt) return null;
 
       // TODO: Allow querying only with a certain proximity
       /*
@@ -99,6 +113,13 @@ const resolvers = {
         type: 'FeatureCollection',
         features,
       };
+    },
+
+    async updateRecentScanTime(mutation, { clear }, { me }) {
+      me.recentlyScannedAt = clear ? null : new Date();
+      await me.save();
+
+      return me.recentlyScannedAt;
     },
   },
 
