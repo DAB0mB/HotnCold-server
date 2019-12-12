@@ -64,6 +64,10 @@ const resolvers = {
       // Run in background
       // Send an echo message back
       (async function () {
+        const match = text.toLowerCase().match(/^echo( *\d+)?$/);
+
+        if (!match) return;
+
         const recipients = await chat.getUsers({
           where: {
             id: { $ne: me.id },
@@ -72,6 +76,8 @@ const resolvers = {
         });
 
         if (!recipients.length) return;
+
+        const ms = Math.max((match[1] || 1) * 1000, 1000);
 
         setTimeout(() => {
           recipients.forEach((recipient) => {
@@ -82,7 +88,7 @@ const resolvers = {
               me: recipient,
             });
           });
-        }, 1000);
+        }, ms);
       })();
 
       return message;
