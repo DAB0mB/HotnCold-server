@@ -11,7 +11,7 @@ import {
 
 import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
-import loaders from './loaders';
+import * as loaders from './loaders';
 import * as middlewares from './middlewares';
 import { useServices } from './providers';
 import resolvers from './resolvers';
@@ -59,7 +59,13 @@ const server = new ApolloServer({
       connection,
       loaders: {
         user: new DataLoader(keys =>
-          loaders.user.batchUsers(keys),
+          loaders.batchUsers(keys),
+        )
+        chat: new DataLoader(keys =>
+          loaders.batchChats(keys),
+        ),
+        message: new DataLoader(keys =>
+          loaders.batchMessages(keys),
         ),
       },
     };

@@ -3,7 +3,7 @@ import { useModels } from '../providers';
 export const batchUsers = async (keys) => {
   const { User } = useModels();
 
-  const users = await models.User.findAll({
+  const users = await User.findAll({
     where: {
       id: {
         $in: keys,

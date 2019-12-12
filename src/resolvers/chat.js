@@ -1,6 +1,14 @@
-import { useModels } from '../providers';
+import { withFilter } from 'apollo-server';
+
+import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
+  Query: {
+    async chats(query, {}, { me }) {
+      return me.getChats();
+    }
+  },
+
   Mutation: {
     async findOrCreateChat(mutation, { usersIds }, { me }) {
       const { Chat } = useModels();
@@ -31,6 +39,34 @@ const resolvers = {
       }
 
       return chat;
+    },
+  },
+
+  Subscription: {
+    chatBumped: {
+      resolve({ chatBumped }) {
+        const { Chat } = useModels();
+
+        return new Chat(chatBumped);
+      },
+      subscribe: withFilter(
+        () => usePubsub().asyncIterator('chatBumped'),
+        async ({ chatBumped }, {}, { me }) => {
+          const { Chat } = useModels();
+
+          if (!me) return false;
+
+          chatBumped = new Chat(chatBumped);
+
+          const user = await chatBumped.getUsers({
+            where: { id: me.id }
+          });
+
+          if (!user) return false;
+
+          return true;
+        },
+      ),
     },
   },
 

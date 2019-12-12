@@ -61,6 +61,10 @@ const resolvers = {
         messageSent: message
       });
 
+      usePubsub().publish('chatBumped', {
+        chatBumped: chat
+      });
+
       // Run in background
       // Send an echo message back
       (async function () {
@@ -97,10 +101,10 @@ const resolvers = {
 
   Subscription: {
     messageSent: {
-      resolve(payload) {
+      resolve({ messageSent }) {
         const { Message } = useModels();
 
-        return new Message(payload.messageSent);
+        return new Message(messageSent);
       },
       subscribe: withFilter(
         () => usePubsub().asyncIterator('messageSent'),
