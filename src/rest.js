@@ -15,7 +15,7 @@ rest.post('/location', asyncHandler(async (req, res) => {
     return;
   }
 
-  await me.setLocation([req.body[0].altitude, req.body[0].latitude]);
+  await me.setLocation([req.body[0].longitude, req.body[0].latitude]);
 
   res.json(me.location);
 }));
