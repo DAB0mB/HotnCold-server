@@ -83,6 +83,17 @@ const resolvers = {
       return messages[0];
     },
 
+    async title(chat, {}, { me }) {
+      const users = await c.getUsers({
+        where: {
+          id: { $ne: me.id },
+        },
+        attributes: ['name']
+      });
+
+      return users.length && users[0].name;
+    },
+
     users(chat) {
       return chat.getUsers();
     },

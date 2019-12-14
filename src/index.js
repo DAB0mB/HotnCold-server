@@ -60,7 +60,7 @@ const server = new ApolloServer({
       loaders: {
         user: new DataLoader(keys =>
           loaders.batchUsers(keys),
-        )
+        ),
         chat: new DataLoader(keys =>
           loaders.batchChats(keys),
         ),
