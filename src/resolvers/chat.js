@@ -83,6 +83,19 @@ const resolvers = {
       return messages[0];
     },
 
+    async picture(chat, args, { me }) {
+      const [recipient] = await chat.getUsers({
+        where: {
+          id: { $ne: me.id },
+        },
+        attributes: ['pictures']
+      });
+
+      if (!recipient) return null;
+
+      return recipient.pictures[0];
+    },
+
     async title(chat, args, { me }) {
       const users = await chat.getUsers({
         where: {

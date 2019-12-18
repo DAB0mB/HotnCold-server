@@ -2,14 +2,13 @@ import 'dotenv/config';
 import cors from 'cors';
 import morgan from 'morgan';
 import http from 'http';
-import DataLoader from 'dataloader';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 
 import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
-import * as loaders from './loaders';
 import * as middlewares from './middlewares';
+import { initLoaders } from './loaders';
 import { useServices } from './providers';
 import resolvers from './resolvers';
 import rest from './rest';
@@ -54,17 +53,7 @@ const server = new ApolloServer({
       req,
       res,
       connection,
-      loaders: {
-        user: new DataLoader(keys =>
-          loaders.batchUsers(keys),
-        ),
-        chat: new DataLoader(keys =>
-          loaders.batchChats(keys),
-        ),
-        message: new DataLoader(keys =>
-          loaders.batchMessages(keys),
-        ),
-      },
+      loaders: initLoaders(),
     };
   },
 });

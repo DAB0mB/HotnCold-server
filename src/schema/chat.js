@@ -16,6 +16,7 @@ export default gql`
   type Chat {
     id: ID!
     title: String!
+    picture: String
     recentMessage: Message
     firstMessage: Message
     users: [User]!
