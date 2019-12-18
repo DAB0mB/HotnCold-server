@@ -4,7 +4,7 @@ const uuid = require('uuid');
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const [areas] = await queryInterface.sequelize.query(`SELECT id, name FROM areas`);
+    const [areas] = await queryInterface.sequelize.query('SELECT id, name FROM areas');
 
     if (!areas.length) {
       throw Error('Run "create-areas" seed first!');
@@ -19,7 +19,7 @@ module.exports = {
         // gender: 'M',
         birthDate: new Date('6/2/1989'),
         occupation: 'Social Science Research Assistant',
-        bio: "Travel maven. Professional alcoholaholic. Infuriatingly humble music specialist. Gamer. Coffee ninja. General internet advocate.",
+        bio: 'Travel maven. Professional alcoholaholic. Infuriatingly humble music specialist. Gamer. Coffee ninja. General internet advocate.',
         location: [34.77914, 32.072124],
         areaId: areas.find(a => a.name == 'HaMerkaz, Israel').id,
         pictures: [
@@ -36,7 +36,7 @@ module.exports = {
         // gender: 'F',
         birthDate: new Date('10/26/1993'),
         occupation: 'Copy Writer',
-        bio: "Amateur tv practitioner. Zombie fanatic. Infuriatingly humble twitter fan. Evil travelaholic.",
+        bio: 'Amateur tv practitioner. Zombie fanatic. Infuriatingly humble twitter fan. Evil travelaholic.',
         location: [-73.984023, 40.725610],
         areaId: areas.find(a => a.name == 'Manhattan, New York, New York, United States').id,
         pictures: [
@@ -53,7 +53,7 @@ module.exports = {
         // gender: 'F',
         birthDate: new Date('9/3/1991'),
         occupation: 'Insurance Policy Processing Clerk',
-        bio: "Social media expert. Devoted beer maven. Music ninja. Evil gamer. Award-winning analyst.",
+        bio: 'Social media expert. Devoted beer maven. Music ninja. Evil gamer. Award-winning analyst.',
         location: [-122.480508, 37.757606],
         areaId: areas.find(a => a.name == 'San Francisco, California, United States').id,
         pictures: [
@@ -70,7 +70,7 @@ module.exports = {
         // gender: 'F',
         birthDate: new Date('7/25/1983'),
         occupation: 'Demonstrator and Product Promoter',
-        bio: "Evil coffee nerd. Analyst. Incurable bacon practitioner. Total twitter fan. Typical food aficionado.",
+        bio: 'Evil coffee nerd. Analyst. Incurable bacon practitioner. Total twitter fan. Typical food aficionado.',
         location: [127.011954, 37.563522],
         areaId: areas.find(a => a.name == 'Seoul, South Korea').id,
         pictures: [
@@ -87,7 +87,7 @@ module.exports = {
         // gender: 'M',
         birthDate: new Date('12/2/1991'),
         occupation: 'Physical Therapist Assistant',
-        bio: "Amateur social media fan. Professional bacon trailblazer. Hardcore explorer. Award-winning tv expert. Friendly pop culture maven.",
+        bio: 'Amateur social media fan. Professional bacon trailblazer. Hardcore explorer. Award-winning tv expert. Friendly pop culture maven.',
         location: [-118.247318, 34.048535],
         areaId: areas.find(a => a.name == 'Los Angeles, California, United States').id,
         pictures: [
@@ -101,7 +101,7 @@ module.exports = {
     ]);
   },
 
-  down(queryInterface, Sequelize) {
+  down(queryInterface) {
     return queryInterface.bulkDelete('users', {
       isMock: true,
     });

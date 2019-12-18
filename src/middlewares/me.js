@@ -1,8 +1,8 @@
 import { parse as parseCookie } from 'cookie';
 
-import { useServices } from '../providers';
+import { provideMe, useServices } from '../providers';
 
-const getMe = () => async (req, res, next) => {
+export const defineMe = () => async (req, res, next) => {
   const { auth } = useServices();
   const cookie = req.headers.cookie;
 
@@ -14,13 +14,13 @@ const getMe = () => async (req, res, next) => {
 
   const { authToken } = parseCookie(cookie);
 
-  req.me = await auth.getMe(authToken);
+  const me = await auth.defineMe(authToken);
 
-  if (!req.me) {
+  if (!me) {
     res.clearCookie('authToken');
   }
 
+  provideMe(req);
+
   next();
 };
-
-export default getMe;

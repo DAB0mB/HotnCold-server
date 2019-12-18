@@ -8,11 +8,16 @@
   "scripts": {
     "start": "nodemon --exec babel-node ./src/index.js",
     "garbage-collect": "nodemon --exec babel-node ./src/jobs/garbage-collect.js",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint --fix"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
-    "jest": "^24.9.0"
+    "eslint": "^6.7.2",
+    "husky": "^3.1.0",
+    "jest": "^24.9.0",
+    "lint-staged": "^9.5.0"
   },
   "dependencies": {
     "@babel/core": "^7.7.2",
@@ -46,5 +51,16 @@
     "sequelize": "^4.41.2",
     "sequelize-cli": "^5.5.1",
     "uuid": "^3.3.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "yarn lint",
+      "git add"
+    ]
   }
 }

@@ -3,7 +3,7 @@ import { useModels } from '../providers';
 export const batchChats = async (keys) => {
   const { Chat } = useModels();
 
-  const chats = await models.Chat.findAll({
+  const chats = await Chat.findAll({
     where: {
       id: {
         $in: keys,

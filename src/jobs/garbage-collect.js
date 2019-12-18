@@ -6,7 +6,7 @@ import { useModels } from '../providers';
 const disposeOutdatedLocations = async () => {
   const { User } = useModels();
 
-  return models.User.disposeOutdatedLocations().catch(e => console.error(e));
+  return User.disposeOutdatedLocations().catch(e => console.error(e));
 };
 
 const startGarbageCollecting = () => {
@@ -22,7 +22,7 @@ if (require.main === module) {
     startGarbageCollecting();
 
     console.log('Started garbage collection...');
-  }).catch((e) => {
+  }).catch(() => {
     console.error('Failed to bootstrap.');
 
     process.exit(1);

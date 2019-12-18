@@ -1,4 +1,4 @@
-import { provideModels } from '../providers'
+import { provideModels } from '../providers';
 
 const bootstrapModels = (sequelize) => {
   const models = {

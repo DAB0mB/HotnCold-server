@@ -4,7 +4,7 @@ import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
   Query: {
-    async messages(query, { chatId, limit, anchor }, { me }) {
+    async messages(query, { chatId, limit, anchor }) {
       const { Chat, Message } = useModels();
 
       const chat = await Chat.findOne({

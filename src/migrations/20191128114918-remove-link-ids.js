@@ -3,7 +3,7 @@
 const tables = ['chats_users', 'chats_messages'];
 
 module.exports = {
-  up(queryInterface, Sequelize) {
+  up(queryInterface) {
     return Promise.all(tables.map((table) => {
       return queryInterface.removeColumn(table, 'id');
     }));

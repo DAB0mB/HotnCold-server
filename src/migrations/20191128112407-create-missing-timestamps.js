@@ -19,7 +19,7 @@ module.exports = {
     }));
   },
 
-  down(queryInterface, Sequelize) {
+  down(queryInterface) {
     return Promise.all(tables.map((table) => {
       return Promise.all([
         queryInterface.removeColumn(table, 'createdAt'),

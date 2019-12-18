@@ -4,10 +4,7 @@ import morgan from 'morgan';
 import http from 'http';
 import DataLoader from 'dataloader';
 import express from 'express';
-import {
-  ApolloServer,
-  AuthenticationError,
-} from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 
 import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
@@ -87,7 +84,7 @@ bootstrap().then(() => {
   httpServer.listen({ port, host }, () => {
     console.log(`Apollo Server on http://${host}:${port}/graphql`);
   });
-}).catch((e) => {
+}).catch(() => {
   console.error('Failed to bootstrap.');
 
   process.exit(1);

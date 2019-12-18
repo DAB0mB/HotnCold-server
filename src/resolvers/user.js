@@ -1,8 +1,8 @@
-import turfDistance from '@turf/distance';
+// import turfDistance from '@turf/distance';
 import { UserInputError } from 'apollo-server';
 import moment from 'moment';
 
-import { useModels, useMapbox } from '../providers';
+import { useModels } from '../providers';
 
 const resolvers = {
   Query: {
@@ -32,7 +32,7 @@ const resolvers = {
       }
 
       if (!userId) {
-        throw new UserInputError("Argument 'userId' on Field 'userProfile' has an invalid value (1). Expected type 'ID'.")
+        throw new UserInputError('Argument \'userId\' on Field \'userProfile\' has an invalid value (1). Expected type \'ID\'.');
       }
 
       if (userId == me.id) {
@@ -76,7 +76,6 @@ const resolvers = {
 
     async updateMyLocation(mutation, { location }, { me }) {
       const { User } = useModels();
-      const mapbox = useMapbox();
 
       await me.setLocation(location);
 
@@ -134,4 +133,4 @@ const resolvers = {
   },
 };
 
-export default resolvers
+export default resolvers;

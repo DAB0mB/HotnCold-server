@@ -16,7 +16,7 @@ class Mutex {
   }
 
   lock() {
-    this.opening = new Promise((resolve, reject) => {
+    this.opening = new Promise((resolve) => {
       this.open = resolve;
     }).then(() => {
       this.opened = true;

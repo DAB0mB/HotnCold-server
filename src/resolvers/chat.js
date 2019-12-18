@@ -4,7 +4,7 @@ import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
   Query: {
-    async chats(query, {}, { me }) {
+    async chats(query, args, { me }) {
       return me.getChats();
     }
   },
@@ -51,7 +51,7 @@ const resolvers = {
       },
       subscribe: withFilter(
         () => usePubsub().asyncIterator('chatBumped'),
-        async ({ chatBumped }, {}, { me }) => {
+        async ({ chatBumped }, args, { me }) => {
           const { Chat } = useModels();
 
           if (!me) return false;
@@ -83,8 +83,8 @@ const resolvers = {
       return messages[0];
     },
 
-    async title(chat, {}, { me }) {
-      const users = await c.getUsers({
+    async title(chat, args, { me }) {
+      const users = await chat.getUsers({
         where: {
           id: { $ne: me.id },
         },

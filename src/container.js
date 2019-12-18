@@ -1,5 +1,6 @@
 let container = new Map();
 const containersStack = [];
+const { before, after, beforeEach, afterEach } = global;
 
 export const get = (key) => {
   if (!has(key)) {
@@ -52,7 +53,7 @@ export const forkBeforeEach = (beforeEachCb = Function) => {
   }
 
   beforeEach(() => {
-    forkContainer();
+    fork();
     beforeEachCb();
   });
   afterEach(converge);

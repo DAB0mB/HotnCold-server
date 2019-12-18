@@ -1,4 +1,3 @@
-import { parse as parseCookie } from 'cookie';
 import jwt from 'jsonwebtoken';
 
 import { useModels } from '../providers';
@@ -8,7 +7,7 @@ export const getMe = async (authToken) => {
 
   const { User } = useModels();
 
-  const userId = await new Promise((resolve, reject) => {
+  const userId = await new Promise((resolve) => {
     jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, id) => {
       if (err) {
         resolve();
