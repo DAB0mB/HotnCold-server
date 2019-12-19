@@ -71,10 +71,8 @@ const resolvers = {
   },
 
   Chat: {
-    async recentMessage(chat) {
-      const messages = await chat.getMessages({ order: [['createdAt', 'DESC']], limit: 1 });
-
-      return messages[0];
+    recentMessages(chat) {
+      return chat.getMessages({ order: [['createdAt', 'DESC']], limit: 12 });
     },
 
     async firstMessage(chat) {

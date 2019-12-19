@@ -17,7 +17,7 @@ export default gql`
     id: ID!
     title: String!
     picture: String
-    recentMessage: Message
+    recentMessages: [Message]!
     firstMessage: Message
     users: [User]!
   }
