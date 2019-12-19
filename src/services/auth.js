@@ -11,7 +11,8 @@ export const getMe = async (authToken) => {
     jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, id) => {
       if (err) {
         resolve();
-      } else {
+      }
+      else {
         resolve(id);
       }
     });

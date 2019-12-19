@@ -120,12 +120,14 @@ const user = (sequelize, DataTypes) => {
 
       if (area) {
         await this.setArea(area);
-      } else {
+      }
+      else {
         await this.setArea(null);
       }
 
       this.setDataValue('location', location);
-    } else {
+    }
+    else {
       if (!selfLocation) return;
 
       await this.setArea(null);

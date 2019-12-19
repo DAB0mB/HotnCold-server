@@ -11,7 +11,8 @@ const resolvers = {
         const uploadStream = cloudinary.v2.uploader.upload_stream({}, (error, image) => {
           if (error) {
             reject(error);
-          } else {
+          }
+          else {
             resolve(image.url);
           }
         });

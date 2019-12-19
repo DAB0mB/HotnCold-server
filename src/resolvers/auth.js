@@ -19,7 +19,8 @@ const resolvers = {
         jwt.sign(user.id, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {
           if (err) {
             reject(err);
-          } else {
+          }
+          else {
             resolve(token);
           }
         });
