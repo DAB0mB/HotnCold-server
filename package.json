@@ -1,6 +1,5 @@
 {
   "name": "HotnCold-server",
-  "version": "1.0.0",
   "main": "index.js",
   "engines": {
     "node": "12.13.0"
@@ -62,5 +61,6 @@
       "yarn lint",
       "git add"
     ]
-  }
+  },
+  "private": true
 }
