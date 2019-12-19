@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { bootstrap } from '../bootstrap';
+import bootstrap from '../bootstrap';
 import { useModels } from '../providers';
 
 const disposeOutdatedLocations = async () => {
