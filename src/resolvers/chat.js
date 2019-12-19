@@ -1,3 +1,4 @@
+import Sequelize from 'sequelize';
 import { withFilter } from 'apollo-server';
 
 import { useModels, usePubsub } from '../providers';
@@ -5,7 +6,24 @@ import { useModels, usePubsub } from '../providers';
 const resolvers = {
   Query: {
     async chats(query, args, { me }) {
-      return me.getChats();
+      const { Chat, Message } = useModels();
+
+      const myChats = await me.getChats();
+
+      const myMessages = await Message.findAll({
+        where: {
+          chatId: { $in: myChats.map(c => c.id) },
+        },
+        attributes: [
+          [Sequelize.fn('DISTINCT', Sequelize.col('chatId')), 'chatId'],
+        ],
+      });
+
+      return Chat.findAll({
+        where: {
+          id: { $in: myMessages.map(m => m.chatId) }
+        }
+      });
     }
   },
 
