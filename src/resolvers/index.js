@@ -2,7 +2,6 @@ import { GraphQLDateTime } from 'graphql-iso-date';
 import * as GraphQLGeo from 'graphql-geojson-scalar-types';
 
 import areaResolvers from './area';
-import authResolvers from './auth';
 import chatResolvers from './chat';
 import messageResolvers from './message';
 import uploadResolvers from './upload';
@@ -21,7 +20,6 @@ export default [
   userResolvers,
   uploadResolvers,
   areaResolvers,
-  authResolvers,
   chatResolvers,
   messageResolvers,
 ];

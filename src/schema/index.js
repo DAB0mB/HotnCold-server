@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-express';
 
 import areaSchema from './area';
-import authSchema from './auth';
 import chatSchema from './chat';
 import directivesSchema from './directives';
 import messageSchema from './message';
@@ -30,7 +29,6 @@ export default [
   areaSchema,
   scalarsSchema,
   directivesSchema,
-  authSchema,
   chatSchema,
   messageSchema,
 ];

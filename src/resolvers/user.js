@@ -1,13 +1,24 @@
 // import turfDistance from '@turf/distance';
-import { UserInputError } from 'apollo-server';
+import { UserInputError, withFilter } from 'apollo-server';
+import jwt from 'jsonwebtoken';
 import moment from 'moment';
 
-import { useModels } from '../providers';
+import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
   Query: {
     me(query, args, { me }) {
       return me;
+    },
+
+    users(query, { usersIds }) {
+      const { User } = useModels();
+
+      return User.findAll({
+        where: {
+          id: { $in: usersIds },
+        },
+      });
     },
 
     async userProfile(query, { userId, randomMock, recentlyScanned }, { me }) {
@@ -68,6 +79,37 @@ const resolvers = {
   },
 
   Mutation: {
+    async registerUser(mutation, { name, birthDate, occupation, bio, pictures }, { res }) {
+      const { User } = useModels();
+
+      const user = await User.create({
+        name,
+        birthDate,
+        occupation,
+        bio,
+        pictures,
+      });
+
+      const authToken = await new Promise((resolve, reject) => {
+        jwt.sign(user.id, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {
+          if (err) {
+            reject(err);
+          }
+          else {
+            resolve(token);
+          }
+        });
+      });
+
+      res.cookie('authToken', authToken);
+
+      usePubsub().publish('userRegistered', {
+        userRegistered: user
+      });
+
+      return user.id;
+    },
+
     async updateMyProfile(mutation, { name, birthDate, occupation, bio, pictures }, { me }) {
       await me.update({ name, birthDate, occupation, bio, pictures });
 
@@ -94,7 +136,7 @@ const resolvers = {
           areaId: myArea.id,
           isMock: me.name == '__TEST__' ? true : { $ne: true },
         },
-        attributes: ['location'],
+        attributes: ['location', 'id'],
       });
 
       const features = nearbyUsers.map(user => ({
@@ -119,6 +161,25 @@ const resolvers = {
       await me.save();
 
       return me.recentlyScannedAt;
+    },
+  },
+
+  Subscription: {
+    userRegistered: {
+      resolve({ userRegistered }) {
+        const { User } = useModels();
+
+        return new User(userRegistered);
+      },
+      subscribe: withFilter(
+        () => usePubsub().asyncIterator('userRegistered'),
+        async ({ userRegistered }, args, { me }) => {
+          if (!me) return false;
+          if (userRegistered.id === me.id) return false;
+
+          return true;
+        },
+      ),
     },
   },
 
