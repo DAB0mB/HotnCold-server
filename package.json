@@ -43,12 +43,14 @@
     "graphql-resolvers": "^0.2.2",
     "graphql-tools": "^4.0.5",
     "jsonwebtoken": "^8.5.1",
+    "libphonenumber-js": "^1.7.29",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
     "nodemon": "^1.19.4",
     "pg": "^7.6.1",
     "sequelize": "^4.41.2",
     "sequelize-cli": "^5.5.1",
+    "twilio": "^3.39.1",
     "uuid": "^3.3.3"
   },
   "husky": {

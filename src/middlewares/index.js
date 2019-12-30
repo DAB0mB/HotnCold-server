@@ -1,1 +1,2 @@
-export { default as getMe } from './getMe';
+export { default as myContract } from './myContract';
+export { default as me } from './me';

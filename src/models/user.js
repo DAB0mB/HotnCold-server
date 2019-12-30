@@ -13,12 +13,6 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    // gender: {
-    //   type: DataTypes.STRING,
-    //   validate: {
-    //     notEmpty: true,
-    //   },
-    // },
     birthDate: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -64,6 +58,7 @@ const user = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.belongsTo(models.Area);
+    User.hasOne(models.Contract);
     User.hasMany(models.Message);
     User.belongsToMany(models.Chat, { through: 'chats_users' });
   };
@@ -85,6 +80,15 @@ const user = (sequelize, DataTypes) => {
           },
         ],
       },
+    });
+  };
+
+  User.prototype.getContract = function getContract(options = {}) {
+    const { Contract } = useModels();
+
+    return Contract.find({
+      ...options,
+      where: { userId: this.id },
     });
   };
 

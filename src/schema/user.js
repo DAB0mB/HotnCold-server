@@ -8,14 +8,14 @@ export default gql`
   }
 
   extend type Mutation {
-    registerUser(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): String!
+    createUser(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): String!
     updateMyProfile(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): User @auth
     updateMyLocation(location: Vector2D!): FeatureCollection @auth
     updateRecentScanTime(clear: Boolean): DateTime @auth
   }
 
   extend type Subscription {
-    userRegistered: User! @auth
+    userCreated: User! @auth
   }
 
   type User {

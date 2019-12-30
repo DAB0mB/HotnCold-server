@@ -4,6 +4,7 @@ const bootstrapModels = (sequelize) => {
   const models = {
     Area: sequelize.import('../models/area'),
     Chat: sequelize.import('../models/chat'),
+    Contract: sequelize.import('../models/contract'),
     Message: sequelize.import('../models/message'),
     User: sequelize.import('../models/user'),
   };

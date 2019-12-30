@@ -9,7 +9,7 @@ import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
 import * as middlewares from './middlewares';
 import { initLoaders } from './loaders';
-import { useServices } from './providers';
+import { useModels } from './providers';
 import resolvers from './resolvers';
 import rest from './rest';
 import schema from './schema';
@@ -19,7 +19,7 @@ const app = express();
 
 app.use(cors());
 app.use(morgan('dev'));
-app.use(middlewares.getMe());
+app.use(middlewares.me());
 app.use(rest);
 
 const server = new ApolloServer({
@@ -41,18 +41,33 @@ const server = new ApolloServer({
     };
   },
   context: async ({ req, res, connection }) => {
-    const { auth } = useServices();
+    const { Contract } = useModels();
 
-    const me = (
-      get(req, 'me') ||
-      await auth.getMe(get(connection, 'context.cookie.authToken'))
-    );
+    let me;
+    let myContract;
+    getMe:
+    if (connection) {
+      const authToken = get(connection, 'context.cookie.authToken');
+
+      if (!authToken) break getMe;
+
+      myContract = await Contract.findByToken(authToken);
+
+      if (!myContract) break getMe;
+
+      me = await myContract.getUser();
+    }
+    else {
+      me = req.me;
+      myContract = req.myContract;
+    }
 
     return {
-      me,
       req,
       res,
       connection,
+      me,
+      myContract,
       loaders: initLoaders(),
     };
   },

@@ -31,3 +31,9 @@ export const set = (obj, path, newValue) => {
     return value && value[key];
   }, obj);
 };
+
+export const generatePasscode = (length = 4) => {
+  return Array.apply(null, { length }).reduce((passcode) => {
+    return passcode + Math.floor(Math.random() * 10);
+  }, '');
+};

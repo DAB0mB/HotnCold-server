@@ -2,7 +2,7 @@ import bootstrapCloudinary from './cloudinary';
 import bootstrapMapbox from './mapbox';
 import bootstrapModels from './models';
 import bootstrapPubsub from './pubsub';
-import bootstrapServices from './services';
+import bootstrapTwilio from './twilio';
 
 const bootstrap = () => {
   const Sequelize = require('sequelize');
@@ -14,7 +14,7 @@ const bootstrap = () => {
     bootstrapMapbox(),
     bootstrapModels(sequelize),
     bootstrapPubsub(sequelize),
-    bootstrapServices(),
+    bootstrapTwilio(),
   ]);
 };
 

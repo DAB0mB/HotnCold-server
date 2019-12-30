@@ -1,6 +1,5 @@
 // import turfDistance from '@turf/distance';
 import { UserInputError, withFilter } from 'apollo-server';
-import jwt from 'jsonwebtoken';
 import moment from 'moment';
 
 import { useModels, usePubsub } from '../providers';
@@ -21,11 +20,11 @@ const resolvers = {
       });
     },
 
-    async userProfile(query, { userId, randomMock, recentlyScanned }, { me }) {
+    async userProfile(query, { userId, randomMock, recentlyScanned }, { me, myContract }) {
       const { User } = useModels();
 
       // Return a random user mock if we're testing
-      if (randomMock && /^ *__TEST__ *$/.test(me.name)) {
+      if (randomMock && myContract.isTest) {
         const myArea = await me.getArea();
 
         if (!myArea) {
@@ -79,7 +78,11 @@ const resolvers = {
   },
 
   Mutation: {
-    async registerUser(mutation, { name, birthDate, occupation, bio, pictures }, { res }) {
+    async createUser(mutation, { name, birthDate, occupation, bio, pictures }, { myContract }) {
+      if (!myContract) {
+        throw Error('Unauthorized');
+      }
+
       const { User } = useModels();
 
       const user = await User.create({
@@ -90,21 +93,10 @@ const resolvers = {
         pictures,
       });
 
-      const authToken = await new Promise((resolve, reject) => {
-        jwt.sign(user.id, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {
-          if (err) {
-            reject(err);
-          }
-          else {
-            resolve(token);
-          }
-        });
-      });
+      await myContract.setUser(user);
 
-      res.cookie('authToken', authToken);
-
-      usePubsub().publish('userRegistered', {
-        userRegistered: user
+      usePubsub().publish('userCreated', {
+        userCreated: user
       });
 
       return user.id;
@@ -116,7 +108,7 @@ const resolvers = {
       return me;
     },
 
-    async updateMyLocation(mutation, { location }, { me }) {
+    async updateMyLocation(mutation, { location }, { me, myContract }) {
       const { User } = useModels();
 
       await me.setLocation(location);
@@ -134,7 +126,7 @@ const resolvers = {
         where: {
           id: { $ne: me.id },
           areaId: myArea.id,
-          isMock: /^ *__TEST__ *$/.test(me.name) ? true : { $ne: true },
+          isMock: myContract.isTest ? true : { $ne: true },
         },
         attributes: ['location', 'id'],
       });
@@ -165,17 +157,17 @@ const resolvers = {
   },
 
   Subscription: {
-    userRegistered: {
-      resolve({ userRegistered }) {
+    userCreated: {
+      resolve({ userCreated }) {
         const { User } = useModels();
 
-        return new User(userRegistered);
+        return new User(userCreated);
       },
       subscribe: withFilter(
-        () => usePubsub().asyncIterator('userRegistered'),
-        async ({ userRegistered }, args, { me }) => {
+        () => usePubsub().asyncIterator('userCreated'),
+        async ({ userCreated }, args, { me }) => {
           if (!me) return false;
-          if (userRegistered.id === me.id) return false;
+          if (userCreated.id === me.id) return false;
 
           return true;
         },

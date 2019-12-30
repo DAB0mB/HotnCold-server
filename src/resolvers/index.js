@@ -3,6 +3,7 @@ import * as GraphQLGeo from 'graphql-geojson-scalar-types';
 
 import areaResolvers from './area';
 import chatResolvers from './chat';
+import contractResolvers from './contract';
 import messageResolvers from './message';
 import uploadResolvers from './upload';
 import userResolvers from './user';
@@ -16,10 +17,11 @@ const customScalarResolver = {
 };
 
 export default [
-  customScalarResolver,
-  userResolvers,
-  uploadResolvers,
   areaResolvers,
   chatResolvers,
+  contractResolvers,
+  customScalarResolver,
   messageResolvers,
+  uploadResolvers,
+  userResolvers,
 ];

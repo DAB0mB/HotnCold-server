@@ -1,3 +1,4 @@
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import uuid from 'uuid';
 
 const area = (sequelize, DataTypes) => {
@@ -11,6 +12,14 @@ const area = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    countryCode: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     geoFeaturesIds: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
@@ -19,6 +28,18 @@ const area = (sequelize, DataTypes) => {
 
   Area.associate = (models) => {
     Area.hasMany(models.User);
+  };
+
+  Area.findByCountryCode = (phone) => {
+    const jsPhone = parsePhoneNumberFromString(phone);
+
+    if (!jsPhone) return;
+
+    return Area.findOne({
+      where: {
+        countryCode: jsPhone.countryCallingCode
+      },
+    });
   };
 
   return Area;

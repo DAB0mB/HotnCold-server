@@ -8,6 +8,7 @@ Configure the following services:
 - [MapBox](https://www.mapbox.com/).
 - [Cloudinary](https://cloudinary.com/).
 - [PostgesSQL](https://www.postgresql.org/).
+- [Twilio](https://www.twilio.com/).
 
 Define environment variables in `.env` file (NEVER COMMIT):
 
@@ -23,6 +24,18 @@ Define environment variables in `.env` file (NEVER COMMIT):
     # Milliseconds to wait before garbage collecting someone's location OR
     # the threshold of which a user is not considered as actively searching anymore
     ACTIVE_MS
+    # Twilio account SID
+    TWILIO_ACCOUNT_SID
+    # Twilio auth token
+    TWILIO_AUTH_TOKEN
+    # One time passcode timeout in milliseconds
+    OTP_TIMEOUT
+    # Test phone number regexp for local testing
+    # Will return the passcode with the response
+    TEST_PHONE_LOCAL
+    # Phone number regexp for testing with phone
+    # Will send the passcode via a text message
+    TEST_PHONE_SMS
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0

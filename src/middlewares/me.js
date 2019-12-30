@@ -1,26 +1,20 @@
-import { parse as parseCookie } from 'cookie';
+import asyncHandler from 'express-async-handler';
 
-import { provideMe, useServices } from '../providers';
+import myContract from './myContract';
 
-export const defineMe = () => async (req, res, next) => {
-  const { auth } = useServices();
-  const cookie = req.headers.cookie;
+const me = () => asyncHandler(async (req, res, next) => {
+  if (!req.myContract) return next();
 
-  if (!cookie) {
-    next();
+  const me = await req.myContract.getUser();
 
-    return;
-  }
+  if (!me) return next();
 
-  const { authToken } = parseCookie(cookie);
-
-  const me = await auth.defineMe(authToken);
-
-  if (!me) {
-    res.clearCookie('authToken');
-  }
-
-  provideMe(req);
+  req.me = me;
 
   next();
-};
+});
+
+export default (...args) => [
+  myContract(...args),
+  me(...args),
+];
