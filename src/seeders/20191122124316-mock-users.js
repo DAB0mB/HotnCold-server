@@ -98,6 +98,23 @@ module.exports = {
         updatedAt: new Date(),
         isMock: true,
       },
+      {
+        id: uuid(),
+        name: 'Kate Connor',
+        // gender: 'F',
+        birthDate: new Date('10/6/1987'),
+        occupation: 'Physical Therapist Assistant',
+        bio: 'Evil coffee nerd. Analyst. Incurable bacon practitioner. Total twitter fan. Typical food aficionado.',
+        location: [-121.883990, 37.332966],
+        areaId: areas.find(a => a.name == 'San Jose, California, United States').id,
+        pictures: [
+          'https://topicimages.mrowl.com/large/gracie/spongebobsquar/thecharacters/sandycheeks_1.jpg',
+          'http://images6.fanpop.com/image/photos/36600000/Spongebob-Squarepants-image-spongebob-squarepants-36641840-512-512.jpg',
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isMock: true,
+      },
     ]);
   },
 

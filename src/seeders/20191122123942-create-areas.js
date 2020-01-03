@@ -30,6 +30,13 @@ module.exports = {
       },
       {
         id: uuid(),
+        name: 'San Jose, California, United States',
+        geoFeaturesIds: ['place.7704339974165690'],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: uuid(),
         name: 'Seoul, South Korea',
         geoFeaturesIds: ['place.15016829751699340'],
         createdAt: new Date(),
