@@ -25,7 +25,7 @@ const resolvers = {
       const { User } = useModels();
 
       // Return a random user mock if we're testing
-      if (randomMock && me.name == '__TEST__') {
+      if (randomMock && /^ *__TEST__ *$/.test(me.name)) {
         const myArea = await me.getArea();
 
         if (!myArea) {
@@ -134,7 +134,7 @@ const resolvers = {
         where: {
           id: { $ne: me.id },
           areaId: myArea.id,
-          isMock: me.name == '__TEST__' ? true : { $ne: true },
+          isMock: /^ *__TEST__ *$/.test(me.name) ? true : { $ne: true },
         },
         attributes: ['location', 'id'],
       });
