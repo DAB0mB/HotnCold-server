@@ -22,8 +22,9 @@ if (require.main === module) {
     startGarbageCollecting();
 
     console.log('Started garbage collection...');
-  }).catch(() => {
-    console.error('Failed to bootstrap.');
+  }).catch((e) => {
+    console.error('Failed to bootstrap :(');
+    console.error(e);
 
     process.exit(1);
   });

@@ -6,6 +6,7 @@
   },
   "scripts": {
     "start": "nodemon --exec babel-node ./src/index.js",
+    "migrate": "yarn sequelize db:seed:undo:all && yarn sequelize db:migrate && yarn sequelize db:seed:all",
     "garbage-collect": "nodemon --exec babel-node ./src/jobs/garbage-collect.js",
     "test": "jest",
     "lint": "eslint --fix"
