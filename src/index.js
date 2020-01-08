@@ -88,8 +88,9 @@ bootstrap().then(() => {
   httpServer.listen({ port, host }, () => {
     console.log(`Apollo Server on http://${host}:${port}/graphql`);
   });
-}).catch(() => {
-  console.error('Failed to bootstrap.');
+}).catch((e) => {
+  console.error('Failed to bootstrap :(');
+  console.error(e);
 
   process.exit(1);
 });
