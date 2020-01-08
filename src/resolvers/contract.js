@@ -23,7 +23,7 @@ const resolvers = {
         passcode,
       };
 
-      if (phone.match(process.env.TEST_PHONE_LOCAL)) {
+      if (new RegExp(process.env.TEST_PHONE_LOCAL).test(phone)) {
         const contract = await Contract.create({
           ...defaults,
           isTest: true,
@@ -33,7 +33,7 @@ const resolvers = {
       }
 
       let isTestPhone;
-      if (phone.match(process.env.TEST_PHONE_SMS)) {
+      if (new RegExp(process.env.TEST_PHONE_SMS).test(phone)) {
         isTestPhone = true;
         phone = `+${phone.slice(1)}`;
         defaults.phone = phone;
@@ -79,7 +79,7 @@ const resolvers = {
       });
 
       if (!contract) {
-        throw Error('Passcode is incorrect');
+        throw Error('Passcode is incorrect or timed-out');
       }
 
       contract.verified = true;
