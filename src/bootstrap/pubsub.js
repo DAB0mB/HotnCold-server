@@ -1,11 +1,12 @@
-import { PostgresPubSub } from 'graphql-postgres-subscriptions';
-
 import { providePubsub } from '../providers';
 
 const bootstrapPubsub = async (sequelize) => {
-  const client = await sequelize.connectionManager.pool.acquire();
+  const { PostgresPubSub } = require('graphql-postgres-subscriptions');
 
-  providePubsub(new PostgresPubSub({ client }));
+  const client = await sequelize.connectionManager.pool.acquire();
+  const pubsub = new PostgresPubSub({ client });
+
+  providePubsub(pubsub);
 };
 
 export default bootstrapPubsub;

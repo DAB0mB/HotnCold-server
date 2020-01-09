@@ -37,6 +37,7 @@
     "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "express-async-handler": "^1.1.4",
+    "google-spreadsheet": "^2.0.8",
     "graphql": "^14.0.2",
     "graphql-geojson-scalar-types": "^0.0.5",
     "graphql-iso-date": "^3.6.1",

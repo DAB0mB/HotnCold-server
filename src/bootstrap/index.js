@@ -3,6 +3,7 @@ import bootstrapMapbox from './mapbox';
 import bootstrapModels from './models';
 import bootstrapPubsub from './pubsub';
 import bootstrapTwilio from './twilio';
+import bootstrapWhitelist from './whitelist';
 
 const bootstrap = () => {
   const Sequelize = require('sequelize');
@@ -15,6 +16,7 @@ const bootstrap = () => {
     bootstrapModels(sequelize),
     bootstrapPubsub(sequelize),
     bootstrapTwilio(),
+    bootstrapWhitelist(),
   ]);
 };
 

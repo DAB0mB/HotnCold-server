@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-import { useModels, useTwilio } from '../providers';
+import { useModels, useTwilio, useWhitelist } from '../providers';
 import { generatePasscode } from '../utils';
 
 const resolvers = {
@@ -38,6 +38,14 @@ const resolvers = {
         phone = `+${phone.slice(1)}`;
         defaults.phone = phone;
         defaults.isTest = true;
+      }
+
+      if (process.env.WHITELIST_SHEET_ID) {
+        const whitelist = useWhitelist();
+
+        if (!await whitelist.hasPhone(phone)) {
+          throw Error('Phone is not invited');
+        }
       }
 
       const area = await Area.findByCountryCode(phone);

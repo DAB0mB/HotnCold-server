@@ -36,6 +36,12 @@ Define environment variables in `.env` file (NEVER COMMIT):
     # Phone number regexp for testing with phone
     # Will send the passcode via a text message
     TEST_PHONE_SMS
+    # Google Sheets client email
+    SHEETS_CLIENT_EMAIL
+    # Google Sheets private key. Use brackets (") for line skips with \n
+    SHEETS_PRIVATE_KEY
+    # Whitelist Google Sheet ID
+    WHITELIST_SHEET_ID
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0
