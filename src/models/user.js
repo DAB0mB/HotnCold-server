@@ -24,6 +24,9 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    notificationsToken: {
+      type: DataTypes.STRING,
+    },
     bio: {
       type: DataTypes.STRING(511),
       allowNull: false,

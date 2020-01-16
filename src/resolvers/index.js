@@ -1,5 +1,6 @@
-import { GraphQLDateTime } from 'graphql-iso-date';
 import * as GraphQLGeo from 'graphql-geojson-scalar-types';
+import { GraphQLDateTime } from 'graphql-iso-date';
+import merge from 'merge-deep';
 
 import areaResolvers from './area';
 import chatResolvers from './chat';
@@ -16,7 +17,7 @@ const customScalarResolver = {
   Box2D,
 };
 
-export default [
+export default merge(
   areaResolvers,
   chatResolvers,
   contractResolvers,
@@ -24,4 +25,4 @@ export default [
   messageResolvers,
   uploadResolvers,
   userResolvers,
-];
+);

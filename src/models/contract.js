@@ -19,7 +19,7 @@ const contract = (sequelize, DataTypes) => {
         len: 4,
       },
     },
-    verified: {
+    signed: {
       type: DataTypes.BOOLEAN,
     },
     isTest: {

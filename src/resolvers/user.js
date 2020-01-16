@@ -78,7 +78,9 @@ const resolvers = {
   },
 
   Mutation: {
-    async createUser(mutation, { name, birthDate, occupation, bio, pictures }, { myContract }) {
+    async createUser(mutation, { notificationsToken, name, birthDate, occupation, bio, pictures }, { myContract }) {
+      const pubsub = usePubsub();
+
       if (!myContract) {
         throw Error('Unauthorized');
       }
@@ -86,6 +88,7 @@ const resolvers = {
       const { User } = useModels();
 
       const user = await User.create({
+        notificationsToken,
         name,
         birthDate,
         occupation,
@@ -94,8 +97,10 @@ const resolvers = {
       });
 
       await myContract.setUser(user);
+      myContract.signed = true;
+      await myContract.save();
 
-      usePubsub().publish('userCreated', {
+      pubsub.publish('userCreated', {
         userCreated: user
       });
 
@@ -153,6 +158,26 @@ const resolvers = {
       await me.save();
 
       return me.recentlyScannedAt;
+    },
+
+    async associateNotificationsToken(mutations, { token }, { me }) {
+      me.notificationsToken = token;
+      await me.save();
+
+      return true;
+    },
+
+    async dissociateNotificationsToken(mutations, args, { me }) {
+      const hasToken = !!me.notificationsToken;
+
+      if (!hasToken) {
+        return false;
+      }
+
+      me.notificationsToken = null;
+      await me.save();
+
+      return true;
     },
   },
 

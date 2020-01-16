@@ -1,4 +1,5 @@
 import bootstrapCloudinary from './cloudinary';
+import bootstrapFirebase from './firebase';
 import bootstrapMapbox from './mapbox';
 import bootstrapModels from './models';
 import bootstrapPubsub from './pubsub';
@@ -17,6 +18,7 @@ const bootstrap = () => {
     bootstrapPubsub(sequelize),
     bootstrapTwilio(),
     bootstrapWhitelist(),
+    bootstrapFirebase(),
   ]);
 };
 

@@ -14,7 +14,7 @@ export default gql`
     id: ID!
     phone: String!
     isTest: Boolean
-    verified: Boolean
+    signed: Boolean
     passcode: String
   }
 `;

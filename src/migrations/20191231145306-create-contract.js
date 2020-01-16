@@ -20,7 +20,7 @@ module.exports = {
           allowNull: false,
           type: Sequelize.STRING,
         },
-        verified: {
+        signed: {
           type: Sequelize.BOOLEAN,
         },
         isTest: {

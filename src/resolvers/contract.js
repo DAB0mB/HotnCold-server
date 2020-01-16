@@ -18,7 +18,7 @@ const resolvers = {
       phone = phone[0] + phone.replace(/[^\d]/g, '');
 
       const defaults = {
-        verified: false,
+        signed: false,
         phone,
         passcode,
       };
@@ -81,17 +81,16 @@ const resolvers = {
       const { Contract } = useModels();
 
       const contract = await Contract.findOne({
-        id: contractId,
-        updatedAt: { $gt: new Date(Date.now() - Number(process.env.OTP_TIMEOUT)) },
-        passcode,
+        where: {
+          id: contractId,
+          updatedAt: { $gt: new Date(Date.now() - Number(process.env.OTP_TIMEOUT)) },
+          passcode,
+        },
       });
 
       if (!contract) {
         throw Error('Passcode is incorrect or timed-out');
       }
-
-      contract.verified = true;
-      await contract.save();
 
       const authToken = await new Promise((resolve, reject) => {
         jwt.sign(contract.id, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {

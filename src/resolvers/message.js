@@ -1,6 +1,6 @@
 import { withFilter } from 'apollo-server';
 
-import { useModels, usePubsub } from '../providers';
+import { useModels, usePubsub, useFirebase } from '../providers';
 
 const resolvers = {
   Query: {
@@ -39,7 +39,10 @@ const resolvers = {
 
   Mutation: {
     async sendMessage(mutation, { chatId, text }, { me }) {
+      const { default: Resolvers } = require('.');
       const { Chat, Message } = useModels();
+      const firebase = useFirebase();
+      const pubsub = usePubsub();
 
       const chat = await Chat.findOne({
         where: { id: chatId }
@@ -57,12 +60,34 @@ const resolvers = {
       await message.save();
       await message.setChat(chat);
 
-      usePubsub().publish('messageSent', {
+      pubsub.publish('messageSent', {
         messageSent: message
       });
 
-      usePubsub().publish('chatBumped', {
+      pubsub.publish('chatBumped', {
         chatBumped: chat
+      });
+
+      const users = await chat.getUsers({
+        where: {
+          id: { $ne: me.id },
+        },
+      });
+
+      users.forEach(async (user) => {
+        if (!user.notificationsToken) return;
+
+        firebase.messaging().sendToDevice(user.notificationsToken, {
+          data: {
+            channelId: 'chat-messages',
+            props: JSON.stringify({
+              data: { chatId },
+              largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
+              title: await Resolvers.Chat.title(chat, {}, { me: user }),
+              body: text,
+            }),
+          },
+        });
       });
 
       // Run in background
