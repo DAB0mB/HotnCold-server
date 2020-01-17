@@ -61,6 +61,15 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: uuid(),
+        name: 'Santa Monica, California, United States',
+        geoFeaturesIds: ['place.2189318093804030'],
+        phone: '+14157993599',
+        countryCode: '1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
     ]);
   },
 

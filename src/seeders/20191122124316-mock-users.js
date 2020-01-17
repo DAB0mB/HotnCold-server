@@ -110,6 +110,22 @@ module.exports = {
         updatedAt: new Date(),
         isMock: true,
       },
+      {
+        id: uuid(),
+        name: 'Patrick Star',
+        birthDate: new Date('6/2/1989'),
+        occupation: 'Social Science Research Assistant',
+        bio: 'Travel maven. Professional alcoholaholic. Infuriatingly humble music specialist. Gamer. Coffee ninja. General internet advocate.',
+        location: [-118.493932,34.0136537],
+        areaId: areas.find(a => a.name == 'Santa Monica, California, United States').id,
+        pictures: [
+          'https://i.imgur.com/I3ysYRt.png',
+          'https://pbs.twimg.com/profile_images/588433110703865856/JgMKUdlE_400x400.jpg',
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isMock: true,
+      },
     ]);
   },
 
