@@ -5,6 +5,16 @@ import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
   Query: {
+    async chat(quert, { chatId }, { me }) {
+      const myChats = await me.getChats({
+        where: {
+          id: chatId
+        }
+      });
+
+      return myChats[0] || null;
+    },
+
     async chats(query, args, { me }) {
       const { Chat, Message } = useModels();
 

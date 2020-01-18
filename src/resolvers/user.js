@@ -78,7 +78,7 @@ const resolvers = {
   },
 
   Mutation: {
-    async createUser(mutation, { notificationsToken, name, birthDate, occupation, bio, pictures }, { myContract }) {
+    async createUser(mutation, { name, birthDate, occupation, bio, pictures }, { myContract }) {
       const pubsub = usePubsub();
 
       if (!myContract) {
@@ -88,7 +88,6 @@ const resolvers = {
       const { User } = useModels();
 
       const user = await User.create({
-        notificationsToken,
         name,
         birthDate,
         occupation,
