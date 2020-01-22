@@ -77,8 +77,10 @@ const resolvers = {
       users.forEach(async (user) => {
         if (!user.notificationsToken) return;
 
+        // TODO: Update body to include all unread messages
         firebase.messaging().sendToDevice(user.notificationsToken, {
           data: {
+            notificationId: `chat-message-${user.id}`,
             channelId: 'chat-messages',
             props: JSON.stringify({
               data: { chatId },
