@@ -42,6 +42,11 @@ Define environment variables in `.env` file (NEVER COMMIT):
     SHEETS_PRIVATE_KEY
     # Whitelist Google Sheet ID
     WHITELIST_SHEET_ID
+    # Firebase-admin related credentials. See https://firebase.google.com/docs/reference/admin/node/admin.credential
+    FIREBASE_PROJECT_ID
+    FIREBASE_CLIENT_EMAIL
+    FIREBASE_PRIVATE_KEY
+    FIREBASE_DB_URL
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0
