@@ -42,7 +42,7 @@ const resolvers = {
       }
 
       if (!userId) {
-        throw new UserInputError('Argument \'userId\' on Field \'userProfile\' has an invalid value (1). Expected type \'ID\'.');
+        throw new UserInputError(`Argument 'userId' on Field 'userProfile' has an invalid value (${userId}). Expected type 'ID'.`);
       }
 
       if (userId == me.id) {
