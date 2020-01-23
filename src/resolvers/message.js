@@ -82,7 +82,7 @@ const resolvers = {
           data: {
             notificationId: `chat-message-${user.id}`,
             channelId: 'chat-messages',
-            props: JSON.stringify({
+            payload: JSON.stringify({
               data: { chatId },
               largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
               title: await Resolvers.Chat.title(chat, {}, { me: user }),
