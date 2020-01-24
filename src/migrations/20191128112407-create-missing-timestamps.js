@@ -1,6 +1,6 @@
 'use strict';
 
-const tables = ['users', 'areas', 'messages', 'chats', 'chats_messages', 'chats_users'];
+const tables = ['users', 'areas', 'messages', 'chats', 'chats_users'];
 
 module.exports = {
   up(queryInterface, Sequelize) {

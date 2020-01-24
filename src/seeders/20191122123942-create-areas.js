@@ -73,7 +73,15 @@ module.exports = {
     ]);
   },
 
-  down(queryInterface) {
+  async down(queryInterface) {
+    try {
+      await queryInterface.describeTable('areas');
+    }
+    catch (e) {
+      //First time migration
+      return;
+    }
+
     return queryInterface.bulkDelete('areas', null);
   },
 };

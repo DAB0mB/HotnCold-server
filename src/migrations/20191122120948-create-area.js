@@ -11,7 +11,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      pictures: {
+      geoFeaturesIds: {
         type: Sequelize.ARRAY(Sequelize.STRING),
         allowNull: false,
       },

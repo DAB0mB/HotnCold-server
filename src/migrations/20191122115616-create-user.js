@@ -21,13 +21,21 @@ module.exports = {
       },
       bio: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.STRING(511)
+      },
+      occupation: {
+        allowNull: false,
+        type: Sequelize.STRING
       },
       pictures: {
         type: Sequelize.ARRAY(Sequelize.STRING),
       },
       location: {
         type: Sequelize.ARRAY(Sequelize.FLOAT),
+      },
+      areaId: {
+        foreignKey: true,
+        type: Sequelize.UUID,
       },
     });
   },

@@ -129,7 +129,15 @@ module.exports = {
     ]);
   },
 
-  down(queryInterface) {
+  async down(queryInterface) {
+    try {
+      await queryInterface.describeTable('users');
+    }
+    catch (e) {
+      //First time migration
+      return;
+    }
+
     return queryInterface.bulkDelete('users', {
       isMock: true,
     });
