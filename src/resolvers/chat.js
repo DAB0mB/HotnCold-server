@@ -5,7 +5,7 @@ import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
   Query: {
-    async chat(quert, { chatId }, { me }) {
+    async chat(query, { chatId }, { me }) {
       const myChats = await me.getChats({
         where: {
           id: chatId
@@ -68,6 +68,18 @@ const resolvers = {
 
       return chat;
     },
+
+    async markChatAsRead(mutation, { chatId }, { me }) {
+      const { ChatUser } = useModels();
+
+      const [updateCount] = await ChatUser.update({
+        unreadMessagesIds: [],
+      }, {
+        where: { chatId, userId: me.id },
+      });
+
+      return !!updateCount;
+    },
   },
 
   Subscription: {
@@ -99,6 +111,14 @@ const resolvers = {
   },
 
   Chat: {
+    async unreadMessagesCount(chat, args, { me }) {
+      const [user] = await chat.getUsers({
+        where: { id: me.id },
+      });
+
+      return user?.chats_users?.unreadMessagesIds?.length || 0;
+    },
+
     recentMessages(chat) {
       return chat.getMessages({ order: [['createdAt', 'DESC']], limit: 12 });
     },

@@ -8,6 +8,7 @@ export default gql`
 
   extend type Mutation {
     findOrCreateChat(usersIds: [ID!]!): Chat! @auth
+    markChatAsRead(chatId: ID!): Boolean @auth
   }
 
   extend type Subscription {
@@ -18,6 +19,7 @@ export default gql`
     id: ID!
     title: String!
     picture: String
+    unreadMessagesCount: Int!
     recentMessages: [Message]!
     firstMessage: Message
     users: [User]!

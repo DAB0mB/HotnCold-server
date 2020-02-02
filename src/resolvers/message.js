@@ -27,13 +27,15 @@ const resolvers = {
         }
       }
 
-      return chat.getMessages({
+      const messages = await chat.getMessages({
         where: {
           createdAt: { $lt: anchorCreatedAt }
         },
         order: [['createdAt', 'DESC']],
         limit,
       });
+
+      return messages;
     },
   },
 
@@ -64,20 +66,28 @@ const resolvers = {
         messageSent: message
       });
 
-      pubsub.publish('chatBumped', {
-        chatBumped: chat
-      });
-
       const users = await chat.getUsers({
         where: {
           id: { $ne: me.id },
         },
       });
 
+      users.forEach((user) => {
+        user.chats_users = {
+          unreadMessagesIds: [message.id].concat(user.chats_users.unreadMessagesIds).filter(Boolean),
+        };
+      });
+
+      await chat.setUsers([...users, me], { through: { unreadMessagesIds: [] } });
+
+      pubsub.publish('chatBumped', {
+        chatBumped: chat
+      });
+
+      // Run in background
       users.forEach(async (user) => {
         if (!user.notificationsToken) return;
 
-        // TODO: Update body to include all unread messages
         firebase.messaging().sendToDevice(user.notificationsToken, {
           data: {
             notificationId: `chat-message-${user.id}`,
@@ -86,7 +96,7 @@ const resolvers = {
               data: { chatId },
               largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
               title: await Resolvers.Chat.title(chat, {}, { me: user }),
-              body: text,
+              body: message.text, // TODO: Multiline?
             }),
           },
         });
@@ -147,7 +157,7 @@ const resolvers = {
 
           if (!chat) return false;
 
-          const user = await chat.getUsers({
+          const [user] = await chat.getUsers({
             where: { id: me.id }
           });
 
