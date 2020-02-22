@@ -8,6 +8,7 @@ const bootstrapModels = (sequelize) => {
     Contract: sequelize.import('../models/contract'),
     Message: sequelize.import('../models/message'),
     User: sequelize.import('../models/user'),
+    Status: sequelize.import('../models/status'),
   };
 
   Object.keys(models).forEach(modelName => {

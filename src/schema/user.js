@@ -14,6 +14,8 @@ export default gql`
     updateRecentScanTime(clear: Boolean): DateTime @auth
     associateNotificationsToken(token: String!): Boolean! @auth
     dissociateNotificationsToken: Boolean! @auth
+    makeDiscoverable: Boolean @auth
+    makeIncognito: Boolean @auth
   }
 
   extend type Subscription {
@@ -26,10 +28,12 @@ export default gql`
     # gender: String!
     birthDate: DateTime @mine
     age: String!
+    discoverable: Boolean! @mine
     occupation: String
     bio: String
     location: Vector2D @mine
     pictures: [String]
     avatar: String
+    status: Status
   }
 `;

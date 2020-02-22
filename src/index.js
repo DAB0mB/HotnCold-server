@@ -41,7 +41,7 @@ const server = new ApolloServer({
     };
   },
   context: async ({ req, res, connection }) => {
-    const { Contract } = useModels();
+    const { Contract, Status } = useModels();
 
     let me;
     let myContract;
@@ -55,7 +55,9 @@ const server = new ApolloServer({
 
       if (!myContract) break getMe;
 
-      me = await myContract.getUser();
+      me = await myContract.getUser({
+        include: [{ model: Status, as: 'status' }],
+      });
     }
     else {
       me = req.me;

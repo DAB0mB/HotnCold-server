@@ -47,6 +47,8 @@ Define environment variables in `.env` file (NEVER COMMIT):
     FIREBASE_CLIENT_EMAIL
     FIREBASE_PRIVATE_KEY
     FIREBASE_DB_URL
+    # Timeout for published statuses
+    STATUS_TIMEOUT
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0

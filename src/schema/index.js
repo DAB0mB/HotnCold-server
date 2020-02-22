@@ -8,6 +8,7 @@ import messageSchema from './message';
 import scalarsSchema from './scalars';
 import uploadSchema from './upload';
 import userSchema from './user';
+import statusSchema from './status';
 
 const linkSchema = gql`
   type Query {
@@ -33,4 +34,5 @@ export default [
   scalarsSchema,
   uploadSchema,
   userSchema,
+  statusSchema,
 ];

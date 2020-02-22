@@ -51,6 +51,9 @@ const user = (sequelize, DataTypes) => {
         len: 2,
       },
     },
+    discoverable: {
+      type: DataTypes.BOOLEAN
+    },
   }, {
     hooks: {
       beforeDestroy: (instance) => {
@@ -61,9 +64,10 @@ const user = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.belongsTo(models.Area);
-    User.hasOne(models.Contract);
-    User.hasMany(models.Message);
     User.belongsToMany(models.Chat, { through: models.ChatUser });
+    User.hasMany(models.Message);
+    User.hasOne(models.Contract);
+    User.belongsTo(models.Status);
   };
 
   User.disposeOutdatedLocations = (dateLimit = new Date(Date.now())) => {

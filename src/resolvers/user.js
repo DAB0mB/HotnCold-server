@@ -113,7 +113,7 @@ const resolvers = {
     },
 
     async updateMyLocation(mutation, { location }, { me, myContract }) {
-      const { User } = useModels();
+      const { Status, User } = useModels();
 
       await me.setLocation(location);
 
@@ -129,16 +129,22 @@ const resolvers = {
       const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
+          statusId: { $ne: null },
           areaId: myArea.id,
           isMock: myContract.isTest ? true : { $ne: true },
+          '$status.location$': { $ne: null },
+          '$status.expiresAt$': { $gte: new Date() },
         },
-        attributes: ['location', 'id'],
+        include: [{ model: Status, as: 'status' }],
+        attributes: ['location', 'pictures', 'statusId', 'id'],
       });
 
       const features = nearbyUsers.map(user => ({
         type: 'Feature',
         properties: {
           userId: user.id,
+          avatar: user.pictures[0],
+          statusText: user.status.text,
         },
         geometry: {
           type: 'Point',
@@ -178,6 +184,20 @@ const resolvers = {
 
       return true;
     },
+
+    async makeDiscoverable(mutation, args, { me }) {
+      if (me.discoverable) return;
+
+      me.discoverable = true;
+      await me.save();
+    },
+
+    async makeIncognito(mutation, args, { me }) {
+      if (!me.discoverable) return;
+
+      me.discoverable = false;
+      await me.save();
+    },
   },
 
   Subscription: {
@@ -207,6 +227,10 @@ const resolvers = {
     avatar(user) {
       return user.pictures[0];
     },
+
+    discoverable(user) {
+      return !!user.discoverable;
+    }
   },
 };
 

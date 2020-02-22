@@ -8,6 +8,7 @@ import contractResolvers from './contract';
 import messageResolvers from './message';
 import uploadResolvers from './upload';
 import userResolvers from './user';
+import statusResolvers from './status';
 import { Vector2D, Box2D } from '../scalars';
 
 const customScalarResolver = {
@@ -25,4 +26,5 @@ export default merge(
   messageResolvers,
   uploadResolvers,
   userResolvers,
+  statusResolvers,
 );
