@@ -10,18 +10,8 @@ const resolvers = {
       return me;
     },
 
-    users(query, { usersIds }) {
-      const { User } = useModels();
-
-      return User.findAll({
-        where: {
-          id: { $in: usersIds },
-        },
-      });
-    },
-
     async userProfile(query, { userId, randomMock, recentlyScanned }, { me, myContract }) {
-      const { User } = useModels();
+      const { Status, User } = useModels();
 
       // Return a random user mock if we're testing
       if (randomMock && myContract.isTest) {
@@ -36,6 +26,7 @@ const resolvers = {
             areaId: myArea.id,
             isMock: true,
           },
+          include: [{ model: Status, as: 'status' }],
         });
 
         return user;
@@ -61,6 +52,7 @@ const resolvers = {
 
       const user = await User.findOne({
         where: userQuery,
+        include: [{ model: Status, as: 'status' }],
       });
 
       if (!user || !user.recentlyScannedAt) return null;
