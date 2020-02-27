@@ -1,6 +1,6 @@
-// import turfDistance from '@turf/distance';
-import { UserInputError, withFilter } from 'apollo-server';
+import { withFilter } from 'apollo-server';
 import moment from 'moment';
+import Sequelize from 'sequelize';
 
 import { useModels, usePubsub } from '../providers';
 
@@ -10,60 +10,60 @@ const resolvers = {
       return me;
     },
 
-    async userProfile(query, { userId, randomMock, recentlyScanned }, { me, myContract }) {
+    async nearbyUsers(query, args, { me }) {
       const { Status, User } = useModels();
 
-      // Return a random user mock if we're testing
-      if (randomMock && myContract.isTest) {
-        const myArea = await me.getArea();
+      const users = await User.findAll({
+        where: {
+          id: { $ne: me.id },
+          areaId: me.areaId,
+          discoverable: true,
+          $or: [
+            {
+              isMock: true,
+            },
+            {
+              $and: [
+                {
+                  locationExpiresAt: { $gte: new Date() },
+                },
+                Sequelize.where(Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...me.location.coordinates), Sequelize.col('user.location')), Sequelize.Op.lte, process.env.DISCOVERY_DISTANCE),
+              ],
+            },
+          ],
+        },
+        include: [{ model: Status, as: 'status' }],
+      });
 
-        if (!myArea) {
-          return null;
-        }
+      return users;
+    },
 
-        const user = await User.findOne({
-          where: {
-            areaId: myArea.id,
-            isMock: true,
-          },
-          include: [{ model: Status, as: 'status' }],
-        });
-
-        return user;
-      }
-
-      if (!userId) {
-        throw new UserInputError(`Argument 'userId' on Field 'userProfile' has an invalid value (${userId}). Expected type 'ID'.`);
-      }
+    async userProfile(query, { userId }, { me }) {
+      const { Status, User } = useModels();
 
       if (userId == me.id) {
         return me;
       }
 
-      const userQuery = {
-        id: userId,
-      };
-
-      if (recentlyScanned) {
-        userQuery.recentlyScannedAt = {
-          $gt: new Date(Date.now() - process.env.ACTIVE_TIME)
-        };
-      }
-
       const user = await User.findOne({
-        where: userQuery,
+        where: {
+          id: userId,
+          $or: [
+            {
+              isMock: true,
+            },
+            {
+              $and: [
+                {
+                  locationExpiresAt: { $gte: new Date() },
+                },
+                Sequelize.where(Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...me.location.coordinates), Sequelize.col('user.location')), Sequelize.Op.lte, process.env.DISCOVERY_DISTANCE),
+              ],
+            },
+          ],
+        },
         include: [{ model: Status, as: 'status' }],
       });
-
-      if (!user || !user.recentlyScannedAt) return null;
-
-      // TODO: Allow querying only with a certain proximity
-      /*
-      const distance = turfDistance(me.location, user.location, { units: 'kilometers' });
-
-      // Users have to be at a certain proximity
-      if (distance < 0.1) return null;
-      */
 
       return user;
     },
@@ -104,10 +104,10 @@ const resolvers = {
       return me;
     },
 
-    async updateMyLocation(mutation, { location }, { me, myContract }) {
+    async updateMyLocation(mutation, { location: coordinates }, { me, myContract }) {
       const { Status, User } = useModels();
 
-      await me.setLocation(location);
+      await me.setLocation(coordinates);
 
       const myArea = await me.getArea();
 
@@ -121,40 +121,74 @@ const resolvers = {
       const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
-          statusId: { $ne: null },
-          areaId: myArea.id,
           isMock: myContract.isTest ? true : { $ne: true },
-          '$status.location$': { $ne: null },
-          '$status.expiresAt$': { $gte: new Date() },
+          $or: [
+            {
+              statusId: { $ne: null }
+            },
+            {
+              discoverable: true,
+            },
+          ],
         },
-        include: [{ model: Status, as: 'status' }],
-        attributes: ['location', 'pictures', 'statusId', 'id'],
+        include: [{
+          model: Status,
+          as: 'status',
+          where: {
+            areaId: myArea.id,
+            locationExpiresAt: { $gte: new Date() },
+          },
+          attributes: [
+            'text',
+            'location',
+            'locationExpiresAt',
+            [Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...coordinates), Sequelize.col('status.location')), 'distance'],
+          ],
+        }],
+        attributes: [
+          'id',
+          'pictures',
+          'isMock',
+          'location',
+          'locationExpiresAt',
+        ],
+        // Using literal because I couldn't find an alternative. The proper solution should be so:
+        // https://github.com/sequelize/sequelize/issues/4553#issuecomment-142221005
+        order: [[Sequelize.literal('"status.distance"'), 'ASC NULLS LAST']],
       });
 
-      const features = nearbyUsers.map(user => ({
-        type: 'Feature',
-        properties: {
-          userId: user.id,
-          avatar: user.pictures[0],
-          statusText: user.status.text,
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: user.location,
-        },
-      }));
+      const features = [];
+
+      nearbyUsers.forEach((user) => {
+        if (user.status && user.status.location && new Date(user.status.locationExpiresAt) > new Date()) {
+          const feature = {
+            type: 'Feature',
+            geometry: user.status.location,
+          };
+
+          if (user.isMock || user.status.distance < process.env.DISCOVERY_DISTANCE) {
+            feature.properties = {
+              userId: user.id,
+              avatar: user.pictures[0],
+              statusText: user.status.text,
+            };
+          }
+
+          features.push(feature);
+        }
+
+        if (user.discoverable && user.location && new Date(user.locationExpiresAt) > new Date()) {
+          features.push({
+            type: 'Feature',
+            geometry: user.location,
+          });
+        }
+      });
 
       return {
         type: 'FeatureCollection',
         features,
       };
-    },
-
-    async updateRecentScanTime(mutation, { clear }, { me }) {
-      me.recentlyScannedAt = clear ? null : new Date();
-      await me.save();
-
-      return me.recentlyScannedAt;
     },
 
     async associateNotificationsToken(mutations, { token }, { me }) {
@@ -179,6 +213,10 @@ const resolvers = {
 
     async makeDiscoverable(mutation, args, { me }) {
       if (me.discoverable) return;
+
+      if (!me.statusId) {
+        throw Error('Cannot make you discoverable if a status wasn\'t yet created');
+      }
 
       me.discoverable = true;
       await me.save();
@@ -212,6 +250,13 @@ const resolvers = {
   },
 
   User: {
+    location(user) {
+      if (!user.location) return null;
+      if (new Date(user.locationExpiresAt) < new Date()) return null;
+
+      return user.location.coordinates;
+    },
+
     age(user) {
       return moment().year() - moment(user.birthDate).year();
     },

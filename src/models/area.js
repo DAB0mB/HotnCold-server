@@ -27,6 +27,7 @@ const area = (sequelize, DataTypes) => {
   });
 
   Area.associate = (models) => {
+    Area.hasMany(models.Status);
     Area.hasMany(models.User);
   };
 

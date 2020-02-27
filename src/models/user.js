@@ -1,6 +1,7 @@
 import uuid from 'uuid';
 
-import { useModels, useMapbox } from '../providers';
+import { useModels } from '../providers';
+import { Location } from './mixins';
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
@@ -16,9 +17,6 @@ const user = (sequelize, DataTypes) => {
     birthDate: {
       type: DataTypes.DATE,
       allowNull: false,
-    },
-    recentlyScannedAt: {
-      type: DataTypes.DATE,
     },
     occupation: {
       type: DataTypes.STRING,
@@ -45,20 +43,17 @@ const user = (sequelize, DataTypes) => {
         },
       },
     },
-    location: {
-      type: DataTypes.ARRAY(DataTypes.FLOAT),
-      validate: {
-        len: 2,
-      },
-    },
     discoverable: {
       type: DataTypes.BOOLEAN
     },
-  }, {
-    hooks: {
-      beforeDestroy: (instance) => {
-        instance.setLocation(null, true);
-      },
+    location: {
+      type: DataTypes.GEOMETRY('POINT'),
+    },
+    locationExpiresAt: {
+      type: DataTypes.DATE,
+    },
+    isMock: {
+      type: DataTypes.BOOLEAN,
     },
   });
 
@@ -70,26 +65,6 @@ const user = (sequelize, DataTypes) => {
     User.belongsTo(models.Status);
   };
 
-  User.disposeOutdatedLocations = (dateLimit = new Date(Date.now())) => {
-    return User.update({
-      location: null,
-      areaId: null,
-    }, {
-      where: {
-        updatedAt: { $lt: dateLimit },
-        isMock: { $ne: true },
-        $or: [
-          {
-            location: { $ne: null },
-          },
-          {
-            areaId: { $ne: null },
-          },
-        ],
-      },
-    });
-  };
-
   User.prototype.getContract = function getContract(options = {}) {
     const { Contract } = useModels();
 
@@ -99,57 +74,9 @@ const user = (sequelize, DataTypes) => {
     });
   };
 
-  // Set location + qualify under a certain place (e.g. San Francisco, California, United States)
-  User.prototype.setLocation = async function setLocation(location, useStage) {
-    const { Area } = useModels();
-    const mapbox = useMapbox();
-    const selfLocation = this.getDataValue('location');
-
-    if (location) {
-      if (
-        selfLocation &&
-        selfLocation[0] === location[0] &&
-        selfLocation[1] === location[1]
-      ) {
-        return;
-      }
-      await this.setLocation(null, true);
-
-      const geoFeaturesIds = await mapbox.geocoding.reverseGeocode({
-        query: location,
-        types: ['region', 'district', 'locality', 'place'],
-      }).send().then(({ body }) => body.features.map(f => f.id));
-
-      // Area might be available from join op
-      const area = await Area.findOne({
-        where: {
-          geoFeaturesIds: {
-            $overlap: geoFeaturesIds,
-          },
-        },
-      });
-
-      if (area) {
-        await this.setArea(area);
-      }
-      else {
-        await this.setArea(null);
-      }
-
-      this.setDataValue('location', location);
-    }
-    else {
-      if (!selfLocation) return;
-
-      await this.setArea(null);
-
-      this.setDataValue('location', null);
-    }
-
-    if (!useStage) {
-      await this.save();
-    }
-  };
+  Location.extend(User, {
+    locationTimeout: Number(process.env.USER_LOCATION_TIMEOUT),
+  });
 
   return User;
 };

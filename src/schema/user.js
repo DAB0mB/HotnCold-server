@@ -3,18 +3,17 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     me: User
-    users(usersIds: [ID!]!): [User]! @auth
-    userProfile(userId: ID, randomMock: Boolean, recentlyScanned: Boolean): User @auth
+    nearbyUsers: [User]! @auth @geo
+    userProfile(userId: ID): User @auth @geo
   }
 
   extend type Mutation {
     createUser(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): String!
     updateMyProfile(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): User @auth
     updateMyLocation(location: Vector2D!): FeatureCollection @auth
-    updateRecentScanTime(clear: Boolean): DateTime @auth
     associateNotificationsToken(token: String!): Boolean! @auth
     dissociateNotificationsToken: Boolean! @auth
-    makeDiscoverable: Boolean @auth
+    makeDiscoverable: Boolean @auth @geo
     makeIncognito: Boolean @auth
   }
 
@@ -28,7 +27,7 @@ export default gql`
     # gender: String!
     birthDate: DateTime @mine
     age: String!
-    discoverable: Boolean! @mine
+    discoverable: Boolean @mine
     occupation: String
     bio: String
     location: Vector2D @mine

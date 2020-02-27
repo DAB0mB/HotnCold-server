@@ -17,31 +17,30 @@ const resolvers = {
         throw Error('Cannot drop a status if it wasn\'t yet created');
       }
 
-      await me.setStatus({
-        location: me.location,
-        expiresAt: new Date(Date.now() + process.env.STATUS_TIMEOUT),
-      }, {
-        fields: ['location'],
-      });
+      me.status.areaId = me.areaId;
+      me.status.location = me.location;
+      me.status.locationExpiresAt = new Date(Date.now() + Number(process.env.STATUS_LOCATION_TIMEOUT));
+      await me.status.save();
 
-      return me.location;
+      return me.location.coordinates;
     },
 
-    async pickupStatus({ me }) {
+    async pickupStatus(mutation, args, { me }) {
       if (!me.statusId) return;
 
-      await me.setStatus({
-        location: null,
-        expiresAt: null,
-      }, {
-        fields: ['location'],
-      });
+      me.status.areaId = null;
+      me.status.location = null;
+      me.status.locationExpiresAt = null;
+      await me.status.save();
     },
   },
 
   Status: {
-    expired(status) {
-      return !status.expiresAt || status.expiresAt < new Date();
+    location(user) {
+      if (!user.location) return null;
+      if (new Date(user.locationExpiresAt) < new Date()) return null;
+
+      return user.location.coordinates;
     },
   },
 };

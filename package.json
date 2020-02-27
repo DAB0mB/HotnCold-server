@@ -7,7 +7,6 @@
   "scripts": {
     "start": "nodemon --exec babel-node ./src/index.js",
     "migrate": "yarn sequelize db:seed:undo:all && yarn sequelize db:migrate && yarn sequelize db:seed:all",
-    "garbage-collect": "nodemon --exec babel-node ./src/jobs/garbage-collect.js",
     "test": "jest",
     "lint": "eslint --fix"
   },
@@ -26,7 +25,6 @@
     "@babel/preset-env": "^7.7.1",
     "@babel/register": "^7.7.0",
     "@mapbox/mapbox-sdk": "^0.7.0",
-    "@turf/distance": "^6.0.1",
     "apollo-server": "^2.2.3",
     "apollo-server-express": "^2.2.3",
     "bcrypt": "^3.0.2",
@@ -51,7 +49,7 @@
     "merge-deep": "^3.0.2",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
-    "nodemon": "^1.19.4",
+    "nodemon": "^2.0.2",
     "pg": "^7.6.1",
     "sequelize": "^4.41.2",
     "sequelize-cli": "^5.5.1",

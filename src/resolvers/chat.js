@@ -154,7 +154,11 @@ const resolvers = {
     },
 
     users(chat) {
-      return chat.getUsers();
+      const { Status } = useModels();
+
+      return chat.getUsers({
+        include: [{ model: Status, as: 'status' }],
+      });
     },
   },
 };

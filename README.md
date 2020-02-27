@@ -21,9 +21,6 @@ Define environment variables in `.env` file (NEVER COMMIT):
     MAPBOX_ACCESS_TOKEN
     # Auth secret for JWT
     AUTH_SECRET
-    # Milliseconds to wait before garbage collecting someone's location OR
-    # the threshold of which a user is not considered as actively searching anymore
-    ACTIVE_MS
     # Twilio account SID
     TWILIO_ACCOUNT_SID
     # Twilio auth token
@@ -47,8 +44,12 @@ Define environment variables in `.env` file (NEVER COMMIT):
     FIREBASE_CLIENT_EMAIL
     FIREBASE_PRIVATE_KEY
     FIREBASE_DB_URL
-    # Timeout for published statuses
-    STATUS_TIMEOUT
+    # Timeout for status location
+    STATUS_LOCATION_TIMEOUT
+    # Timeout for user location
+    USER_LOCATION_TIMEOUT
+    # The proximity of which user's details can be revealed to someone in meters
+    DISCOVERY_DISTANCE
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0
