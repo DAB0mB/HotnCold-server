@@ -10,6 +10,8 @@ Configure the following services:
 - [PostgesSQL](https://www.postgresql.org/).
 - [Twilio](https://www.twilio.com/).
 
+You will need to add [PostGIS](https://postgis.net/install/) extension to PostgresSQL to enable geo spatial indexing and querying. On Heroku, the extension is already installed out of the box and you only need to enable it with `CREATE EXTENSION postgis;` (See [reference](https://devcenter.heroku.com/articles/postgis)).
+
 Define environment variables in `.env` file (NEVER COMMIT):
 
     # Cloudinary API URL
@@ -54,6 +56,8 @@ Define environment variables in `.env` file (NEVER COMMIT):
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0
     HOST
+
+Alternatively, you can define these variables in Heroku's dashboard.
 
 Install dependencies:
 
