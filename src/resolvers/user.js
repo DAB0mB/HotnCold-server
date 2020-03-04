@@ -2,7 +2,7 @@ import { withFilter } from 'apollo-server';
 import moment from 'moment';
 import Sequelize from 'sequelize';
 
-import { useModels, usePubsub } from '../providers';
+import { useCloudinary, useModels, usePubsub } from '../providers';
 
 const resolvers = {
   Query: {
@@ -71,6 +71,7 @@ const resolvers = {
 
   Mutation: {
     async createUser(mutation, { name, birthDate, occupation, bio, pictures }, { myContract }) {
+      const cloudinary = useCloudinary();
       const pubsub = usePubsub();
 
       if (!myContract) {
@@ -85,6 +86,7 @@ const resolvers = {
         occupation,
         bio,
         pictures,
+        avatar: await cloudinary.uploadFromUrl(pictures[0], { upload_preset: 'avatar-pic' }),
       });
 
       await myContract.setUser(user);
@@ -99,7 +101,20 @@ const resolvers = {
     },
 
     async updateMyProfile(mutation, { name, birthDate, occupation, bio, pictures }, { me }) {
-      await me.update({ name, birthDate, occupation, bio, pictures });
+      const cloudinary = useCloudinary();
+
+      const avatar = pictures[0] === me.pictures[0]
+        ? me.avatar
+        : await cloudinary.uploadFromUrl(pictures[0], { upload_preset: 'avatar-pic' });
+
+      await me.update({
+        name,
+        birthDate,
+        occupation,
+        bio,
+        pictures,
+        avatar,
+      });
 
       return me;
     },
@@ -139,6 +154,8 @@ const resolvers = {
             locationExpiresAt: { $gte: new Date() },
           },
           attributes: [
+            'id',
+            'updatedAt',
             'text',
             'location',
             'locationExpiresAt',
@@ -147,6 +164,8 @@ const resolvers = {
         }],
         attributes: [
           'id',
+          'name',
+          'avatar',
           'pictures',
           'isMock',
           'location',
@@ -159,7 +178,9 @@ const resolvers = {
 
       const features = [];
 
-      nearbyUsers.forEach((user) => {
+      await nearbyUsers.reduce(async (creatingFeature, user) => {
+        await creatingFeature;
+
         if (user.status && user.status.location && new Date(user.status.locationExpiresAt) > new Date()) {
           const feature = {
             type: 'Feature',
@@ -168,13 +189,51 @@ const resolvers = {
 
           if (user.isMock || user.status.distance < process.env.DISCOVERY_DISTANCE) {
             feature.properties = {
-              userId: user.id,
-              avatar: user.pictures[0],
-              statusText: user.status.text,
+              user: {
+                id: user.id,
+                name: user.name,
+                avatar: await user.ensureAvatar(),
+              },
+              status: {
+                id: user.status.id,
+                text: user.status.text,
+                updatedAt: user.status.updatedAt,
+              },
             };
           }
 
           features.push(feature);
+
+          if (user.isMock) {
+            // Adding extra features so we can see the heatmap effect better
+            let extraFeature = {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'Point',
+                coordinates: [
+                  feature.geometry.coordinates[0] + 0.001,
+                  feature.geometry.coordinates[1] + 0.001,
+                ],
+              },
+            };
+
+            features.push(extraFeature);
+
+            extraFeature = {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'Point',
+                coordinates: [
+                  feature.geometry.coordinates[0] - 0.002,
+                  feature.geometry.coordinates[1] - 0.001,
+                ],
+              },
+            };
+
+            features.push(extraFeature);
+          }
         }
 
         if (user.discoverable && user.location && new Date(user.locationExpiresAt) > new Date()) {
@@ -183,7 +242,7 @@ const resolvers = {
             geometry: user.location,
           });
         }
-      });
+      }, Promise.resolve());
 
       return {
         type: 'FeatureCollection',
@@ -262,12 +321,12 @@ const resolvers = {
     },
 
     avatar(user) {
-      return user.pictures[0];
+      return user.ensureAvatar();
     },
 
     discoverable(user) {
       return !!user.discoverable;
-    }
+    },
   },
 };
 

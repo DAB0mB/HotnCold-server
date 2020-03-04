@@ -1,6 +1,6 @@
 import uuid from 'uuid';
 
-import { useModels } from '../providers';
+import { useCloudinary, useModels } from '../providers';
 import { Location } from './mixins';
 
 const user = (sequelize, DataTypes) => {
@@ -43,6 +43,9 @@ const user = (sequelize, DataTypes) => {
         },
       },
     },
+    avatar: {
+      type: DataTypes.STRING,
+    },
     discoverable: {
       type: DataTypes.BOOLEAN
     },
@@ -64,6 +67,21 @@ const user = (sequelize, DataTypes) => {
     User.hasOne(models.Contract);
     User.belongsTo(models.Status);
   };
+
+  User.prototype.ensureAvatar = async function ensureAvatar() {
+    const cloudinary = useCloudinary();
+
+    let avatar = this.avatar;
+
+    // Not likely to happen, useful for migration purposes
+    if (avatar) return avatar;
+
+    avatar = await cloudinary.uploadFromUrl(this.pictures[0], { upload_preset: 'avatar-pic' });
+    // This is an atomic operation, so it's relatively safe
+    await this.update({ avatar });
+
+    return avatar;
+  },
 
   User.prototype.getContract = function getContract(options = {}) {
     const { Contract } = useModels();
