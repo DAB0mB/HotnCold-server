@@ -10,7 +10,7 @@ const status = (sequelize, DataTypes) => {
       defaultValue: () => uuid(),
     },
     text: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(150),
       allowNull: false,
     },
     location: {
