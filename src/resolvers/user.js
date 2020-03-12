@@ -10,7 +10,7 @@ const resolvers = {
       return me;
     },
 
-    async nearbyUsers(query, args, { me }) {
+    async nearbyUsers(query, args, { me, myContract }) {
       const { Status, User } = useModels();
 
       const users = await User.findAll({
@@ -18,19 +18,17 @@ const resolvers = {
           id: { $ne: me.id },
           areaId: me.areaId,
           discoverable: true,
-          $or: [
-            {
-              isMock: true,
-            },
-            {
-              $and: [
-                {
-                  locationExpiresAt: { $gte: new Date() },
-                },
-                Sequelize.where(Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...me.location.coordinates), Sequelize.col('user.location')), Sequelize.Op.lte, process.env.DISCOVERY_DISTANCE),
-              ],
-            },
-          ],
+          ...(myContract.isTest ? {
+            isMock: true,
+          } : {
+            isMock: { $ne: true },
+            $and: [
+              {
+                locationExpiresAt: { $gte: new Date() },
+              },
+              Sequelize.where(Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...me.location.coordinates), Sequelize.col('user.location')), Sequelize.Op.lte, process.env.DISCOVERY_DISTANCE),
+            ]
+          }),
         },
         include: [{ model: Status, as: 'status' }],
       });
@@ -48,19 +46,6 @@ const resolvers = {
       const user = await User.findOne({
         where: {
           id: userId,
-          $or: [
-            {
-              isMock: true,
-            },
-            {
-              $and: [
-                {
-                  locationExpiresAt: { $gte: new Date() },
-                },
-                Sequelize.where(Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...me.location.coordinates), Sequelize.col('user.location')), Sequelize.Op.lte, process.env.DISCOVERY_DISTANCE),
-              ],
-            },
-          ],
         },
         include: [{ model: Status, as: 'status' }],
       });
@@ -133,6 +118,7 @@ const resolvers = {
         };
       }
 
+      // Unlike nearbyUsers resolver, this will query based on statuses
       const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
