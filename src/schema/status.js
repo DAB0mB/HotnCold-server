@@ -11,5 +11,6 @@ export default gql`
     id: ID!
     text: String!
     location: Vector2D
+    updatedAt: DateTime! @auth
   }
 `;
