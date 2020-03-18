@@ -15,12 +15,14 @@ const resolvers = {
       const { Area, Contract } = useModels();
       const twilio = useTwilio();
       const passcode = generatePasscode();
+      const passcodeExpiresAt = new Date(Date.now() + Number(process.env.OTP_TIMEOUT));
       phone = phone[0] + phone.replace(/[^\d]/g, '');
 
       const defaults = {
         signed: false,
         phone,
         passcode,
+        passcodeExpiresAt,
       };
 
       if (new RegExp(process.env.TEST_PHONE_LOCAL).test(phone)) {
@@ -54,6 +56,7 @@ const resolvers = {
         throw Error('Country is not yet supported');
       }
 
+      let created;
       let contract;
       let passcodePhrase;
       if (isTestPhone) {
@@ -61,11 +64,17 @@ const resolvers = {
         passcodePhrase = 'test passcode';
       }
       else {
-        contract = await Contract.findOrCreate({
+        [contract, created] = await Contract.findOrCreate({
           where: { phone },
           defaults,
         });
         passcodePhrase = 'passcode';
+      }
+
+      if (!created) {
+        contract.passcode = passcode;
+        contract.passcodeExpiresAt = passcodeExpiresAt;
+        await contract.save();
       }
 
       await twilio.messages.create({
@@ -83,7 +92,7 @@ const resolvers = {
       const contract = await Contract.findOne({
         where: {
           id: contractId,
-          updatedAt: { $gt: new Date(Date.now() - Number(process.env.OTP_TIMEOUT)) },
+          passcodeExpiresAt: { $gte: new Date() },
           passcode,
         },
       });

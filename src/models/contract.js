@@ -19,6 +19,9 @@ const contract = (sequelize, DataTypes) => {
         len: 4,
       },
     },
+    passcodeExpiresAt: {
+      type: DataTypes.DATE,
+    },
     signed: {
       type: DataTypes.BOOLEAN,
     },
