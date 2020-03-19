@@ -27,6 +27,8 @@ Define environment variables in `.env` file (NEVER COMMIT):
     TWILIO_ACCOUNT_SID
     # Twilio auth token
     TWILIO_AUTH_TOKEN
+    # Skip SMS messaging
+    TWILIO_SKIP
     # One time passcode timeout in milliseconds
     OTP_TIMEOUT
     # Test phone number regexp for local testing

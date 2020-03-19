@@ -21,7 +21,7 @@ const resolvers = {
           ...(myContract.isTest ? {
             isMock: true,
           } : {
-            isMock: { $ne: true },
+            isMock: { $or: [false, null] },
             $and: [
               {
                 locationExpiresAt: { $gte: new Date() },
@@ -122,7 +122,7 @@ const resolvers = {
       const nearbyUsers = await User.findAll({
         where: {
           id: { $ne: me.id },
-          isMock: myContract.isTest ? true : { $ne: true },
+          isMock: myContract.isTest ? true : { $or: [false, null] },
           $or: [
             {
               statusId: { $ne: null }
@@ -170,10 +170,11 @@ const resolvers = {
         if (user.status && user.status.location && new Date(user.status.locationExpiresAt) > new Date()) {
           const feature = {
             type: 'Feature',
+            properties: {},
             geometry: user.status.location,
           };
 
-          if (user.isMock || user.status.distance < process.env.DISCOVERY_DISTANCE) {
+          if (user.isMock || user.status?.dataValues.distance < process.env.DISCOVERY_DISTANCE) {
             feature.properties = {
               user: {
                 id: user.id,
@@ -225,6 +226,7 @@ const resolvers = {
         if (user.discoverable && user.location && new Date(user.locationExpiresAt) > new Date()) {
           features.push({
             type: 'Feature',
+            properties: {},
             geometry: user.location,
           });
         }

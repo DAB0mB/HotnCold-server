@@ -77,11 +77,13 @@ const resolvers = {
         await contract.save();
       }
 
-      await twilio.messages.create({
-        body: `Hot&Cold ${passcodePhrase}: ${passcode}`,
-        from: area.phone,
-        to: phone,
-      });
+      if (!process.env.TWILIO_SKIP) {
+        await twilio.messages.create({
+          body: `Hot&Cold ${passcodePhrase}: ${passcode}`,
+          from: area.phone,
+          to: phone,
+        });
+      }
 
       return contract;
     },
