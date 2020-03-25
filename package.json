@@ -2,7 +2,7 @@
   "name": "HotnCold-server",
   "main": "index.js",
   "engines": {
-    "node": "12.13.0"
+    "node": "^12.13.0"
   },
   "scripts": {
     "start": "nodemon --exec babel-node ./src/index.js",
