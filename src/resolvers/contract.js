@@ -1,3 +1,4 @@
+import { serialize as serializeCookie } from 'cookie';
 import jwt from 'jsonwebtoken';
 
 import { useModels, useTwilio, useWhitelist } from '../providers';
@@ -103,8 +104,13 @@ const resolvers = {
         throw Error('Passcode is incorrect or timed-out');
       }
 
+      const expires = new Date(Date.now() + Number(process.env.AUTH_TTL) * 60000);
+
       const authToken = await new Promise((resolve, reject) => {
-        jwt.sign(contract.id, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {
+        jwt.sign({
+          contractId: contract.id,
+          expires: expires.toString(),
+        }, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, token) => {
           if (err) {
             reject(err);
           }
@@ -114,7 +120,7 @@ const resolvers = {
         });
       });
 
-      res.cookie('authToken', authToken);
+      res.setHeader('Set-Cookie', serializeCookie('authToken', authToken, { expires }));
 
       return contract;
     },

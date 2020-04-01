@@ -15,8 +15,6 @@ const myContract = () => asyncHandler(async (req, res, next) => {
   const myContract = await Contract.findByToken(authToken);
 
   if (!myContract) {
-    res.clearCookie('authToken');
-
     return next();
   }
 

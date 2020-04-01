@@ -54,6 +54,8 @@ Define environment variables in `.env` file (NEVER COMMIT):
     USER_LOCATION_TIMEOUT
     # The proximity of which user's details can be revealed to someone in meters
     DISCOVERY_DISTANCE
+    # How long will authentication token last (in seconds)
+    AUTH_TTL
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0

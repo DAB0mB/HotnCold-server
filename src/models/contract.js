@@ -38,13 +38,16 @@ const contract = (sequelize, DataTypes) => {
     if (typeof authToken != 'string') return null;
 
     const contractId = await new Promise((resolve) => {
-      jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, id) => {
+      jwt.verify(authToken, process.env.AUTH_SECRET, { algorithm: 'HS256' }, (err, { contractId, expires } = {}) => {
         if (err) {
-          resolve();
+          return resolve();
         }
-        else {
-          resolve(id);
+
+        if (new Date(expires) < new Date()) {
+          return resolve();
         }
+
+        resolve(contractId);
       });
     });
 
