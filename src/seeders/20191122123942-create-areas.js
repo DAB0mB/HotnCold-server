@@ -6,11 +6,12 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await module.exports.down(queryInterface, Sequelize);
 
+    // TODO: Use names only, not IDs, since they're subject to change by Mapbox
     return queryInterface.bulkInsert('areas', [
       {
         id: uuid(),
         name: 'HaMerkaz, Israel',
-        geoFeaturesIds: ['region.8593132391633450', 'region.12549636937738800'],
+        geoFeaturesIds: ['place.6158663202435630', 'region.9798269880738800'],
         phone: '+14157993599',
         countryCode: '972',
         createdAt: new Date(),
@@ -28,7 +29,7 @@ module.exports = {
       {
         id: uuid(),
         name: 'San Francisco, California, United States',
-        geoFeaturesIds: ['place.15734669613361910'],
+        geoFeaturesIds: ['place.15734669613559250'],
         phone: '+14157993599',
         countryCode: '1',
         createdAt: new Date(),
@@ -46,7 +47,7 @@ module.exports = {
       {
         id: uuid(),
         name: 'Seoul, South Korea',
-        geoFeaturesIds: ['place.15016829751699340'],
+        geoFeaturesIds: ['place.10069031024699340'],
         phone: '+14157993599',
         countryCode: '82',
         createdAt: new Date(),
@@ -55,7 +56,7 @@ module.exports = {
       {
         id: uuid(),
         name: 'Los Angeles, California, United States',
-        geoFeaturesIds: ['region.11319063928738010'],
+        geoFeaturesIds: ['place.7397503093427640'],
         phone: '+14157993599',
         countryCode: '1',
         createdAt: new Date(),
