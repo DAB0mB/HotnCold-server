@@ -1,5 +1,5 @@
-import Sequelize from 'sequelize';
 import { withFilter } from 'apollo-server';
+import Sequelize from 'sequelize';
 
 import { useModels, usePubsub } from '../providers';
 

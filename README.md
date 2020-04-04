@@ -52,10 +52,20 @@ Define environment variables in `.env` file (NEVER COMMIT):
     STATUS_LOCATION_TIMEOUT
     # Timeout for user location
     USER_LOCATION_TIMEOUT
-    # The proximity of which user's details can be revealed to someone in meters
-    DISCOVERY_DISTANCE
+    # Radar's scanning radius for discovering nearby users
+    RADAR_DISCOVERY_DISTANCE
+    # Features on the map will always be at this proximity range
+    MAP_DISCOVERY_DISTANCE
     # How long will authentication token last (in seconds)
     AUTH_TTL
+    # Consumer key provided by Meetup's API
+    MEETUP_CONSUMER_KEY
+    # Consumer secret provided by Meetup's API
+    MEETUP_CONSUMER_SECRET
+    # The user email used to detect events
+    MEETUP_USER_MAIL
+    # The user password used to detect events
+    MEETUP_USER_PASS
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0

@@ -1,4 +1,5 @@
 export { default as Mutex } from './mutex';
+export * from './units';
 
 export const omit = (obj, ...blacklist) => {
   obj = { ...obj };

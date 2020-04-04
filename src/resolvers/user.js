@@ -2,7 +2,8 @@ import { withFilter } from 'apollo-server';
 import moment from 'moment';
 import Sequelize from 'sequelize';
 
-import { useCloudinary, useModels, usePubsub } from '../providers';
+import { useCloudinary, useMeetup, useModels, usePubsub } from '../providers';
+import { kilometersToMiles } from '../utils';
 
 const resolvers = {
   Query: {
@@ -27,7 +28,8 @@ const resolvers = {
                 locationExpiresAt: { $gte: new Date() },
               },
               // ST_DWithin uses spatial indexes, unlike ST_Distance_Sphere
-              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...me.location.coordinates), 'geography'), Sequelize.col('user.location'), process.env.DISCOVERY_DISTANCE), false),
+              // false is the right return value I have no idea why... I think it might be related to Sequelize
+              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...me.location.coordinates), 'geography'), Sequelize.col('user.location'), process.env.RADAR_DISCOVERY_DISTANCE), false),
             ]
           }),
         },
@@ -107,6 +109,7 @@ const resolvers = {
 
     async updateMyLocation(mutation, { location: coordinates }, { me, myContract }) {
       const { Status, User } = useModels();
+      const meetup = useMeetup();
 
       await me.setLocation(coordinates);
 
@@ -124,13 +127,9 @@ const resolvers = {
         where: {
           id: { $ne: me.id },
           isMock: myContract.isTest ? true : { $or: [false, null] },
-          $or: [
-            {
-              statusId: { $ne: null }
-            },
-            {
-              discoverable: true,
-            },
+          statusId: { $ne: null },
+          $and: [
+            Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...myArea.center.coordinates), 'geography'), Sequelize.col('user.location'), process.env.MAP_DISCOVERY_DISTANCE), true),
           ],
         },
         include: [{
@@ -146,7 +145,6 @@ const resolvers = {
             'text',
             'location',
             'locationExpiresAt',
-            [Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...coordinates), Sequelize.col('status.location')), 'distance'],
           ],
         }],
         attributes: [
@@ -158,9 +156,6 @@ const resolvers = {
           'location',
           'locationExpiresAt',
         ],
-        // Using literal because I couldn't find an alternative. The proper solution should be so:
-        // https://github.com/sequelize/sequelize/issues/4553#issuecomment-142221005
-        order: [[Sequelize.literal('"status.distance"'), 'ASC NULLS LAST']],
       });
 
       const features = [];
@@ -175,63 +170,82 @@ const resolvers = {
             geometry: user.status.location,
           };
 
-          if (user.isMock || user.status?.dataValues.distance < process.env.DISCOVERY_DISTANCE) {
-            feature.properties = {
-              user: {
-                id: user.id,
-                name: user.name,
-                avatar: await user.ensureAvatar(),
-              },
-              status: {
-                id: user.status.id,
-                text: user.status.text,
-                updatedAt: user.status.updatedAt,
-              },
-            };
-          }
+          feature.properties = {
+            type: 'user',
+            user: {
+              id: user.id,
+              name: user.name,
+              avatar: await user.ensureAvatar(),
+            },
+            status: {
+              id: user.status.id,
+              text: user.status.text,
+              updatedAt: user.status.updatedAt,
+            },
+          };
 
           features.push(feature);
-
-          if (user.isMock) {
-            // Adding extra features so we can see the heatmap effect better
-            let extraFeature = {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'Point',
-                coordinates: [
-                  feature.geometry.coordinates[0] + 0.001,
-                  feature.geometry.coordinates[1] + 0.001,
-                ],
-              },
-            };
-
-            features.push(extraFeature);
-
-            extraFeature = {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'Point',
-                coordinates: [
-                  feature.geometry.coordinates[0] - 0.002,
-                  feature.geometry.coordinates[1] - 0.001,
-                ],
-              },
-            };
-
-            features.push(extraFeature);
-          }
-        }
-
-        if (user.discoverable && user.location && new Date(user.locationExpiresAt) > new Date()) {
-          features.push({
-            type: 'Feature',
-            properties: {},
-            geometry: user.location,
-          });
         }
       }, Promise.resolve());
+
+      // Not using variables because this is a large amount of data
+      (await meetup.getUpcomingEvents({
+        lon: myArea.center.coordinates[0],
+        lat: myArea.center.coordinates[1],
+        page: 300,
+        radius: Math.floor(kilometersToMiles(process.env.MAP_DISCOVERY_DISTANCE / 1000)),
+        fields: 'featured_photo',
+        only: [
+          'events.id',
+          'events.name',
+          'events.city',
+          'events.duration',
+          'events.local_date',
+          'events.local_time',
+          'events.status',
+          'events.yes_rsvp_count',
+          'events.duration',
+          'events.rsvp_limit',
+          // If we filter venue fields, it's not returned correctly.
+          // Probably an issue with Meetup's API
+          'events.group',
+          'events.venue',
+          'events.featured_photo',
+        ].join(','),
+      })).events.forEach((event) => {
+        if (!event.venue) return;
+        if (!event.venue.lon && !event.venue.lat) return;
+        if (/online/i.test(event.venue.address_1)) return;
+
+        const eventFeature = {
+          type: 'Feature',
+          properties: {
+            type: 'event',
+            event: {
+              id: event.id,
+              name: event.name,
+              city: event.city,
+              maxPeople: event.rsvp_limit,
+              attendanceCount: event.yes_rsvp_count,
+              featuredPhoto: event.featured_photo?.photo_link,
+              localDate: event.local_date,
+              localTime: event.local_time,
+              duration: event.duration,
+              urlname: event.group.urlname,
+              link: event.link,
+              venueName: event.venue.name,
+              address: event.venue.address_1,
+              source: 'meetup',
+            },
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: [event.venue.lon, event.venue.lat],
+          },
+        };
+
+        features.push(eventFeature);
+      });
 
       return {
         type: 'FeatureCollection',

@@ -20,8 +20,12 @@ const area = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    geoFeaturesIds: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+    polygon: {
+      type: DataTypes.GEOMETRY('POLYGON'),
+      allowNull: false,
+    },
+    center: {
+      type: DataTypes.GEOMETRY('POINT'),
       allowNull: false,
     },
   });

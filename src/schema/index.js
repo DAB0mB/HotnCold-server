@@ -3,7 +3,8 @@ import { gql } from 'apollo-server-express';
 import areaSchema from './area';
 import chatSchema from './chat';
 import contractSchema from './contract';
-import directivesSchema from './directives';
+import directiveSchema from './directive';
+import eventSchema from './event';
 import messageSchema from './message';
 import scalarsSchema from './scalars';
 import uploadSchema from './upload';
@@ -28,7 +29,8 @@ export default [
   areaSchema,
   chatSchema,
   contractSchema,
-  directivesSchema,
+  directiveSchema,
+  eventSchema,
   linkSchema,
   messageSchema,
   scalarsSchema,
