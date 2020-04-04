@@ -8,13 +8,13 @@ export const extend = (Model, { locationTimeout }) => {
 
     updatingCoords:
     if (coordinates) {
-      if (
-        selfCoordinates &&
-        selfCoordinates[0] === coordinates[0] &&
-        selfCoordinates[1] === coordinates[1]
-      ) {
-        break updatingCoords;
-      }
+      // if (
+      //   selfCoordinates &&
+      //   selfCoordinates[0] === coordinates[0] &&
+      //   selfCoordinates[1] === coordinates[1]
+      // ) {
+      //   break updatingCoords;
+      // }
 
       await this.setLocation(null, true);
 

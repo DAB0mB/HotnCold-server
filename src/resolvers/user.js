@@ -26,7 +26,8 @@ const resolvers = {
               {
                 locationExpiresAt: { $gte: new Date() },
               },
-              Sequelize.where(Sequelize.fn('ST_Distance_Sphere', Sequelize.fn('ST_MakePoint', ...me.location.coordinates), Sequelize.col('user.location')), Sequelize.Op.lte, process.env.DISCOVERY_DISTANCE),
+              // ST_DWithin uses spatial indexes, unlike ST_Distance_Sphere
+              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...me.location.coordinates), 'geography'), Sequelize.col('user.location'), process.env.DISCOVERY_DISTANCE), false),
             ]
           }),
         },
