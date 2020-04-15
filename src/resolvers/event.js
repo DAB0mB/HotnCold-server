@@ -1,23 +1,34 @@
-import { useMeetup } from '../providers';
+import lzstring from 'lz-string';
+
+import { useModels } from '../providers';
 
 const resolvers = {
   Query: {
-    async eventDescription(query, { eventSource, eventId, urlname }) {
-      const meetup = useMeetup();
+    async event(query, { eventId }) {
+      const { Area, Event } = useModels();
 
-      if (eventSource == 'meetup') {
-        if (!urlname) {
-          throw Error('Variable "urlname" was not provided');
-        }
+      const event = await Event.findOne({
+        where: { id: eventId },
+        include: [{ model: Area, as: 'area' }],
+      });
 
-        const event = await meetup.getEvent(urlname, eventId, {
-          only: 'description',
-        });
+      return event;
+    },
+  },
 
-        return event.description;
+  Event: {
+    description(event) {
+      return lzstring.decompressFromBase64(event.description.toString());
+    },
+
+    location(event) {
+      return event.location.coordinates;
+    },
+
+    duration(event) {
+      if (event.endsAt && event.startsAt) {
+        return event.endsAt.getTime() - event.startsAt.getTime();
       }
-
-      return '';
     },
   },
 };

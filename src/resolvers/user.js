@@ -2,8 +2,8 @@ import { withFilter } from 'apollo-server';
 import moment from 'moment';
 import Sequelize from 'sequelize';
 
-import { useCloudinary, useMeetup, useModels, usePubsub } from '../providers';
-import { kilometersToMiles } from '../utils';
+import { useCloudinary, useModels, usePubsub } from '../providers';
+import { omit } from '../utils';
 
 const resolvers = {
   Query: {
@@ -107,9 +107,23 @@ const resolvers = {
       return me;
     },
 
-    async updateMyLocation(mutation, { location: coordinates }, { me, myContract }) {
-      const { Status, User } = useModels();
-      const meetup = useMeetup();
+    async updateMyLocation(mutation, { location: coordinates, featuredAt }, { me, myContract }) {
+      const { Event, Status, User } = useModels();
+
+      let isFeaturedNow;
+      if (!featuredAt) {
+        isFeaturedNow = true;
+        featuredAt = new Date();
+      }
+
+      const mFeaturedAt = moment(featuredAt);
+      const featuredToday = mFeaturedAt.startOf('day').toDate();
+      const featuredTomorrow = mFeaturedAt.endOf('day').toDate();
+      const now = new Date();
+
+      if (featuredTomorrow < now) {
+        throw Error('Given day cannot be in the past');
+      }
 
       await me.setLocation(coordinates);
 
@@ -122,126 +136,111 @@ const resolvers = {
         };
       }
 
-      // Unlike nearbyUsers resolver, this will query based on statuses
-      const nearbyUsers = await User.findAll({
-        where: {
-          id: { $ne: me.id },
-          isMock: myContract.isTest ? true : { $or: [false, null] },
-          statusId: { $ne: null },
-          $and: [
-            Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...myArea.center.coordinates), 'geography'), Sequelize.col('user.location'), process.env.MAP_DISCOVERY_DISTANCE), true),
-          ],
-        },
-        include: [{
-          model: Status,
-          as: 'status',
+      const features = [];
+
+      // Status are relevant only if we're looking for features of the moment
+      if (isFeaturedNow) {
+        // Unlike nearbyUsers resolver, this will query based on statuses
+        const nearbyUsers = await User.findAll({
           where: {
-            areaId: myArea.id,
-            locationExpiresAt: { $gte: new Date() },
+            id: { $ne: me.id },
+            isMock: myContract.isTest ? true : { $or: [false, null] },
+            statusId: { $ne: null },
+            $and: [
+              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...myArea.center.coordinates), 'geography'), Sequelize.col('user.location'), process.env.MAP_DISCOVERY_DISTANCE), true),
+            ],
           },
+          include: [{
+            model: Status,
+            as: 'status',
+            where: {
+              areaId: myArea.id,
+              locationExpiresAt: { $gte: new Date() },
+            },
+            attributes: [
+              'id',
+              'updatedAt',
+              'text',
+              'location',
+              'locationExpiresAt',
+            ],
+          }],
           attributes: [
             'id',
-            'updatedAt',
-            'text',
+            'name',
+            'avatar',
+            'pictures',
+            'isMock',
             'location',
             'locationExpiresAt',
           ],
-        }],
+        });
+
+        await nearbyUsers.reduce(async (creatingFeature, user) => {
+          await creatingFeature;
+
+          if (user.status && user.status.location && new Date(user.status.locationExpiresAt) > new Date()) {
+            const feature = {
+              type: 'Feature',
+              properties: {},
+              geometry: user.status.location,
+            };
+
+            feature.properties = {
+              type: 'user',
+              user: {
+                id: user.id,
+                name: user.name,
+                avatar: await user.ensureAvatar(),
+              },
+              status: {
+                id: user.status.id,
+                text: user.status.text,
+                updatedAt: user.status.updatedAt,
+              },
+            };
+
+            features.push(feature);
+          }
+        }, Promise.resolve());
+      }
+
+      // Not using variables because this is a large amount of data
+      (await Event.findAll({
+        where: {
+          areaId: myArea.id,
+          $or: [
+            {
+              startsAt: {
+                $gt: featuredToday > now ? featuredToday : now,
+                $lt: featuredTomorrow,
+              }
+            },
+            {
+              endsAt: {
+                $gt: featuredToday > now ? featuredToday : now,
+                $lt: featuredTomorrow,
+              },
+            },
+          ],
+        },
         attributes: [
           'id',
           'name',
-          'avatar',
-          'pictures',
-          'isMock',
+          'featuredPhoto',
+          'attendanceCount',
           'location',
-          'locationExpiresAt',
+          'localDate',
+          'localTime',
         ],
-      });
-
-      const features = [];
-
-      await nearbyUsers.reduce(async (creatingFeature, user) => {
-        await creatingFeature;
-
-        if (user.status && user.status.location && new Date(user.status.locationExpiresAt) > new Date()) {
-          const feature = {
-            type: 'Feature',
-            properties: {},
-            geometry: user.status.location,
-          };
-
-          feature.properties = {
-            type: 'user',
-            user: {
-              id: user.id,
-              name: user.name,
-              avatar: await user.ensureAvatar(),
-            },
-            status: {
-              id: user.status.id,
-              text: user.status.text,
-              updatedAt: user.status.updatedAt,
-            },
-          };
-
-          features.push(feature);
-        }
-      }, Promise.resolve());
-
-      // Not using variables because this is a large amount of data
-      (await meetup.getUpcomingEvents({
-        lon: myArea.center.coordinates[0],
-        lat: myArea.center.coordinates[1],
-        page: 300,
-        radius: Math.floor(kilometersToMiles(process.env.MAP_DISCOVERY_DISTANCE / 1000)),
-        fields: 'featured_photo',
-        only: [
-          'events.id',
-          'events.name',
-          'events.city',
-          'events.duration',
-          'events.local_date',
-          'events.local_time',
-          'events.status',
-          'events.yes_rsvp_count',
-          'events.duration',
-          'events.rsvp_limit',
-          // If we filter venue fields, it's not returned correctly.
-          // Probably an issue with Meetup's API
-          'events.group',
-          'events.venue',
-          'events.featured_photo',
-        ].join(','),
-      })).events.forEach((event) => {
-        if (!event.venue) return;
-        if (!event.venue.lon && !event.venue.lat) return;
-        if (/online/i.test(event.venue.address_1)) return;
-
+      })).forEach((event) => {
         const eventFeature = {
           type: 'Feature',
           properties: {
             type: 'event',
-            event: {
-              id: event.id,
-              name: event.name,
-              city: event.city,
-              maxPeople: event.rsvp_limit,
-              attendanceCount: event.yes_rsvp_count,
-              featuredPhoto: event.featured_photo?.photo_link,
-              localDate: event.local_date,
-              localTime: event.local_time,
-              duration: event.duration,
-              urlname: event.group.urlname,
-              link: event.link,
-              venueName: event.venue.name,
-              address: event.venue.address_1,
-              source: 'meetup',
-            },
+            event: omit(event.dataValues, 'location'),
           },
-          geometry: {
-            type: 'Point',
-            coordinates: [event.venue.lon, event.venue.lat],
-          },
+          geometry: event.location,
         };
 
         features.push(eventFeature);

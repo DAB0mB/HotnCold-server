@@ -6,6 +6,7 @@
   },
   "scripts": {
     "start": "nodemon --exec babel-node ./src/index.js",
+    "sync-meetup-events": "nodemon --exec babel-node ./src/jobs/sync-meetup-events.js",
     "migrate": "yarn sequelize db:seed:undo:all && yarn sequelize db:migrate && yarn sequelize db:seed:all",
     "test": "jest",
     "lint": "eslint --fix"
@@ -48,6 +49,7 @@
     "jsonwebtoken": "^8.5.1",
     "jss": "^10.1.1",
     "libphonenumber-js": "^1.7.29",
+    "lz-string": "^1.4.4",
     "merge-deep": "^3.0.2",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",

@@ -6,7 +6,7 @@ export default gql`
   }
 
   extend type Query {
-    eventDescription(eventSource: EventSource!, eventId: ID!, urlname: String): String! @auth
+    event(eventId: ID!): Event! @auth
   }
 
   type Event {
@@ -15,14 +15,16 @@ export default gql`
     name: String!
     localDate: String!
     localTime: String!
-    duration: String!
+    startsAt: DateTime!
+    endsAt: DateTime!
     description: String!
     attendanceCount: Int!
     location: Vector2D!
-    city: String
+    venueName: String!
+    area: Area!
+    duration: Int
     maxPeople: Int
     address: String
-    venueName: String
     featuredPhoto: String
     link: String
   }

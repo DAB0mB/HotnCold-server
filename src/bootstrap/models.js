@@ -6,6 +6,7 @@ const bootstrapModels = (sequelize) => {
     ChatUser: sequelize.import('../models/chat_user'),
     Chat: sequelize.import('../models/chat'),
     Contract: sequelize.import('../models/contract'),
+    Event: sequelize.import('../models/event'),
     Message: sequelize.import('../models/message'),
     User: sequelize.import('../models/user'),
     Status: sequelize.import('../models/status'),

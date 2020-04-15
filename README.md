@@ -66,6 +66,8 @@ Define environment variables in `.env` file (NEVER COMMIT):
     MEETUP_USER_MAIL
     # The user password used to detect events
     MEETUP_USER_PASS
+    # How frequently should Meetup.com events should be synced in milliseconds
+    MEETUP_SYNC_INTERVAL
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0

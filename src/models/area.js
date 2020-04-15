@@ -12,6 +12,10 @@ const area = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    shortName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     phone: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -31,6 +35,7 @@ const area = (sequelize, DataTypes) => {
   });
 
   Area.associate = (models) => {
+    Area.hasMany(models.Event);
     Area.hasMany(models.Status);
     Area.hasMany(models.User);
   };
