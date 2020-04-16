@@ -107,19 +107,13 @@ const resolvers = {
       return me;
     },
 
-    async updateMyLocation(mutation, { location: coordinates, featuredAt }, { me, myContract }) {
+    async updateMyLocation(mutation, { location: coordinates, featuredAt = new Date() }, { me, myContract }) {
       const { Event, Status, User } = useModels();
-
-      let isFeaturedNow;
-      if (!featuredAt) {
-        isFeaturedNow = true;
-        featuredAt = new Date();
-      }
-
       const mFeaturedAt = moment(featuredAt);
       const featuredToday = mFeaturedAt.startOf('day').toDate();
       const featuredTomorrow = mFeaturedAt.endOf('day').toDate();
       const now = new Date();
+      const isFeaturedNow = moment().startOf('day').toDate().getTime() == featuredToday.getTime();
 
       if (featuredTomorrow < now) {
         throw Error('Given day cannot be in the past');
