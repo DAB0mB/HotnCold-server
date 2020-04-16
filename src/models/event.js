@@ -150,6 +150,13 @@ const event = (sequelize, DataTypes) => {
         }
       }
     }
+
+    // According to Meetup's policy, we cannot archive data longer than 30 days
+    await Event.destroy({
+      where: {
+        endsAt: { $lt: new Date() },
+      },
+    });
   };
 
   Location.extend(Event, {
