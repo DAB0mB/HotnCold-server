@@ -26,6 +26,6 @@ export default gql`
     maxPeople: Int
     address: String
     featuredPhoto: String
-    link: String
+    sourceLink: String
   }
 `;

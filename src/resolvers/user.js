@@ -214,7 +214,7 @@ const resolvers = {
               startsAt: {
                 $gt: featuredToday > now ? featuredToday : now,
                 $lt: featuredTomorrow,
-              }
+              },
             },
             {
               endsAt: {
