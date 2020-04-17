@@ -4,7 +4,7 @@ const uuid = require('uuid');
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const [areas] = await queryInterface.sequelize.query('SELECT id, name FROM areas');
+    const [areas] = await queryInterface.sequelize.query('SELECT id, name, center FROM areas');
 
     if (!areas.length) {
       throw Error('Run "create-areas" seed first!');
@@ -12,12 +12,25 @@ module.exports = {
 
     await module.exports.down(queryInterface, Sequelize);
 
-    const locations = [
-      {
-        coordinates: [-118.247318, 34.048535],
-        areaId: areas.find(a => a.name == 'Los Angeles, California, United States').id,
-      },
-    ];
+    const locations = [];
+
+    {
+      const area = areas.find(a => a.name == 'Los Angeles, California, United States');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
+    {
+      const area = areas.find(a => a.name == 'Taipei, Taiwan');
+
+      locations.push({
+        areaId: area.id,
+        coordinates: area.center.coordinates,
+      });
+    }
 
     const statuses = [];
     const users = [];
