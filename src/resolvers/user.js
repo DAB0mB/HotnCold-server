@@ -11,36 +11,8 @@ const resolvers = {
       return me;
     },
 
-    async nearbyUsers(query, args, { me, myContract }) {
-      const { Status, User } = useModels();
-
-      const users = await User.findAll({
-        where: {
-          id: { $ne: me.id },
-          areaId: me.areaId,
-          discoverable: true,
-          ...(myContract.isTest ? {
-            isMock: true,
-          } : {
-            isMock: { $or: [false, null] },
-            $and: [
-              {
-                locationExpiresAt: { $gte: new Date() },
-              },
-              // ST_DWithin uses spatial indexes, unlike ST_Distance_Sphere
-              // false is the right return value I have no idea why... I think it might be related to Sequelize
-              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...me.location.coordinates), 'geography'), Sequelize.col('user.location'), process.env.RADAR_DISCOVERY_DISTANCE), false),
-            ]
-          }),
-        },
-        include: [{ model: Status, as: 'status' }],
-      });
-
-      return users;
-    },
-
     async userProfile(query, { userId }, { me }) {
-      const { Status, User } = useModels();
+      const { User } = useModels();
 
       if (userId == me.id) {
         return me;
@@ -50,7 +22,6 @@ const resolvers = {
         where: {
           id: userId,
         },
-        include: [{ model: Status, as: 'status' }],
       });
 
       return user;
@@ -107,17 +78,8 @@ const resolvers = {
       return me;
     },
 
-    async updateMyLocation(mutation, { location: coordinates, featuredAt = new Date() }, { me, myContract }) {
+    async updateMyLocation(mutation, { location: coordinates, featuredAt }, { me, myContract }) {
       const { Event, Status, User } = useModels();
-      const mFeaturedAt = moment(featuredAt);
-      const featuredToday = mFeaturedAt.startOf('day').toDate();
-      const featuredTomorrow = mFeaturedAt.endOf('day').toDate();
-      const now = new Date();
-      const isFeaturedNow = moment().startOf('day').toDate().getTime() == featuredToday.getTime();
-
-      if (featuredTomorrow < now) {
-        throw Error('Given day cannot be in the past');
-      }
 
       await me.setLocation(coordinates);
 
@@ -130,72 +92,70 @@ const resolvers = {
         };
       }
 
+      const featuredTomorrow = moment(featuredAt).add(1, 'day').toDate();
+      const now = moment().toDate();
+      const featuredNow = featuredAt > now ? featuredAt : now;
+
+      if (featuredTomorrow < now) {
+        throw Error('Given day cannot be in the past');
+      }
+
       const features = [];
 
-      // Status are relevant only if we're looking for features of the moment
-      if (isFeaturedNow) {
-        // Unlike nearbyUsers resolver, this will query based on statuses
-        const nearbyUsers = await User.findAll({
+      {
+        const statuses = await Status.findAll({
           where: {
-            id: { $ne: me.id },
-            isMock: myContract.isTest ? true : { $or: [false, null] },
-            statusId: { $ne: null },
+            areaId: myArea.id,
+            userId: { $ne: null },
+            ...(myContract.isTest ? {
+              $or: [
+                {
+                  isMock: true,
+                },
+                {
+                  userId: me.id,
+                  publishedAt: {
+                    $gte: featuredAt,
+                    $lt: featuredTomorrow,
+                  },
+                },
+              ]
+            } : {
+              isMock: { $or: [false, null] },
+              isTest: { $or: [false, null] },
+              publishedAt: {
+                $gte: featuredAt,
+                $lt: featuredTomorrow,
+              },
+            }),
             $and: [
-              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...myArea.center.coordinates), 'geography'), Sequelize.col('user.location'), process.env.MAP_DISCOVERY_DISTANCE), true),
+              Sequelize.where(Sequelize.fn('ST_DWithin', Sequelize.cast(Sequelize.fn('ST_MakePoint', ...myArea.center.coordinates), 'geography'), Sequelize.col('status.location'), process.env.MAP_DISCOVERY_DISTANCE), true),
             ],
           },
-          include: [{
-            model: Status,
-            as: 'status',
-            where: {
-              areaId: myArea.id,
-              locationExpiresAt: { $gte: new Date() },
-            },
-            attributes: [
-              'id',
-              'updatedAt',
-              'text',
-              'location',
-              'locationExpiresAt',
-            ],
-          }],
-          attributes: [
-            'id',
-            'name',
-            'avatar',
-            'pictures',
-            'isMock',
-            'location',
-            'locationExpiresAt',
-          ],
+          include: [{ model: User, as: 'user' }],
         });
 
-        await nearbyUsers.reduce(async (creatingFeature, user) => {
+        await statuses.reduce(async (creatingFeature, status) => {
           await creatingFeature;
 
-          if (user.status && user.status.location && new Date(user.status.locationExpiresAt) > new Date()) {
-            const feature = {
-              type: 'Feature',
-              properties: {},
-              geometry: user.status.location,
-            };
-
-            feature.properties = {
-              type: 'user',
+          const feature = {
+            type: 'Feature',
+            geometry: status.location,
+            properties: {
+              type: 'status',
               user: {
-                id: user.id,
-                name: user.name,
-                avatar: await user.ensureAvatar(),
+                id: status.userId,
+                name: status.user.name,
+                avatar: await status.user.ensureAvatar(),
               },
               status: {
-                id: user.status.id,
-                text: user.status.text,
-                updatedAt: user.status.updatedAt,
+                id: status.id,
+                text: status.text,
               },
-            };
+            },
+          };
 
-            features.push(feature);
-          }
+          features.push(feature);
         }, Promise.resolve());
       }
 
@@ -206,13 +166,13 @@ const resolvers = {
           $or: [
             {
               startsAt: {
-                $gt: featuredToday > now ? featuredToday : now,
+                $gte: featuredNow,
                 $lt: featuredTomorrow,
               },
             },
             {
               endsAt: {
-                $gt: featuredToday > now ? featuredToday : now,
+                $gte: featuredNow,
                 $lt: featuredTomorrow,
               },
             },
@@ -265,24 +225,6 @@ const resolvers = {
 
       return true;
     },
-
-    async makeDiscoverable(mutation, args, { me }) {
-      if (me.discoverable) return;
-
-      if (!me.statusId) {
-        throw Error('Cannot make you discoverable if a status wasn\'t yet created');
-      }
-
-      me.discoverable = true;
-      await me.save();
-    },
-
-    async makeIncognito(mutation, args, { me }) {
-      if (!me.discoverable) return;
-
-      me.discoverable = false;
-      await me.save();
-    },
   },
 
   Subscription: {
@@ -312,16 +254,16 @@ const resolvers = {
       return user.location.coordinates;
     },
 
+    area(user) {
+      return user.getArea();
+    },
+
     age(user) {
       return moment().year() - moment(user.birthDate).year();
     },
 
     avatar(user) {
       return user.ensureAvatar();
-    },
-
-    discoverable(user) {
-      return !!user.discoverable;
     },
   },
 };

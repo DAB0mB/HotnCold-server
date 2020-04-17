@@ -48,8 +48,6 @@ Define environment variables in `.env` file (NEVER COMMIT):
     FIREBASE_CLIENT_EMAIL
     FIREBASE_PRIVATE_KEY
     FIREBASE_DB_URL
-    # Timeout for status location
-    STATUS_LOCATION_TIMEOUT
     # Timeout for user location
     USER_LOCATION_TIMEOUT
     # Radar's scanning radius for discovering nearby users

@@ -44,24 +44,24 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
         location: Sequelize.fn('ST_GeomFromText', `POINT(${coordinates.join(' ')})`),
-        locationExpiresAt: new Date('1 / 1 / 3000'),
         areaId,
       };
 
       const status = {
         id: statusId,
+        userId: userId,
         text: 'Who wants to have a crabby patty?!',
+        publishedAt: new Date(),
         ...base,
       };
 
       const user = {
         id: userId,
-        statusId,
-        discoverable: true,
         name: 'Patrick Star',
-        birthDate: new Date('6/2/1989'),
         occupation: 'Unemployed',
         bio: 'Travel maven. Professional alcoholaholic. Infuriatingly humble music specialist. Gamer. Coffee ninja. General internet advocate.',
+        birthDate: new Date('6 / 2 / 1989'),
+        locationExpiresAt: new Date('1 / 1 / 3000'),
         pictures: [
           'https://i.imgur.com/I3ysYRt.png',
           'https://pbs.twimg.com/profile_images/588433110703865856/JgMKUdlE_400x400.jpg',

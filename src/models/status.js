@@ -15,9 +15,14 @@ const status = (sequelize, DataTypes) => {
     },
     location: {
       type: DataTypes.GEOMETRY('POINT'),
+      allowNull: false,
     },
-    locationExpiresAt: {
+    publishedAt: {
       type: DataTypes.DATE,
+      allowNull: false,
+    },
+    isTest: {
+      type: DataTypes.BOOLEAN,
     },
     isMock: {
       type: DataTypes.BOOLEAN,
@@ -26,12 +31,10 @@ const status = (sequelize, DataTypes) => {
 
   Status.associate = (models) => {
     Status.belongsTo(models.Area);
-    Status.hasOne(models.User);
+    Status.belongsTo(models.User);
   };
 
-  Location.extend(Status, {
-    locationTimeout: Number(process.env.STATUS_LOCATION_TIMEOUT)
-  });
+  Location.extend(Status);
 
   return Status;
 };

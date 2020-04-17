@@ -5,5 +5,6 @@ export default gql`
     id: ID!
     name: String!
     shortName: String!
+    timezone: String!
   }
 `;

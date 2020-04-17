@@ -1,46 +1,172 @@
-import { useModels } from '../providers';
+import { withFilter } from 'apollo-server';
+import moment from 'moment';
+
+import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
+  Query: {
+    async statuses(query, { userId, limit, anchor }, { me }) {
+      const { User, Status } = useModels();
+
+      const user = await User.findOne({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        return [];
+      }
+
+      const myArea = await me.getArea();
+
+      if (!myArea) {
+        return [];
+      }
+
+      let anchorPublishedAt = moment().tz(myArea.timezone).startOf('day').toDate();
+      if (anchor) {
+        const status = await Status.findOne({
+          where: { id: anchor },
+        });
+
+        if (status) {
+          anchorPublishedAt = status.publishedAt;
+        }
+      }
+
+      const statuses = await Status.findAll({
+        where: {
+          userId,
+          areaId: user.areaId,
+          publishedAt: {
+            $gt: anchorPublishedAt,
+          },
+        },
+        order: [['publishedAt', 'ASC']],
+        limit,
+      });
+
+      return statuses;
+    },
+
+    async veryFirstStatus(query, { userId }, { me }) {
+      const { Status, User } = useModels();
+
+      const user = await User.findOne({
+        where: { id: userId },
+      });
+
+      if (!user) return null;
+
+      const myArea = await me.getArea();
+
+      if (!myArea) return null;
+
+      const statuses = await Status.findAll({
+        where: {
+          userId,
+          areaId: myArea.id,
+          publishedAt: {
+            $gt: moment().tz(myArea.timezone).startOf('day').toDate(),
+          },
+        },
+        order: [['publishedAt', 'DESC']],
+        limit: 1,
+      });
+
+      return statuses[0];
+    },
+  },
+
   Mutation: {
-    async createStatus(mutation, { text }, { me }) {
+    async createStatus(mutation, { text, location, publishedAt }, { me, myContract }) {
       const { Status } = useModels();
+      const pubsub = usePubsub();
 
-      const status = await Status.create({ text });
+      const status = new Status({
+        text,
+        publishedAt,
+        userId: me.id,
+        areaId: me.areaId,
+        isTest: myContract.isTest,
+        location: {
+          type: 'Point',
+          coordinates: location,
+        },
+      });
+      await status.save();
 
-      await me.setStatus(status);
+      pubsub.publish('statusCreated', {
+        statusCreated: status,
+      });
 
       return status;
     },
 
-    async dropStatus(mutation, args, { me }) {
-      if (!me.statusId) {
-        throw Error('Cannot drop a status if it wasn\'t yet created');
-      }
+    async deleteStatus(mutation, { statusId }) {
+      const { Status } = useModels();
+      const pubsub = usePubsub();
 
-      me.status.areaId = me.areaId;
-      me.status.location = me.location;
-      me.status.locationExpiresAt = new Date(Date.now() + Number(process.env.STATUS_LOCATION_TIMEOUT));
-      await me.status.save();
+      const status = await Status.findOne({
+        where: { id: statusId },
+      });
 
-      return me.location.coordinates;
+      if (!status) return false;
+
+      await status.destroy();
+
+      pubsub.publish('statusDeleted', {
+        statusDeleted: status,
+      });
+
+      return true;
+    },
+  },
+
+  Subscription: {
+    statusCreated: {
+      resolve({ statusCreated }) {
+        const { Status } = useModels();
+
+        return new Status(statusCreated);
+      },
+      subscribe: withFilter(
+        () => usePubsub().asyncIterator('statusCreated'),
+        async ({ statusCreated }, { userId }, { me }) => {
+          return (
+            me &&
+            statusCreated &&
+            statusCreated.areaId === me.areaId &&
+            statusCreated.userId === userId
+          );
+        },
+      ),
     },
 
-    async pickupStatus(mutation, args, { me }) {
-      if (!me.statusId) return;
-
-      me.status.areaId = null;
-      me.status.location = null;
-      me.status.locationExpiresAt = null;
-      await me.status.save();
+    statusDeleted: {
+      resolve({ statusDeleted }) {
+        return statusDeleted.id;
+      },
+      subscribe: withFilter(
+        () => usePubsub().asyncIterator('statusDeleted'),
+        async ({ statusDeleted }, { userId }, { me }) => {
+          return (
+            me &&
+            statusDeleted &&
+            statusDeleted.areaId === me.areaId &&
+            statusDeleted.userId === userId
+          );
+        },
+      ),
     },
   },
 
   Status: {
-    location(user) {
-      if (!user.location) return null;
-      if (new Date(user.locationExpiresAt) < new Date()) return null;
+    location(status) {
+      return status.location?.coordinates;
+    },
 
-      return user.location.coordinates;
+    user(status) {
+      return status.getUser();
     },
   },
 };

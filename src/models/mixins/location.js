@@ -2,7 +2,7 @@ import Sequelize from 'sequelize';
 
 import { useModels } from '../../providers';
 
-export const extend = (Model, { locationTimeout }) => {
+export const extend = (Model, { locationTimeout } = {}) => {
   Model.prototype.setLocation = async function setLocation(coordinates, useStage) {
     const { Area } = useModels();
     const { coordinates: selfCoordinates } = this.getDataValue('location') || {};
@@ -46,7 +46,9 @@ export const extend = (Model, { locationTimeout }) => {
     }
 
     if (!useStage) {
-      this.setDataValue('locationExpiresAt', new Date(Date.now() + locationTimeout));
+      if (locationTimeout) {
+        this.setDataValue('locationExpiresAt', new Date(Date.now() + locationTimeout));
+      }
 
       await this.save();
     }

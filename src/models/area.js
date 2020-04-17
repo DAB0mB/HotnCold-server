@@ -24,6 +24,10 @@ const area = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    timezone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     polygon: {
       type: DataTypes.GEOMETRY('POLYGON'),
       allowNull: false,

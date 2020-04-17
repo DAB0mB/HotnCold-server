@@ -46,9 +46,6 @@ const user = (sequelize, DataTypes) => {
     avatar: {
       type: DataTypes.STRING,
     },
-    discoverable: {
-      type: DataTypes.BOOLEAN
-    },
     location: {
       type: DataTypes.GEOMETRY('POINT'),
     },
@@ -65,7 +62,7 @@ const user = (sequelize, DataTypes) => {
     User.belongsToMany(models.Chat, { through: models.ChatUser });
     User.hasMany(models.Message);
     User.hasOne(models.Contract);
-    User.belongsTo(models.Status);
+    User.hasMany(models.Status);
   };
 
   User.prototype.ensureAvatar = async function ensureAvatar() {

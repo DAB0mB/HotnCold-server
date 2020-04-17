@@ -57,10 +57,10 @@ const resolvers = {
       // Create the message and associate it with me and target chat
       const message = new Message({
         text,
+        chatId,
         userId: me.id,
       });
       await message.save();
-      await message.setChat(chat);
 
       pubsub.publish('messageSent', {
         messageSent: message
