@@ -78,6 +78,7 @@ const resolvers = {
       return me;
     },
 
+    // TODO: Split features fetching to a separate query
     async updateMyLocation(mutation, { location: coordinates, featuredAt }, { me, myContract }) {
       const { Event, Status, User } = useModels();
 
@@ -202,6 +203,9 @@ const resolvers = {
 
       return {
         type: 'FeatureCollection',
+        properties: {
+          timezone: myArea.timezone,
+        },
         features,
       };
     },
