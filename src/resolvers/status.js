@@ -96,13 +96,14 @@ const resolvers = {
       await status.save();
 
       pubsub.publish('statusCreated', {
+        areaId: me.areaId,
         statusCreated: status,
       });
 
       return status;
     },
 
-    async deleteStatus(mutation, { statusId }) {
+    async deleteStatus(mutation, { statusId }, { me }) {
       const { Status } = useModels();
       const pubsub = usePubsub();
 
@@ -115,6 +116,7 @@ const resolvers = {
       await status.destroy();
 
       pubsub.publish('statusDeleted', {
+        areaId: me.areaId,
         statusDeleted: status,
       });
 
@@ -131,11 +133,11 @@ const resolvers = {
       },
       subscribe: withFilter(
         () => usePubsub().asyncIterator('statusCreated'),
-        async ({ statusCreated }, { userId }, { me }) => {
+        async ({ areaId, statusCreated }, { userId }, { me }) => {
           return (
             me &&
             statusCreated &&
-            statusCreated.areaId === me.areaId &&
+            statusCreated.areaId === areaId &&
             statusCreated.userId === userId
           );
         },
@@ -148,11 +150,11 @@ const resolvers = {
       },
       subscribe: withFilter(
         () => usePubsub().asyncIterator('statusDeleted'),
-        async ({ statusDeleted }, { userId }, { me }) => {
+        async ({ areaId, statusDeleted }, { userId }, { me }) => {
           return (
             me &&
             statusDeleted &&
-            statusDeleted.areaId === me.areaId &&
+            statusDeleted.areaId === areaId &&
             statusDeleted.userId === userId
           );
         },
