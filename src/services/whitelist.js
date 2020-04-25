@@ -1,9 +1,14 @@
 class Whitelist {
-  constructor(sheet) {
+  constructor(sheet, { disabled } = {}) {
     this.sheet = sheet;
+    this.disabled = !!disabled;
   }
 
   async hasPhone(phone) {
+    if (this.disabled) {
+      return true;
+    }
+
     const rows = await new Promise((resolve, reject) => {
       this.sheet.getRows({
         offset: 1,

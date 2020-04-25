@@ -31,7 +31,9 @@ const bootstrapWhitelist = async () => {
     });
   });
 
-  const whitelist = new Whitelist(sheet);
+  const whitelist = new Whitelist(sheet, {
+    disabled: !!JSON.parse(process.env.WHITELIST_DISABLED || false),
+  });
 
   provideWhitelist(whitelist);
 };

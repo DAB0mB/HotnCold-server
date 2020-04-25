@@ -43,6 +43,8 @@ Define environment variables in `.env` file (NEVER COMMIT):
     SHEETS_PRIVATE_KEY
     # Whitelist Google Sheet ID
     WHITELIST_SHEET_ID
+    # Disabled whitelist
+    WHITELIST_DISABLED
     # Firebase-admin related credentials. See https://firebase.google.com/docs/reference/admin/node/admin.credential
     FIREBASE_PROJECT_ID
     FIREBASE_CLIENT_EMAIL
