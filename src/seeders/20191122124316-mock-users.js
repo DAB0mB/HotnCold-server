@@ -32,6 +32,15 @@ module.exports = {
       });
     }
 
+    {
+      const area = areas.find(a => a.name == 'Berlin, Germany');
+
+      locations.push({
+        areaId: area.id,
+        coordinates: area.center.coordinates,
+      });
+    }
+
     const statuses = [];
     const users = [];
 
