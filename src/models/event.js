@@ -71,6 +71,7 @@ const event = (sequelize, DataTypes) => {
 
   Event.associate = (models) => {
     Event.belongsTo(models.Area);
+    Event.belongsToMany(models.User, { as: 'attendees', through: models.EventAttendee });
   };
 
   Event.syncMeetupEvents = async () => {
