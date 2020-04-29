@@ -89,6 +89,9 @@ const resolvers = {
       if (!myArea) {
         return {
           type: 'FeatureCollection',
+          properties: {
+            timezone: null,
+          },
           features: [],
         };
       }
