@@ -44,5 +44,6 @@ export default gql`
     address: String
     featuredPhoto: String
     sourceLink: String
+    checkedInAt: DateTime
   }
 `;

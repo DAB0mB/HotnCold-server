@@ -80,7 +80,7 @@ const resolvers = {
 
     // TODO: Split features fetching to a separate query
     async updateMyLocation(mutation, { location: coordinates, featuredAt }, { me, myContract }) {
-      const { Event, EventAttendee, Status, User } = useModels();
+      const { Event, Status, User } = useModels();
 
       await me.setLocation(coordinates);
 
@@ -181,6 +181,14 @@ const resolvers = {
             },
           ],
         },
+        // TODO: Properly count
+        include : [
+          {
+            model: User,
+            as: 'attendees',
+            attributes: ['id'],
+          },
+        ],
         attributes: [
           'id',
           'name',
@@ -192,14 +200,8 @@ const resolvers = {
         ],
       });
 
-      const hncAttendanceCounts = await EventAttendee.findAll({
-        where: { eventId: events.map(e => e.id) },
-        group: ['eventId'],
-        attributes: ['eventId', [Sequelize.fn('COUNT', 'eventId'), 'attendanceCount']],
-      });
-
       events.forEach((event) => {
-        const hncAttendanceCount = hncAttendanceCounts.find(c => c.dataValues.eventId == event.id)?.dataValues.attendanceCount || 0;
+        const hncAttendanceCount = event.dataValues.attendees.length;
 
         const eventFeature = {
           type: 'Feature',
@@ -207,7 +209,7 @@ const resolvers = {
             type: 'event',
             event: {
               ...omit(event.dataValues, 'location'),
-              attendanceCount: event.dataValues.sourceAttendanceCount + Number(hncAttendanceCount),
+              attendanceCount: event.dataValues.sourceAttendanceCount + hncAttendanceCount,
             },
           },
           geometry: event.location,
