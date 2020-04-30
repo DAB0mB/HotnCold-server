@@ -53,33 +53,39 @@ const resolvers = {
           'avatar',
           'pictures',
           'bio',
+          [Sequelize.literal('"events_attendees"."createdAt"'), 'checkedInAt'],
         ],
         order: [[Sequelize.literal('"events_attendees"."createdAt"'), 'DESC']],
       });
 
+      const [meAttendee] = await new Event({ id: eventId }).getAttendees({
+        limit: 1,
+        through: {
+          where: {
+            userId: me.id,
+          },
+        },
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'pictures',
+          'bio',
+          [Sequelize.literal('"events_attendees"."createdAt"'), 'checkedInAt'],
+        ],
+      });
+
       // Put me first. Always
-      if (!anchor && await new Event({ id: eventId }).hasAttendee(me)) {
-        attendees.unshift(me);
+      if (!anchor && meAttendee) {
+        attendees.unshift(meAttendee);
         attendees.splice(limit);
       }
-
-      // TODO: Use a single query
-      const checkIns = await EventAttendee.findAll({
-        where: { userId: attendees.map(a => a.id) },
-        attributes: ['userId', 'createdAt'],
-      });
-
-      checkIns.forEach((checkIn) => {
-        const attendee = attendees.find(a => a.id === checkIn.userId);
-
-        attendee.checkedInAt = checkIn.createdAt;
-      });
 
       return attendees;
     },
 
     async veryFirstAttendee(query, { eventId }) {
-      const { Event, EventAttendee } = useModels();
+      const { Event } = useModels();
 
       const [attendee] = await new Event({ id: eventId }).getAttendees({
         limit: 1,
@@ -89,18 +95,12 @@ const resolvers = {
           'avatar',
           'pictures',
           'bio',
+          [Sequelize.literal('"events_attendees"."createdAt"'), 'checkedInAt'],
         ],
         order: [[Sequelize.literal('"events_attendees.createdAt"'), 'DESC']],
       });
 
       if (!attendee) return null;
-
-      const [checkIn] = await EventAttendee.findAll({
-        where: { userId: attendee.id },
-        attributes: ['userId', 'createdAt'],
-      });
-
-      attendee.checkedInAt = checkIn.createdAt;
 
       return attendee;
     },
