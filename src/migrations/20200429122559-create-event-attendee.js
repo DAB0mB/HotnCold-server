@@ -1,8 +1,10 @@
 'use strict';
 
 module.exports = {
-  up(queryInterface, Sequelize) {
-    return queryInterface.createTable('events_attendees', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.renameColumn('events', 'attendanceCount', 'sourceAttendanceCount');
+
+    await queryInterface.createTable('events_attendees', {
       eventId: {
         foreignKey: true,
         type: Sequelize.STRING,
@@ -22,7 +24,9 @@ module.exports = {
     });
   },
 
-  down(queryInterface) {
-    return queryInterface.dropTable('events_attendees');
+  async down(queryInterface) {
+    await queryInterface.renameColumn('events', 'sourceAttendanceCount', 'attendanceCount');
+
+    await queryInterface.dropTable('events_attendees');
   }
 };

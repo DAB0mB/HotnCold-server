@@ -42,34 +42,67 @@ const resolvers = {
       const attendees = await event.getAttendees({
         through: {
           where: {
-            $or: [
-              // Put me first
-              !anchor && {
-                userId: me.id
-              },
-              {
-                userId: { $ne: me.id },
-                createdAt: { $lt: anchorCreatedAt },
-              },
-            ].filter(Boolean),
+            userId: { $ne: me.id },
+            createdAt: { $lt: anchorCreatedAt },
           },
         },
-        order: [[Sequelize.literal('"events_attendees.createdAt"'), 'DESC']],
         limit,
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'pictures',
+          'bio',
+        ],
+        order: [[Sequelize.literal('"events_attendees"."createdAt"'), 'DESC']],
+      });
+
+      // Put me first. Always
+      if (!anchor && await new Event({ id: eventId }).hasAttendee(me)) {
+        attendees.unshift(me);
+        attendees.splice(limit);
+      }
+
+      // TODO: Use a single query
+      const checkIns = await EventAttendee.findAll({
+        where: { userId: attendees.map(a => a.id) },
+        attributes: ['userId', 'createdAt'],
+      });
+
+      checkIns.forEach((checkIn) => {
+        const attendee = attendees.find(a => a.id === checkIn.userId);
+
+        attendee.checkedInAt = checkIn.createdAt;
       });
 
       return attendees;
     },
 
     async veryFirstAttendee(query, { eventId }) {
-      const { Event } = useModels();
+      const { Event, EventAttendee } = useModels();
 
-      const attendees = await new Event({ id: eventId }).getAttendees({
-        order: [[Sequelize.literal('"events_attendees.createdAt"'), 'DESC']],
+      const [attendee] = await new Event({ id: eventId }).getAttendees({
         limit: 1,
+        attributes: [
+          'id',
+          'name',
+          'avatar',
+          'pictures',
+          'bio',
+        ],
+        order: [[Sequelize.literal('"events_attendees.createdAt"'), 'DESC']],
       });
 
-      return attendees[0];
+      if (!attendee) return null;
+
+      const [checkIn] = await EventAttendee.findAll({
+        where: { userId: attendee.id },
+        attributes: ['userId', 'createdAt'],
+      });
+
+      attendee.checkedInAt = checkIn.createdAt;
+
+      return attendee;
     },
 
     async scheduledEvents(query, { limit, anchor }, { me }) {
@@ -135,6 +168,12 @@ const resolvers = {
     },
   },
 
+  Attendee: {
+    avatar(attendee) {
+      return attendee.ensureAvatar();
+    },
+  },
+
   Event: {
     description(event) {
       return lzstring.decompressFromBase64(event.description.toString());
@@ -155,7 +194,7 @@ const resolvers = {
     },
 
     async attendanceCount(event) {
-      return event.attendanceCount + (await event.countAttendees());
+      return event.sourceAttendanceCount + (await event.countAttendees());
     },
   },
 };

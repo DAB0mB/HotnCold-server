@@ -36,7 +36,7 @@ const event = (sequelize, DataTypes) => {
     endsAt: {
       type: DataTypes.DATE,
     },
-    attendanceCount: {
+    sourceAttendanceCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -136,7 +136,7 @@ const event = (sequelize, DataTypes) => {
             localTime: event.local_time,
             startsAt: new Date(event.time),
             endsAt: event.duration && new Date(event.time + event.duration),
-            attendanceCount: event.yes_rsvp_count,
+            sourceAttendanceCount: event.yes_rsvp_count,
             maxPeople: event.rsvp_limit,
             sourceLink: event.link,
             venueName: event.venue.name,
