@@ -16,27 +16,20 @@ const user = (sequelize, DataTypes) => {
     },
     birthDate: {
       type: DataTypes.DATE,
-      allowNull: false,
     },
     occupation: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     notificationsToken: {
       type: DataTypes.STRING,
     },
     bio: {
       type: DataTypes.STRING(511),
-      allowNull: false,
     },
     pictures: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       validate: {
         len(value) {
-          if (value.length < 1) {
-            throw Error('User must have at least a single picture');
-          }
-
           if (value.length > 6) {
             throw Error('User must have 6 pictures at most');
           }
@@ -73,6 +66,7 @@ const user = (sequelize, DataTypes) => {
 
     // Not likely to happen, useful for migration purposes
     if (avatar) return avatar;
+    if (!this.pictures[0]) return null;
 
     avatar = await cloudinary.uploadFromUrl(this.pictures[0], { upload_preset: 'avatar-pic' });
     // This is an atomic operation, so it's relatively safe

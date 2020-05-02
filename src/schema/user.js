@@ -7,8 +7,8 @@ export default gql`
   }
 
   extend type Mutation {
-    createUser(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): String!
-    updateMyProfile(name: String!, bio: String!, occupation: String!, birthDate: DateTime!, pictures: [String!]!): User @auth
+    createUser(name: String!, bio: String, occupation: String, birthDate: DateTime, pictures: [String]!): String!
+    updateMyProfile(name: String!, bio: String, occupation: String, birthDate: DateTime, pictures: [String]!): User @auth
     updateMyLocation(location: Vector2D!, featuredAt: DateTime!): FeatureCollection @auth
     associateNotificationsToken(token: String!): Boolean! @auth
     dissociateNotificationsToken: Boolean! @auth
@@ -22,7 +22,7 @@ export default gql`
     id: ID!
     name: String!
     birthDate: DateTime @mine
-    age: String!
+    age: String
     occupation: String
     bio: String
     location: Vector2D @mine

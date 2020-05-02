@@ -14,7 +14,11 @@ export default gql`
   }
 
   extend type Mutation {
-    toggleCheckIn(eventId: ID!): Boolean! @auth
+    toggleCheckIn(eventId: ID!, checkedIn: Boolean): Event! @auth
+  }
+
+  extend type Subscription {
+    checkInToggled: Event @auth
   }
 
   type Attendee {
@@ -34,6 +38,7 @@ export default gql`
     startsAt: DateTime!
     endsAt: DateTime!
     description: String!
+    sourceAttendanceCount: Int!
     attendanceCount: Int!
     location: Vector2D!
     venueName: String!

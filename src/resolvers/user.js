@@ -64,7 +64,9 @@ const resolvers = {
 
       const avatar = pictures[0] === me.pictures[0]
         ? me.avatar
-        : await cloudinary.uploadFromUrl(pictures[0], { upload_preset: 'avatar-pic' });
+        : pictures.length
+          ? await cloudinary.uploadFromUrl(pictures[0], { upload_preset: 'avatar-pic' })
+          : null;
 
       await me.update({
         name,
@@ -280,7 +282,11 @@ const resolvers = {
     },
 
     age(user) {
-      return moment().year() - moment(user.birthDate).year();
+      return user.birthDate && moment().diff(user.birthDate, 'years');
+    },
+
+    pictures(user) {
+      return user.pictures || [];
     },
 
     avatar(user) {

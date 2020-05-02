@@ -108,6 +108,10 @@ const resolvers = {
     async scheduledEvents(query, { limit, anchor }, { me }) {
       const { EventAttendee } = useModels();
 
+      const myArea = await me.getArea();
+
+      if (!myArea) return [];
+
       let anchorCreatedAt = new Date();
       if (anchor) {
         const eventAttendee = await EventAttendee.findOne({
@@ -123,47 +127,78 @@ const resolvers = {
       const scheduledEvents = await me.getScheduledEvents({
         through: {
           where: {
-            createdAt: { $lt: anchorCreatedAt },
+            createdAt: {
+              $lt: anchorCreatedAt,
+            },
           },
         },
-        order: [['scheduledEvents', 'createdAt', 'DESC']],
+        where: {
+          endsAt: { $gt: new Date() },
+          areaId: myArea.id,
+        },
+        attributes: {
+          include: [[Sequelize.literal('"events_attendees"."createdAt"'), 'checkedInAt']],
+        },
+        order: [[Sequelize.literal('"events_attendees.createdAt"'), 'ASC']],
         limit,
+      });
+
+      scheduledEvents.forEach((event) => {
+        event.area = myArea;
+        event.checkedInAt = event.dataValues.checkedInAt;
       });
 
       return scheduledEvents;
     },
 
     async veryFirstScheduledEvent(query, args, { me }) {
-      const events = await me.getScheduledEvents({
-        order: [['scheduledEvents', 'createdAt', 'DESC']],
+      const myArea = await me.getArea();
+
+      if (!myArea) return null;
+
+      const [event] = await me.getScheduledEvents({
+        attributes: {
+          include: [[Sequelize.literal('"events_attendees"."createdAt"'), 'checkedInAt']],
+        },
+        where: {
+          areaId: myArea.id,
+          endsAt: { $gt: new Date() },
+        },
+        order: [[Sequelize.literal('"events_attendees.createdAt"'), 'DESC']],
         limit: 1,
       });
 
-      return events[0];
+      if (!event) return null;
+
+      event.area = myArea;
+      event.checkedInAt = event.dataValues.checkedInAt;
+
+      return event;
     },
   },
 
   Mutation: {
-    async toggleCheckIn(mutation, { eventId }, { me }) {
-      const { Event } = useModels();
+    async toggleCheckIn(mutation, { eventId, checkedIn }, { me }) {
+      const { Area, Event } = useModels();
 
       const event = await Event.findOne({
         where: { id: eventId },
+        include: [{ model: Area }],
       });
 
       if (!event) {
-        return false;
+        throw Error(`Event with ID ${eventId} not found`);
       }
 
-      if (await event.hasAttendee(me)) {
+      if (await event.hasAttendee(me) && (typeof checkedIn != 'boolean' || checkedIn === false)) {
         await event.removeAttendee(me);
 
-        return false;
+        return event;
       }
-      else {
+      else if (typeof checkedIn != 'boolean' || checkedIn === true) {
         await event.addAttendee(me);
 
-        return true;
+        return event;
       }
     },
   },
