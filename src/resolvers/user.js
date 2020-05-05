@@ -45,7 +45,7 @@ const resolvers = {
         occupation,
         bio,
         pictures,
-        avatar: await cloudinary.uploadFromUrl(pictures[0], { upload_preset: 'avatar-pic' }),
+        avatar: pictures[0] ? await cloudinary.uploadFromUrl(pictures[0], { upload_preset: 'avatar-pic' }) : null,
       });
 
       await myContract.setUser(user);

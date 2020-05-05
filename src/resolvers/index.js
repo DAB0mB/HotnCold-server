@@ -4,6 +4,7 @@ import merge from 'merge-deep';
 
 import areaResolvers from './area';
 import chatResolvers from './chat';
+import commentResolvers from './comment';
 import contractResolvers from './contract';
 import eventResolvers from './event';
 import messageResolvers from './message';
@@ -22,6 +23,7 @@ const customScalarResolver = {
 export default merge(
   areaResolvers,
   chatResolvers,
+  commentResolvers,
   contractResolvers,
   customScalarResolver,
   eventResolvers,

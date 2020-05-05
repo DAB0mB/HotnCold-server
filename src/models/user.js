@@ -57,6 +57,7 @@ const user = (sequelize, DataTypes) => {
     User.hasMany(models.Message);
     User.hasOne(models.Contract);
     User.hasMany(models.Status);
+    User.hasMany(models.Comment);
   };
 
   User.prototype.ensureAvatar = async function ensureAvatar() {

@@ -70,6 +70,7 @@ const event = (sequelize, DataTypes) => {
   };
 
   Event.associate = (models) => {
+    Event.hasMany(models.Comment);
     Event.belongsTo(models.Area);
     Event.belongsToMany(models.User, { as: 'attendees', through: models.EventAttendee });
   };
