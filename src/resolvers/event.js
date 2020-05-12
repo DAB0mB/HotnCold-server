@@ -1,4 +1,5 @@
 import lzstring from 'lz-string';
+import moment from 'moment';
 import Sequelize from 'sequelize';
 
 import { useModels } from '../providers';
@@ -230,6 +231,14 @@ const resolvers = {
 
     async attendanceCount(event) {
       return event.sourceAttendanceCount + (await event.countAttendees());
+    },
+
+    localDate(event) {
+      return moment(event.startsAt).tz(event.area.timezone).format('YYYY-MM-DD');
+    },
+
+    localTime(event) {
+      return moment(event.startsAt).tz(event.area.timezone).format('HH:mm');
     },
   },
 };

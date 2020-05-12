@@ -33,6 +33,7 @@ export default gql`
     id: ID!
     source: EventSource!
     name: String!
+    category: String!
     localDate: String!
     localTime: String!
     startsAt: DateTime!

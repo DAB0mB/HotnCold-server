@@ -82,6 +82,7 @@ const resolvers = {
 
     // TODO: Split features fetching to a separate query
     async updateMyLocation(mutation, { location: coordinates, featuredAt }, { me, myContract }) {
+      const { default: Resolvers } = require('.');
       const { Event, Status, User } = useModels();
 
       await me.setLocation(coordinates);
@@ -197,13 +198,14 @@ const resolvers = {
           'featuredPhoto',
           'sourceAttendanceCount',
           'location',
-          'localDate',
-          'localTime',
+          'startsAt',
         ],
       });
 
       events.forEach((event) => {
         const hncAttendanceCount = event.dataValues.attendees.length;
+        // Required for upcoming resolution
+        event.area = myArea;
 
         const eventFeature = {
           type: 'Feature',
@@ -211,6 +213,8 @@ const resolvers = {
             type: 'event',
             event: {
               ...omit(event.dataValues, 'location'),
+              localTime: Resolvers.Event.localTime(event),
+              localDate: Resolvers.Event.localDate(event),
               attendanceCount: event.dataValues.sourceAttendanceCount + hncAttendanceCount,
             },
           },

@@ -2,40 +2,10 @@ import lzstring from 'lz-string';
 import moment from 'moment';
 import uuid from 'uuid';
 
-import { useMeetup, useModels } from '../providers';
-import { bulkUpsert, kilometersToMiles } from '../utils';
-import { Location } from './mixins';
-
-export const Source = {
-  meetup: 'meetup',
-};
-
-export const Category = {
-  OutdoorsAdventure: 'outdoors-adventure',
-  Tech: 'tech',
-  ParentsFamily: 'parents-family',
-  HealthWellness: 'health-wellness',
-  SportsFitness: 'sports-fitness',
-  Education: 'education',
-  Photography: 'photography',
-  Food: 'food',
-  Writing: 'writing',
-  Language: 'language',
-  Music: 'music',
-  Movements: 'movements',
-  Lgbtq: 'lgbtq',
-  Film: 'film',
-  GamesSciFi: 'games-sci-fi',
-  Beliefs: 'beliefs',
-  ArtsCulture: 'arts-culture',
-  BookClubs: 'book-clubs',
-  Dancing: 'dancing',
-  Pets: 'pets',
-  HobbiesCrafts: 'hobbies-crafts',
-  FashionBeauty: 'fashion-beauty',
-  Social: 'social',
-  CareerBusiness: 'career-business',
-};
+import { useMeetup, useModels } from '../../providers';
+import { bulkUpsert, kilometersToMiles } from '../../utils';
+import { Location } from '../mixins';
+import { Category, Source } from './enums';
 
 const event = (sequelize, DataTypes) => {
   const Event = sequelize.define('event', {
@@ -72,11 +42,11 @@ const event = (sequelize, DataTypes) => {
       allowNull: false,
     },
     category: {
-      type: DataTypes.STRING,
+      type: DataTypes.Enum(Object.values(Category)),
       allowNull: false,
     },
     source: {
-      type: DataTypes.ENUM(Object.values(Source)),
+      type: DataTypes.STRING,
     },
     sourceLink: {
       type: DataTypes.STRING,
@@ -169,7 +139,7 @@ const event = (sequelize, DataTypes) => {
             address: event.venue.address_1,
             featuredPhoto: event.featured_photo?.photo_link,
             location: `POINT(${event.venue.lon} ${event.venue.lat})`,
-            category: event.group.category.name,
+            category: event.group.category,
           };
         });
 
