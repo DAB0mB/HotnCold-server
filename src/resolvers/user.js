@@ -195,6 +195,7 @@ const resolvers = {
         attributes: [
           'id',
           'name',
+          'category',
           'featuredPhoto',
           'sourceAttendanceCount',
           'location',
