@@ -29,7 +29,7 @@ const area = (sequelize, DataTypes) => {
       allowNull: false,
     },
     polygon: {
-      type: DataTypes.GEOMETRY('POLYGON'),
+      type: DataTypes.GEOMETRY('MULTIPOLYGON'),
       allowNull: false,
     },
     center: {
