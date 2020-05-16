@@ -106,7 +106,7 @@ const event = (sequelize, DataTypes) => {
     const meetup = useMeetup();
 
     const areas = await Area.findAll({
-      attributes: ['id', 'center'],
+      attributes: ['id', 'center', 'timezone'],
     });
 
     for (const area of areas) {
@@ -119,8 +119,8 @@ const event = (sequelize, DataTypes) => {
           lat: area.center.coordinates[1],
           page: step * 100,
           radius: Math.floor(kilometersToMiles(process.env.MAP_DISCOVERY_DISTANCE / 1000)),
-          start_date_range: moment().add(i, 'days').format('YYYY-MM-DDT00:00'),
-          end_date_range: moment().add(i + step, 'days').format('YYYY-MM-DDT00:00'),
+          start_date_range: moment().tz(area.timezone).add(i, 'days').format('YYYY-MM-DDTHH:mm'),
+          end_date_range: moment().tz(area.timezone).add(i + step, 'days').format('YYYY-MM-DDTHH:mm'),
           fields: 'featured_photo,group_category',
           only: [
             'events.id',
