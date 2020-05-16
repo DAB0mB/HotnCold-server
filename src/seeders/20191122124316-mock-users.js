@@ -15,6 +15,15 @@ module.exports = {
     const locations = [];
 
     {
+      const area = areas.find(a => a.name == 'Hong Kong');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
+    {
       const area = areas.find(a => a.name == 'Los Angeles, California, United States');
 
       locations.push({
@@ -38,6 +47,15 @@ module.exports = {
       locations.push({
         areaId: area.id,
         coordinates: area.center.coordinates,
+      });
+    }
+
+    {
+      const area = areas.find(a => a.name == 'Tel Aviv-Yafo, Gush Dan, Israel');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
       });
     }
 
