@@ -11,6 +11,14 @@ const message = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    isTest: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
+    },
+    isMock: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
+    },
   });
 
   Message.associate = (models) => {

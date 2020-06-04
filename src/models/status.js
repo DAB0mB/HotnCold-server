@@ -1,7 +1,5 @@
 import uuid from 'uuid';
 
-import { Location } from './mixins';
-
 const status = (sequelize, DataTypes) => {
   const Status = sequelize.define('status', {
     id: {
@@ -10,31 +8,32 @@ const status = (sequelize, DataTypes) => {
       defaultValue: () => uuid(),
     },
     text: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING,
       allowNull: false,
     },
     location: {
       type: DataTypes.GEOMETRY('POINT'),
       allowNull: false,
     },
-    publishedAt: {
+    expiresAt: {
       type: DataTypes.DATE,
       allowNull: false,
     },
     isTest: {
       type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
     },
     isMock: {
       type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
     },
   });
 
   Status.associate = (models) => {
     Status.belongsTo(models.Area);
-    Status.belongsTo(models.User);
+    Status.belongsTo(models.Chat);
+    Status.belongsToMany(models.User, { through: models.StatusUser, as: 'users' });
   };
-
-  Location.extend(Status);
 
   return Status;
 };

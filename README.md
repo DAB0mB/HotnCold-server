@@ -31,43 +31,15 @@ Define environment variables in `.env` file (NEVER COMMIT):
     TWILIO_SKIP
     # One time passcode timeout in milliseconds
     OTP_TIMEOUT
-    # Test phone number regexp for local testing
-    # Will return the passcode with the response
-    TEST_PHONE_LOCAL
-    # Phone number regexp for testing with phone
-    # Will send the passcode via a text message
-    TEST_PHONE_SMS
-    # Google Sheets client email
-    SHEETS_CLIENT_EMAIL
-    # Google Sheets private key. Use brackets (") for line skips with \n
-    SHEETS_PRIVATE_KEY
-    # Whitelist Google Sheet ID
-    WHITELIST_SHEET_ID
-    # Disabled whitelist
-    WHITELIST_DISABLED
     # Firebase-admin related credentials. See https://firebase.google.com/docs/reference/admin/node/admin.credential
     FIREBASE_PROJECT_ID
     FIREBASE_CLIENT_EMAIL
     FIREBASE_PRIVATE_KEY
     FIREBASE_DB_URL
-    # Timeout for user location
-    USER_LOCATION_TIMEOUT
-    # Radar's scanning radius for discovering nearby users
-    RADAR_DISCOVERY_DISTANCE
-    # Features on the map will always be at this proximity range
-    MAP_DISCOVERY_DISTANCE
+    # How long a status chat is gonna live once created
+    CHAT_TTL
     # How long will authentication token last (in seconds)
     AUTH_TTL
-    # Consumer key provided by Meetup's API
-    MEETUP_CONSUMER_KEY
-    # Consumer secret provided by Meetup's API
-    MEETUP_CONSUMER_SECRET
-    # The user email used to detect events
-    MEETUP_USER_MAIL
-    # The user password used to detect events
-    MEETUP_USER_PASS
-    # How frequently should Meetup.com events should be synced in milliseconds
-    MEETUP_SYNC_INTERVAL
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0
@@ -88,10 +60,6 @@ In a new environment, migrate DB schema changes:
 Start the API:
 
     $ yarn start
-
-Optionally, you can run the garbage collector on a second tab:
-
-    $ yarn garbage-collect
 
 ## Test
 

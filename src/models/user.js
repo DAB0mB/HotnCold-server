@@ -1,7 +1,6 @@
 import uuid from 'uuid';
 
 import { useCloudinary, useModels } from '../providers';
-import { Location } from './mixins';
 
 const user = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
@@ -16,48 +15,43 @@ const user = (sequelize, DataTypes) => {
     },
     birthDate: {
       type: DataTypes.DATE,
+      allowNull: true,
     },
     occupation: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     notificationsToken: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     bio: {
-      type: DataTypes.STRING(511),
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     pictures: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      validate: {
-        len(value) {
-          if (value.length > 6) {
-            throw Error('User must have 6 pictures at most');
-          }
-        },
-      },
+      allowNull: true,
     },
     avatar: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
-    location: {
-      type: DataTypes.GEOMETRY('POINT'),
-    },
-    locationExpiresAt: {
-      type: DataTypes.DATE,
+    isTest: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
     },
     isMock: {
       type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
     },
   });
 
   User.associate = (models) => {
-    User.belongsTo(models.Area);
-    User.belongsToMany(models.Chat, { through: models.ChatUser });
-    User.belongsToMany(models.Event, { as: 'scheduledEvents', through: models.EventAttendee });
-    User.hasMany(models.Message);
     User.hasOne(models.Contract);
-    User.hasMany(models.Status);
-    User.hasMany(models.Comment);
+    User.hasMany(models.Message);
+    User.belongsToMany(models.Status, { through: models.StatusUser, as: 'statuses' });
+    User.belongsToMany(models.Chat, { through: models.ChatUser, as: 'chats' });
   };
 
   User.prototype.ensureAvatar = async function ensureAvatar() {
@@ -74,7 +68,7 @@ const user = (sequelize, DataTypes) => {
     await this.update({ avatar });
 
     return avatar;
-  },
+  };
 
   User.prototype.getContract = function getContract(options = {}) {
     const { Contract } = useModels();
@@ -84,10 +78,6 @@ const user = (sequelize, DataTypes) => {
       where: { userId: this.id },
     });
   };
-
-  Location.extend(User, {
-    locationTimeout: Number(process.env.USER_LOCATION_TIMEOUT),
-  });
 
   return User;
 };

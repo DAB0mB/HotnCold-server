@@ -21,12 +21,15 @@ const contract = (sequelize, DataTypes) => {
     },
     passcodeExpiresAt: {
       type: DataTypes.DATE,
+      allowNull: true,
     },
     signed: {
       type: DataTypes.BOOLEAN,
+      allowNull: true,
     },
     isTest: {
       type: DataTypes.BOOLEAN,
+      allowNull: true,
     },
   });
 

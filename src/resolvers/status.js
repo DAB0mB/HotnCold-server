@@ -1,164 +1,139 @@
-import { withFilter } from 'apollo-server';
-import moment from 'moment';
+import Sequelize, { Op } from 'sequelize';
 
-import { useModels, usePubsub } from '../providers';
+import { useModels } from '../providers';
 
 const resolvers = {
   Query: {
-    async statuses(query, { userId, limit, anchor }, { me }) {
-      const { User, Status } = useModels();
+    async statusChat(query, { statusId }) {
+      const { Status, User } = useModels();
 
-      const user = await User.findOne({
-        where: { id: userId }
+      const status = await Status.findOne({
+        include: [
+          {
+            model: User,
+            as: 'users',
+            through: {
+              where: { isAuthor: true },
+            },
+          },
+        ],
+        where: { id: statusId },
       });
 
-      if (!user) {
-        return [];
+      if (!status) {
+        return null;
       }
 
-      const myArea = await me.getArea();
+      const chat = await status.getChat();
 
-      if (!myArea) {
-        return [];
-      }
+      chat.recipient = status.users[0];
 
-      let anchorPublishedAt = moment().tz(myArea.timezone).startOf('day').toDate();
+      return chat;
+    },
+
+    async statuses(query, { limit, anchor }, { me }) {
+      let anchorCreatedAt = new Date(0);
       if (anchor) {
-        const status = await Status.findOne({
+        const [status] = await me.getStatuses({
           where: { id: anchor },
+          attributes: ['createdAt'],
+          limit: 1,
         });
 
         if (status) {
-          anchorPublishedAt = status.publishedAt;
+          anchorCreatedAt = status.createdAt;
         }
       }
 
-      const statuses = await Status.findAll({
+      const statuses = await me.getStatuses({
         where: {
-          userId,
-          areaId: user.areaId,
-          publishedAt: {
-            $gt: anchorPublishedAt,
-          },
+          createdAt: { [Op.gt]: anchorCreatedAt }
         },
-        order: [['publishedAt', 'ASC']],
+        order: [['createdAt', 'DESC']],
         limit,
       });
 
       return statuses;
     },
 
-    async veryFirstStatus(query, { userId }, { me }) {
-      const { Status, User } = useModels();
-
-      const user = await User.findOne({
-        where: { id: userId },
-      });
-
-      if (!user) return null;
-
-      const myArea = await me.getArea();
-
-      if (!myArea) return null;
-
-      const statuses = await Status.findAll({
-        where: {
-          userId,
-          areaId: myArea.id,
-          publishedAt: {
-            $gt: moment().tz(myArea.timezone).startOf('day').toDate(),
-          },
-        },
-        order: [['publishedAt', 'DESC']],
+    async firstStatus(query, args, { me }) {
+      const [status] = await me.getStatuses({
+        order: [['createdAt', 'ASC']],
         limit: 1,
       });
 
-      return statuses[0];
+      return status || null;
+    },
+
+    async areaStatuses(query, { location }, { myContract }) {
+      const { Area, Status } = useModels();
+
+      const area = await Area.findOne({
+        where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
+      });
+
+      if (!area) {
+        return [];
+      }
+
+      return Status.findAll({
+        where: {
+          expiresAt: { [Op.gt]: new Date() },
+          areaId: area.id,
+          [Op.or]: [
+            { isTest: myContract.isTest || { [Op.or]: [false, null] } },
+            { isMock: myContract.isTest || { [Op.or]: [false, null] } },
+          ],
+        },
+      });
     },
   },
 
   Mutation: {
-    async createStatus(mutation, { text, location, publishedAt }, { me, myContract }) {
-      const { Status } = useModels();
-      const pubsub = usePubsub();
+    async createStatus(mutation, { text, location }, { me, myContract }) {
+      const { Area, Chat, Status } = useModels();
+
+      const area = await Area.findOne({
+        where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
+      });
+
+      if (!area) {
+        throw Error('Status location not supported');
+      }
+
+      const chat = new Chat({
+        isListed: true,
+        isThread: true,
+        isTest: myContract.isTest,
+        bumpedAt: new Date(),
+      });
+      await chat.save();
+      await chat.addUser(me, {
+        through: {
+          isTest: myContract.isTest,
+        },
+      });
 
       const status = new Status({
         text,
-        publishedAt,
-        userId: me.id,
-        areaId: me.areaId,
+        areaId: area.id,
+        chatId: chat.id,
         isTest: myContract.isTest,
+        expiresAt: new Date(Date.now() + Number(process.env.STATUS_TTL)),
         location: {
           type: 'Point',
           coordinates: location,
         },
       });
       await status.save();
-
-      pubsub.publish('statusCreated', {
-        areaId: me.areaId,
-        statusCreated: status,
+      await status.addUser(me, {
+        through: {
+          isAuthor: true,
+          isTest: myContract.isTest,
+        },
       });
 
       return status;
-    },
-
-    async deleteStatus(mutation, { statusId }, { me }) {
-      const { Status } = useModels();
-      const pubsub = usePubsub();
-
-      const status = await Status.findOne({
-        where: { id: statusId },
-      });
-
-      if (!status) return false;
-
-      await status.destroy();
-
-      pubsub.publish('statusDeleted', {
-        areaId: me.areaId,
-        statusDeleted: status,
-      });
-
-      return true;
-    },
-  },
-
-  Subscription: {
-    statusCreated: {
-      resolve({ statusCreated }) {
-        const { Status } = useModels();
-
-        return new Status(statusCreated);
-      },
-      subscribe: withFilter(
-        () => usePubsub().asyncIterator('statusCreated'),
-        async ({ areaId, statusCreated }, { userId }, { me }) => {
-          return (
-            me &&
-            statusCreated &&
-            statusCreated.areaId === areaId &&
-            statusCreated.userId === userId
-          );
-        },
-      ),
-    },
-
-    statusDeleted: {
-      resolve({ statusDeleted }) {
-        return statusDeleted.id;
-      },
-      subscribe: withFilter(
-        () => usePubsub().asyncIterator('statusDeleted'),
-        async ({ areaId, statusDeleted }, { userId }, { me }) => {
-          return (
-            me &&
-            statusDeleted &&
-            statusDeleted.areaId === areaId &&
-            statusDeleted.userId === userId
-          );
-        },
-      ),
     },
   },
 
@@ -167,8 +142,20 @@ const resolvers = {
       return status.location?.coordinates;
     },
 
-    user(status) {
-      return status.getUser();
+    async author(status) {
+      const [user] = await status.getUsers({
+        through: {
+          where: {
+            isAuthor: true,
+          },
+        },
+      });
+
+      return user || null;
+    },
+
+    weight(status) {
+      return status.countUsers();
     },
   },
 };

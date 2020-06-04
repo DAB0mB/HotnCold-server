@@ -1,7 +1,9 @@
 import { serialize as serializeCookie } from 'cookie';
 import jwt from 'jsonwebtoken';
+import { Op } from 'sequelize';
 
-import { useModels, useTwilio, useWhitelist } from '../providers';
+import { phoneLocalPattern, phoneSmsPattern } from '../consts';
+import { useModels, useTwilio } from '../providers';
 import { generatePasscode } from '../utils';
 
 const resolvers = {
@@ -26,7 +28,7 @@ const resolvers = {
         passcodeExpiresAt,
       };
 
-      if (new RegExp(process.env.TEST_PHONE_LOCAL).test(phone)) {
+      if (phoneLocalPattern.test(phone)) {
         const contract = await Contract.create({
           ...defaults,
           isTest: true,
@@ -36,19 +38,11 @@ const resolvers = {
       }
 
       let isTestPhone;
-      if (new RegExp(process.env.TEST_PHONE_SMS).test(phone)) {
+      if (phoneSmsPattern.test(phone)) {
         isTestPhone = true;
         phone = `+${phone.slice(1)}`;
         defaults.phone = phone;
         defaults.isTest = true;
-      }
-
-      if (process.env.WHITELIST_SHEET_ID) {
-        const whitelist = useWhitelist();
-
-        if (!await whitelist.hasPhone(phone)) {
-          throw Error('Phone is not invited');
-        }
       }
 
       const area = await Area.findByCountryCode(phone);
@@ -95,7 +89,7 @@ const resolvers = {
       const contract = await Contract.findOne({
         where: {
           id: contractId,
-          passcodeExpiresAt: { $gte: new Date() },
+          passcodeExpiresAt: { [Op.gte]: new Date() },
           passcode,
         },
       });

@@ -1,10 +1,8 @@
-'use strict';
+import uuid from 'uuid';
 
-const uuid = require('uuid');
-
-module.exports = {
+const createAreas = {
   async up(queryInterface, Sequelize) {
-    await module.exports.down(queryInterface, Sequelize);
+    await createAreas.down(queryInterface, Sequelize);
 
     return queryInterface.bulkInsert('areas', [
       {
@@ -82,3 +80,5 @@ module.exports = {
     return queryInterface.bulkDelete('areas', null);
   },
 };
+
+export default createAreas;

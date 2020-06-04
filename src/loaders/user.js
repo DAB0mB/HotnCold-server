@@ -5,9 +5,7 @@ export const batchUsers = async (keys) => {
 
   const users = await User.findAll({
     where: {
-      id: {
-        $in: keys,
-      },
+      id: keys,
     },
   });
 

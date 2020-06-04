@@ -1,4 +1,5 @@
 import { withFilter } from 'apollo-server';
+import { Op } from 'sequelize';
 
 import { useModels, usePubsub, useFirebase } from '../providers';
 
@@ -29,7 +30,7 @@ const resolvers = {
 
       const messages = await chat.getMessages({
         where: {
-          createdAt: { $lt: anchorCreatedAt }
+          createdAt: { [Op.lt]: anchorCreatedAt }
         },
         order: [['createdAt', 'DESC']],
         limit,
@@ -40,14 +41,15 @@ const resolvers = {
   },
 
   Mutation: {
-    async sendMessage(mutation, { chatId, text }, { me }) {
+    async sendMessage(mutation, { chatId, text }, { me, myContract }) {
       const { default: Resolvers } = require('.');
-      const { Chat, Message } = useModels();
+      const { Chat, Message, Status } = useModels();
       const firebase = useFirebase();
       const pubsub = usePubsub();
 
       const chat = await Chat.findOne({
-        where: { id: chatId }
+        include: [{ model: Status }],
+        where: { id: chatId },
       });
 
       if (!chat) {
@@ -59,6 +61,8 @@ const resolvers = {
         text,
         chatId,
         userId: me.id,
+        isTest: myContract.isTest,
+        isMock: myContract.isMock,
       });
       await message.save();
 
@@ -68,42 +72,64 @@ const resolvers = {
 
       const users = await chat.getUsers({
         where: {
-          id: { $ne: me.id },
+          id: { [Op.ne]: me.id },
         },
       });
 
-      users.forEach((user) => {
-        user.chats_users = {
-          unreadMessagesIds: [message.id].concat(user.chats_users.unreadMessagesIds).filter(Boolean),
-        };
+      // For now, accumulate unread messages for private chats only
+      if (chat.isThread) {
+        users.forEach((user) => {
+          user.chats = {
+            unreadMessagesIds: [message.id].concat(user.chats_users.unreadMessagesIds).filter(Boolean),
+          };
+        });
+      }
+
+      chat.bumpedAt = new Date();
+      chat.isListed = true;
+
+      await chat.save();
+      await chat.setUsers([...users, me], {
+        through: {
+          isTest: myContract.isTest,
+          unreadMessagesIds: [],
+        }
       });
 
-      await chat.setUsers([...users, me], { through: { unreadMessagesIds: [] } });
+      if (chat.status) {
+        await chat.status.addUser(me, {
+          through: {
+            isTest: myContract.isTest,
+          },
+        });
+      }
 
       pubsub.publish('chatBumped', {
         chatBumped: chat
       });
 
-      // Run in background
-      users.forEach(async (user) => {
-        if (!user.notificationsToken) return;
+      if (!chat.isThread) {
+        // Send notifications to private chats. Run in background
+        users.forEach(async (user) => {
+          if (!user.notificationsToken) return;
 
-        firebase.messaging().sendToDevice(user.notificationsToken, {
-          data: {
-            notificationId: `chat-message-${user.id}`,
-            channelId: 'chat-messages',
-            payload: JSON.stringify({
-              data: { chatId },
-              largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
-              title: await Resolvers.Chat.title(chat, {}, { me: user }),
-              body: message.text, // TODO: Multiline?
-            }),
-          },
+          firebase.messaging().sendToDevice(user.notificationsToken, {
+            data: {
+              notificationId: `chat-message-${user.id}`,
+              channelId: 'chat-messages',
+              payload: JSON.stringify({
+                data: { chatId },
+                largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
+                title: await Resolvers.Chat.title(chat, {}, { me: user }),
+                body: message.text, // TODO: Multiline?
+              }),
+            },
+          });
         });
-      });
+      }
 
       // Run in background
-      // Send an echo message back
+      // Send an echo message back after X amount of seconds
       (async function () {
         const match = text.toLowerCase().match(/^echo( *\d+)?$/);
 
@@ -111,7 +137,7 @@ const resolvers = {
 
         const recipients = await chat.getUsers({
           where: {
-            id: { $ne: me.id },
+            id: { [Op.ne]: me.id },
             isMock: true,
           },
         });
@@ -127,6 +153,7 @@ const resolvers = {
               text: 'echo',
             }, {
               me: recipient,
+              myContract: { isMock: true },
             });
           });
         }, ms);
@@ -170,8 +197,8 @@ const resolvers = {
   },
 
   Message: {
-    user(message) {
-      return message.getUser();
+    user(message, args, { loaders }) {
+      return loaders.user.load(message.userId);
     },
   },
 };

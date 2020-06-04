@@ -6,10 +6,10 @@
   },
   "scripts": {
     "start": "nodemon --exec babel-node ./src/index.js",
-    "sync-meetup-events": "nodemon --exec babel-node ./src/jobs/sync-meetup-events.js",
     "migrate": "yarn sequelize db:seed:undo:all && yarn sequelize db:migrate && yarn sequelize db:seed:all",
-    "test": "jest",
-    "lint": "eslint --fix"
+    "sequelize": "babel-node ./node_modules/.bin/sequelize",
+    "lint": "eslint --fix",
+    "test": "jest"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
@@ -57,7 +57,7 @@
     "nodemon": "^2.0.2",
     "pg": "^7.6.1",
     "qs": "^6.9.3",
-    "sequelize": "^4.41.2",
+    "sequelize": "^5.21.12",
     "sequelize-cli": "^5.5.1",
     "twilio": "^3.39.1",
     "uuid": "^3.3.3"

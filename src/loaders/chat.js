@@ -5,9 +5,7 @@ export const batchChats = async (keys) => {
 
   const chats = await Chat.findAll({
     where: {
-      id: {
-        $in: keys,
-      },
+      id: keys,
     },
   });
 

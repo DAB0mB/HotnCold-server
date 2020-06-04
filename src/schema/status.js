@@ -1,27 +1,23 @@
 import { gql } from 'apollo-server-express';
 
-// TODO: Implement subscriptions
-export default gql`
+export default gql `
   extend type Query {
-    statuses(userId: ID!, limit: Int!, anchor: ID): [Status]! @auth
-    veryFirstStatus(userId: ID!): Status @auth
+    statuses(limit: Int!, anchor: ID): [Status]! @auth
+    firstStatus: Status @auth
+    areaStatuses(location: Vector2D!): [Status]! @auth
+    statusChat(statusId: ID!): Chat @auth
   }
 
   extend type Mutation {
-    createStatus(text: String!, location: Vector2D!, publishedAt: DateTime!): Status! @auth
-    deleteStatus(statusId: ID!): Boolean! @auth
-  }
-
-  extend type Subscription {
-    statusCreated(userId: ID!): Status @auth
-    statusDeleted(userId: ID!): ID @auth
+    createStatus(text: String!, location: Vector2D!): Status! @auth
   }
 
   type Status {
     id: ID!
     text: String!
     location: Vector2D!
-    publishedAt: DateTime!
-    user: User!
+    weight: Int!
+    author: User!
+    createdAt: DateTime!
   }
 `;

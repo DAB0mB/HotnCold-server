@@ -1,3 +1,0 @@
-exports.Source = {
-  meetup: 'meetup',
-};

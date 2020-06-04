@@ -1,6 +1,7 @@
 import { withFilter } from 'apollo-server';
-import Sequelize from 'sequelize';
+import { Op } from 'sequelize';
 
+import { lazyLimit } from '../consts';
 import { useModels, usePubsub } from '../providers';
 
 const resolvers = {
@@ -15,55 +16,124 @@ const resolvers = {
       return myChats[0] || null;
     },
 
-    async chats(query, args, { me }) {
-      const { Chat, Message } = useModels();
+    async chats(query, { limit, anchor }, { me }) {
+      const { ChatUser } = useModels();
 
-      const myChats = await me.getChats();
+      let anchorBumpedAt = new Date();
+      if (anchor) {
+        const chatUser = await ChatUser.findOne({
+          where: { userId: me.id, chatId: anchor },
+          attributes: ['bumpedAt'],
+        });
 
-      const myMessages = await Message.findAll({
-        where: {
-          chatId: { $in: myChats.map(c => c.id) },
-        },
-        attributes: [
-          [Sequelize.fn('DISTINCT', Sequelize.col('chatId')), 'chatId'],
-        ],
-      });
-
-      return Chat.findAll({
-        where: {
-          id: { $in: myMessages.map(m => m.chatId) }
+        if (chatUser) {
+          anchorBumpedAt = chatUser.bumpedAt;
         }
+      }
+
+      return me.getChats({
+        where: {
+          isThread: { [Op.or]: [false, null] },
+          bumpedAt: { [Op.lt]: anchorBumpedAt },
+          isListed: true,
+        },
+        order: [['bumpedAt', 'DESC']],
+        limit,
       });
-    }
+    },
+
+    async firstChat(query, args, { me }) {
+      const [chat] = await me.getChats({
+        where: {
+          isThread: { [Op.or]: [false, null] },
+          isListed: true,
+        },
+        order: [['bumpedAt', 'DESC']],
+        limit: 1,
+      });
+
+      return chat || null;
+    },
+
+    async participants(query, { chatId, limit, anchor }) {
+      const { Chat, ChatUser } = useModels();
+
+      const chat = await Chat.findOne({
+        where: { id: chatId },
+      });
+
+      if (!chat) {
+        return [];
+      }
+
+      let anchorCreatedAt = new Date(0);
+      if (anchor) {
+        const user = await ChatUser.findOne({
+          where: { chatId, userId: anchor },
+          attributes: ['createdAt'],
+        });
+
+        if (user) {
+          anchorCreatedAt = user.createdAt;
+        }
+      }
+
+      const users = await chat.getUsers({
+        through: {
+          where: {
+            createdAt: { [Op.gt]: anchorCreatedAt },
+          },
+        },
+        limit,
+        order: [['createdAt', 'DESC']],
+      });
+
+      return users;
+    },
+
+    async firstParticipant(query, { chatId }) {
+      const { Chat } = useModels();
+
+      const [user] = await new Chat({ id: chatId }).getUsers({
+        limit: 1,
+        order: [['createdAt', 'ASC']],
+      });
+
+      if (!user) return null;
+
+      return user;
+    },
   },
 
   Mutation: {
-    async findOrCreateChat(mutation, { usersIds }, { me }) {
-      const { Chat } = useModels();
+    async findOrCreateChat(mutation, { usersIds }, { me, myContract }) {
+      const { Chat, User } = useModels();
 
-      let chats = await Chat.findForUsers([me, ...usersIds], {
-        attributes: ['id'],
+      let chat = await Chat.findOne({
+        include: [
+          {
+            model: User,
+            as: 'users',
+            where: {
+              id: usersIds,
+            },
+          },
+        ],
+        where: {
+          isThread: { [Op.or]: [false, null] },
+        },
       });
-
-      let chat;
-      for (let c of chats) {
-        const users = await c.getUsers({
-          attributes: ['id']
-        });
-
-        // Find a chat with specified IDs exclusively (including me)
-        if (users.length == usersIds.length + 1) {
-          chat = c;
-
-          break;
-        }
-      }
 
       // Build chat if not found
       if (!chat) {
         chat = new Chat();
+        chat.isTest = myContract.isTest;
         await chat.save();
-        await chat.addUsers([me, ...usersIds]);
+        await chat.addUsers([me, ...usersIds], {
+          through: {
+            isTest: myContract.isTest,
+          },
+        });
       }
 
       return chat;
@@ -98,7 +168,7 @@ const resolvers = {
 
           chatBumped = new Chat(chatBumped);
 
-          const user = await chatBumped.getUsers({
+          const [user] = await chatBumped.getUsers({
             where: { id: me.id }
           });
 
@@ -116,11 +186,11 @@ const resolvers = {
         where: { id: me.id },
       });
 
-      return user?.chats_users?.unreadMessagesIds?.length || 0;
+      return user?.chats?.unreadMessagesIds?.length || 0;
     },
 
     recentMessages(chat) {
-      return chat.getMessages({ order: [['createdAt', 'DESC']], limit: 12 });
+      return chat.getMessages({ order: [['createdAt', 'DESC']], limit: lazyLimit });
     },
 
     async firstMessage(chat) {
@@ -130,9 +200,11 @@ const resolvers = {
     },
 
     async picture(chat, args, { me }) {
+      if (chat.isThread) return null;
+
       const [recipient] = await chat.getUsers({
         where: {
-          id: { $ne: me.id },
+          id: { [Op.ne]: me.id },
         },
         attributes: ['pictures']
       });
@@ -143,9 +215,11 @@ const resolvers = {
     },
 
     async title(chat, args, { me }) {
+      if (chat.isThread) return null;
+
       const users = await chat.getUsers({
         where: {
-          id: { $ne: me.id },
+          id: { [Op.ne]: me.id },
         },
         attributes: ['name']
       });
@@ -153,8 +227,22 @@ const resolvers = {
       return users.length && users[0].name;
     },
 
-    users(chat) {
-      return chat.getUsers();
+    async recipient(chat, args, { me }) {
+      if (chat.isThread) {
+        return chat.recipient;
+      }
+
+      const users = await chat.getUsers({
+        where: {
+          id: { [Op.ne]: me.id },
+        },
+      });
+
+      return users[0];
+    },
+
+    participantsCount(chat) {
+      return chat.countUsers();
     },
   },
 };

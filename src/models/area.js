@@ -39,9 +39,7 @@ const area = (sequelize, DataTypes) => {
   });
 
   Area.associate = (models) => {
-    Area.hasMany(models.Event);
     Area.hasMany(models.Status);
-    Area.hasMany(models.User);
   };
 
   Area.findByCountryCode = (phone) => {

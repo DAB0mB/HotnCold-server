@@ -3,7 +3,10 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     chat(chatId: ID!): Chat @auth
-    chats: [Chat]! @auth
+    chats(limit: Int!, anchor: ID): [Chat]! @auth
+    firstChat: Chat @auth
+    participants(chatId: ID!, limit: Int!, anchor: ID): [User]! @auth
+    firstParticipant(chatId: ID!): User @auth
   }
 
   extend type Mutation {
@@ -17,11 +20,12 @@ export default gql`
 
   type Chat {
     id: ID!
-    title: String!
+    title: String
     picture: String
     unreadMessagesCount: Int!
     recentMessages: [Message]!
     firstMessage: Message
-    users: [User]!
+    participantsCount: Int!
+    recipient: User!
   }
 `;
