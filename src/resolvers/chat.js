@@ -48,7 +48,7 @@ const resolvers = {
           isThread: { [Op.or]: [false, null] },
           isListed: true,
         },
-        order: [['bumpedAt', 'DESC']],
+        order: [['bumpedAt', 'ASC']],
         limit: 1,
       });
 
