@@ -57,6 +57,24 @@ const mockData = {
       });
     }
 
+    {
+      const area = areas.find(a => a.name == 'New York, New York, United States');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
+    {
+      const area = areas.find(a => a.name == 'San Francisco, California, United States');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
     const chats = [];
     const users = [];
     const statuses = [];
