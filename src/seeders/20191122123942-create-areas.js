@@ -4,6 +4,7 @@ const createAreas = {
   async up(queryInterface, Sequelize) {
     await createAreas.down(queryInterface, Sequelize);
 
+    // See StackOverflow answer on how to collect GeoJSON data: https://gis.stackexchange.com/questions/183248/getting-polygon-boundaries-of-city-in-json-from-google-maps-api
     return queryInterface.bulkInsert('areas', [
       {
         id: uuid(),
@@ -36,6 +37,30 @@ const createAreas = {
         timezone: 'America/Los_Angeles',
         polygon: Sequelize.fn('ST_GeomFromText', 'MULTIPOLYGON(((-117.6687 34.8204, -117.6468 34.2892, -117.7289 34.0208, -117.7673 34.0263, -117.8056 33.9770, -117.7837 33.9441, -117.9754 33.9441, -117.9754 33.9003, -118.0575 33.8455, -118.1178 33.7415, -118.1835 33.7634, -118.1835 33.7196, -118.2602 33.7031, -118.4135 33.7415, -118.4300 33.7743, -118.3916 33.8401, -118.4628 33.9715, -118.5450 34.0372, -118.7476 34.0318, -118.8024 33.9989, -118.9448 34.0427, -118.9393 34.0756, -118.7860 34.1687, -118.6655 34.1687, -118.6655 34.2399, -118.6326 34.2399, -118.8846 34.7931, -118.8955 34.8204, -117.6687 34.8204)))'),
         center: Sequelize.fn('ST_GeomFromText', 'POINT(-118.2436 34.0522)'),
+        phone: '+14157993599',
+        countryCode: '1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: uuid(),
+        name: 'San Francisco, California, United States',
+        shortName: 'San Francisco',
+        timezone: 'America/San_Francisco',
+        polygon: Sequelize.fn('ST_GeomFromText', 'MULTIPOLYGON(((-123.0949 37.7100, -123.1300 37.7100, -123.1800 37.7599, -123.1749 37.7950, -123.1200 37.8299, -123.0550 37.8149, -123.0300 37.7800, -122.9900 37.7749, -122.9699 37.75, -122.9600 37.75, -122.9399 37.7300, -122.9300 37.6899, -122.9399 37.6649, -122.9699 37.6400, -123.0150 37.6349, -123.0450 37.6450, -123.0750 37.6700, -123.0949 37.7100)))'),
+        center: Sequelize.fn('ST_GeomFromText', 'POINT(-122.4194 37.7790)'),
+        phone: '+14157993599',
+        countryCode: '1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: uuid(),
+        name: 'New York, New York, United States',
+        shortName: 'New York',
+        timezone: 'America/New_York',
+        polygon: Sequelize.fn('ST_GeomFromText', 'MULTIPOLYGON(((-74.2630 40.494, -74.262 40.5129, -74.2510 40.5240, -74.2540 40.5470, -74.2349 40.5630, -74.2199 40.5630, -74.2049 40.5990, -74.2070 40.6330, -74.1910 40.6490, -74.0589 40.6570, -74.0420 40.6839, -74.0520 40.6929, -74.0430 40.7049, -74.0310 40.7019, -74.0190 40.7580, -73.9680 40.8290, -73.9219 40.9209, -73.8619 40.9059, -73.8490 40.9149, -73.8320 40.8969, -73.7429 40.8740, -73.7750 40.814, -73.6989 40.7569, -73.6950 40.738, -73.7040 40.7240, -73.7240 40.7190, -73.7210 40.6490, -73.7369 40.6439, -73.738 40.6300, -73.762 40.622, -73.7420 40.616, -73.7300 40.5960, -73.7519 40.5829, -73.756 40.5279, -73.8020 40.5279, -73.8889 40.5020, -73.9030 40.488, -73.9809 40.5150, -74.2270 40.4720, -74.2549 40.4819, -74.2630 40.494)), ((-74.0349 40.695, -74.0400 40.6940, -74.0379 40.6899, -74.0349 40.695)))'),
+        center: Sequelize.fn('ST_GeomFromText', 'POINT(-74.006 40.7127)'),
         phone: '+14157993599',
         countryCode: '1',
         createdAt: new Date(),
