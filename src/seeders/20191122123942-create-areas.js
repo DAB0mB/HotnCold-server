@@ -1,5 +1,3 @@
-import uuid from 'uuid';
-
 const createAreas = {
   async up(queryInterface, Sequelize) {
     await createAreas.down(queryInterface, Sequelize);
@@ -7,7 +5,7 @@ const createAreas = {
     // See StackOverflow answer on how to collect GeoJSON data: https://gis.stackexchange.com/questions/183248/getting-polygon-boundaries-of-city-in-json-from-google-maps-api
     return queryInterface.bulkInsert('areas', [
       {
-        id: uuid(),
+        id: '86a76d71-9228-46d4-987a-993f88544988',
         name: 'Hong Kong',
         shortName: 'Hong Kong',
         timezone: 'Asia/Hong_Kong',
@@ -19,7 +17,7 @@ const createAreas = {
         updatedAt: new Date(),
       },
       {
-        id: uuid(),
+        id: '45a33a0f-c759-463b-ac4d-f2f9389ae363',
         name: 'Berlin, Germany',
         shortName: 'Berlin',
         timezone: 'Europe/Berlin',
@@ -31,7 +29,7 @@ const createAreas = {
         updatedAt: new Date(),
       },
       {
-        id: uuid(),
+        id: 'fca8aac6-60d1-44cf-bf42-dfd8ca89c296',
         name: 'Los Angeles, California, United States',
         shortName: 'Los Angeles',
         timezone: 'America/Los_Angeles',
@@ -43,7 +41,7 @@ const createAreas = {
         updatedAt: new Date(),
       },
       {
-        id: uuid(),
+        id: '9f892197-f556-4b56-b5bd-4a0619a9d068',
         name: 'San Francisco, California, United States',
         shortName: 'San Francisco',
         timezone: 'America/San_Francisco',
@@ -55,7 +53,7 @@ const createAreas = {
         updatedAt: new Date(),
       },
       {
-        id: uuid(),
+        id: '0044da5b-5091-4b81-8e32-ed7c5324b5ec',
         name: 'New York, New York, United States',
         shortName: 'New York',
         timezone: 'America/New_York',
@@ -67,7 +65,7 @@ const createAreas = {
         updatedAt: new Date(),
       },
       {
-        id: uuid(),
+        id: 'ee1c0644-c9c4-4b92-8809-5dbe316631cf',
         name: 'Taipei, Taiwan',
         shortName: 'Taipei',
         timezone: 'Asia/Taipei',
@@ -79,7 +77,7 @@ const createAreas = {
         updatedAt: new Date(),
       },
       {
-        id: uuid(),
+        id: 'e860413e-4c57-4f22-a8f3-dbe3e4e5a488',
         name: 'Tel Aviv-Yafo, Gush Dan, Israel',
         shortName: 'Tel Aviv',
         timezone: 'Asia/Jerusalem',
