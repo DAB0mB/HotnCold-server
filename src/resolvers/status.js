@@ -65,7 +65,7 @@ const resolvers = {
       return status || null;
     },
 
-    async areaStatuses(query, { location }, { myContract }) {
+    async areaStatuses(query, { location }, { me, myContract }) {
       const { Area, Status } = useModels();
 
       const area = await Area.findOne({
@@ -76,14 +76,30 @@ const resolvers = {
         return [];
       }
 
+      if (myContract.isTest) {
+        const myStatuses = await me.getStatuses({
+          where: {
+            expiresAt: { [Op.gt]: new Date() },
+          },
+        });
+
+        const statuses = await Status.findAll({
+          where: {
+            expiresAt: { [Op.gt]: new Date() },
+            areaId: area.id,
+            isMock: true,
+          },
+        });
+
+        return [...myStatuses, ...statuses];
+      }
+
       return Status.findAll({
         where: {
           expiresAt: { [Op.gt]: new Date() },
           areaId: area.id,
-          [Op.or]: [
-            { isTest: myContract.isTest || { [Op.or]: [false, null] } },
-            { isMock: myContract.isTest || { [Op.or]: [false, null] } },
-          ],
+          isTest: { [Op.or]: [false, null] },
+          isMock: { [Op.or]: [false, null] },
         },
       });
     },
