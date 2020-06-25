@@ -186,7 +186,7 @@ const resolvers = {
         where: { id: me.id },
       });
 
-      return user?.chats?.unreadMessagesIds?.length || 0;
+      return user?.chats_users?.dataValues?.unreadMessagesIds?.length || 0;
     },
 
     recentMessages(chat) {

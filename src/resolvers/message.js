@@ -77,9 +77,9 @@ const resolvers = {
       });
 
       // For now, accumulate unread messages for private chats only
-      if (chat.isThread) {
+      if (!chat.isThread) {
         users.forEach((user) => {
-          user.chats = {
+          user.chats_users = {
             unreadMessagesIds: [message.id].concat(user.chats_users.unreadMessagesIds).filter(Boolean),
           };
         });
