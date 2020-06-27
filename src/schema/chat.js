@@ -11,6 +11,7 @@ export default gql`
 
   extend type Mutation {
     findOrCreateChat(usersIds: [ID!]!): Chat! @auth
+    findOrCreateChat_2(recipientId: ID!): Chat! @auth
     markChatAsRead(chatId: ID!): Boolean @auth
   }
 

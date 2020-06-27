@@ -107,22 +107,10 @@ const resolvers = {
 
   Mutation: {
     async findOrCreateChat(mutation, { usersIds }, { me, myContract }) {
-      const { Chat, User } = useModels();
+      const { Chat } = useModels();
+      const recipientId = usersIds[0];
 
-      let chat = await Chat.findOne({
-        include: [
-          {
-            model: User,
-            as: 'users',
-            where: {
-              id: usersIds,
-            },
-          },
-        ],
-        where: {
-          isThread: { [Op.or]: [false, null] },
-        },
-      });
+      let chat = await Chat.findPrivateChat(me, recipientId);
 
       // Build chat if not found
       if (!chat) {
@@ -137,6 +125,10 @@ const resolvers = {
       }
 
       return chat;
+    },
+
+    findOrCreateChat_2(mutation, { recipientId }, context) {
+      return resolvers.Mutation.findOrCreateChat(mutation, { usersIds: [recipientId] }, context);
     },
 
     async markChatAsRead(mutation, { chatId }, { me }) {

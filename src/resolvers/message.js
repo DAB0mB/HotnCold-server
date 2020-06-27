@@ -66,10 +66,6 @@ const resolvers = {
       });
       await message.save();
 
-      pubsub.publish('messageSent', {
-        messageSent: message
-      });
-
       const users = await chat.getUsers({
         where: {
           id: { [Op.ne]: me.id },
@@ -103,6 +99,10 @@ const resolvers = {
           },
         });
       }
+
+      pubsub.publish('messageSent', {
+        messageSent: message
+      });
 
       pubsub.publish('chatBumped', {
         chatBumped: chat
