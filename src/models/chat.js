@@ -1,5 +1,7 @@
 import uuid from 'uuid';
 
+import { isUUID } from '../utils';
+
 const chat = (sequelize, DataTypes) => {
   const Chat = sequelize.define('chat', {
     id: {
@@ -38,6 +40,11 @@ const chat = (sequelize, DataTypes) => {
   Chat.findPrivateChat = async (user, recipient) => {
     const userId = typeof user == 'string' ? user : user.id;
     const recipientId = typeof recipient == 'string' ? recipient : recipient.id;
+
+    // Important to avoid SQL injection
+    if (!isUUID(userId)) return null;
+    if (!isUUID(recipientId)) return null;
+
     const { chats_users: ChatUser } = sequelize.models;
 
     const records = await sequelize.query(

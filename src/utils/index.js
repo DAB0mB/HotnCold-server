@@ -40,6 +40,10 @@ export const generatePasscode = (length = 4) => {
   }, '');
 };
 
+export const isUUID = (str) => {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+};
+
 // Will use the shortest indention as an axis
 export const freeText = (text) => {
   if (text instanceof Array) {
