@@ -5,6 +5,7 @@ import chatSchema from './chat';
 import contractSchema from './contract';
 import directiveSchema from './directive';
 import messageSchema from './message';
+import notificationSchema from './notification';
 import scalarsSchema from './scalars';
 import uploadSchema from './upload';
 import userSchema from './user';
@@ -31,6 +32,7 @@ export default [
   directiveSchema,
   linkSchema,
   messageSchema,
+  notificationSchema,
   scalarsSchema,
   uploadSchema,
   userSchema,

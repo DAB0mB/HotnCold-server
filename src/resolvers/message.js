@@ -43,7 +43,7 @@ const resolvers = {
   Mutation: {
     async sendMessage(mutation, { chatId, text }, { me, myContract }) {
       const { default: Resolvers } = require('.');
-      const { Chat, Message, Status } = useModels();
+      const { Chat, ChatSubscription, Message, Status, User } = useModels();
       const firebase = useFirebase();
       const pubsub = usePubsub();
 
@@ -108,25 +108,65 @@ const resolvers = {
         chatBumped: chat
       });
 
-      if (!chat.isThread) {
-        // Send notifications to private chats. Run in background
-        users.forEach(async (user) => {
+      const subscriptions = await chat.getSubscriptions({
+        include: [
+          {
+            model: User,
+            as: 'user',
+          },
+        ],
+      });
+
+      const newSubscriptions = users
+        .filter((user) => {
+          return !subscriptions.find(s => s.userId == user.id);
+        })
+        .map((user) => {
+          const chatSubscription = new ChatSubscription({
+            chatId: chat.id,
+            userId: user.id,
+            isActive: !chat.isThread,
+            isTest: myContract.isTest,
+          });
+
+          chatSubscription.user = user;
+
+          return chatSubscription;
+        });
+
+      if (newSubscriptions.length) {
+        await chat.addSubscriptions(newSubscriptions);
+
+        subscriptions.push(...newSubscriptions);
+      }
+
+      subscriptions
+        .filter(s => s.isActive)
+        .map(s => s.user).forEach(async (user) => {
           if (!user.notificationsToken) return;
 
           firebase.messaging().sendToDevice(user.notificationsToken, {
             data: {
-              notificationId: `chat-message-${user.id}`,
+              notificationId: `${chat.id}-${user.id}`,
               channelId: 'chat-messages',
               payload: JSON.stringify({
-                data: { chatId },
-                largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
-                title: await Resolvers.Chat.title(chat, {}, { me: user }),
+                data: {
+                  isThread: !!chat.isThread,
+                  statusId: chat.status?.id,
+                  chatId,
+                },
                 body: message.text, // TODO: Multiline?
+                ...(chat.isThread ? {
+                  largeIcon: await me.ensureAvatar(),
+                  title: `${me.name} (thread)`,
+                } : {
+                  largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
+                  title: await Resolvers.Chat.title(chat, {}, { me: user }),
+                }),
               }),
             },
           });
         });
-      }
 
       // Run in background
       // Send an echo message back after X amount of seconds

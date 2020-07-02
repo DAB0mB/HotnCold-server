@@ -32,8 +32,9 @@ const chat = (sequelize, DataTypes) => {
   });
 
   Chat.associate = (models) => {
-    Chat.hasMany(models.Message);
     Chat.hasOne(models.Status);
+    Chat.hasMany(models.Message);
+    Chat.hasMany(models.ChatSubscription, { as: 'subscriptions' });
     Chat.belongsToMany(models.User, { through: models.ChatUser, as: 'users' });
   };
 

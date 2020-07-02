@@ -9,8 +9,6 @@ export default gql`
   extend type Mutation {
     createUser(name: String!, bio: String, occupation: String, birthDate: DateTime, pictures: [String]!): String!
     updateMyProfile(name: String!, bio: String, occupation: String, birthDate: DateTime, pictures: [String]!): User @auth
-    associateNotificationsToken(token: String!): Boolean! @auth
-    dissociateNotificationsToken: Boolean! @auth
   }
 
   type User {

@@ -72,7 +72,14 @@ const resolvers = {
         await contract.save();
       }
 
-      if (!process.env.TWILIO_SKIP) {
+      if (process.env.TWILIO_SKIP) {
+        console.log({
+          body: `Hot&Cold ${passcodePhrase}: ${passcode}`,
+          from: area.phone,
+          to: phone,
+        });
+      }
+      else {
         await twilio.messages.create({
           body: `Hot&Cold ${passcodePhrase}: ${passcode}`,
           from: area.phone,

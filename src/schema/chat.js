@@ -13,6 +13,7 @@ export default gql`
     findOrCreateChat(usersIds: [ID!]!): Chat! @auth
     findOrCreateChat_2(recipientId: ID!): Chat! @auth
     markChatAsRead(chatId: ID!): Boolean @auth
+    toggleChatSubscription(chatId: ID!): Boolean! @auth
   }
 
   extend type Subscription {
@@ -28,5 +29,6 @@ export default gql`
     firstMessage: Message
     participantsCount: Int!
     recipient: User!
+    subscribed: Boolean!
   }
 `;

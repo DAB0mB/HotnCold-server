@@ -6,6 +6,7 @@ import areaResolvers from './area';
 import chatResolvers from './chat';
 import contractResolvers from './contract';
 import messageResolvers from './message';
+import notificationResolvers from './notification';
 import uploadResolvers from './upload';
 import statusResolvers from './status';
 import userResolvers from './user';
@@ -24,6 +25,7 @@ export default merge(
   contractResolvers,
   customScalarResolver,
   messageResolvers,
+  notificationResolvers,
   uploadResolvers,
   userResolvers,
   statusResolvers,

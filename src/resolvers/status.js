@@ -4,8 +4,15 @@ import { useModels } from '../providers';
 
 const resolvers = {
   Query: {
+    // Older version support
     async statusChat(query, { statusId }) {
-      const { Status, User } = useModels();
+      const status = await resolvers.Query.status(query, { statusId });
+
+      return status?.chat || null;
+    },
+
+    async status(query, { statusId }) {
+      const { Status, Chat, User } = useModels();
 
       const status = await Status.findOne({
         include: [
@@ -16,6 +23,10 @@ const resolvers = {
               where: { isAuthor: true },
             },
           },
+          {
+            model: Chat,
+            as: 'chat',
+          },
         ],
         where: { id: statusId },
       });
@@ -24,11 +35,9 @@ const resolvers = {
         return null;
       }
 
-      const chat = await status.getChat();
+      status.chat.recipient = status.users[0];
 
-      chat.recipient = status.users[0];
-
-      return chat;
+      return status;
     },
 
     async statuses(query, { limit, anchor }, { me }) {
@@ -172,6 +181,10 @@ const resolvers = {
 
     weight(status) {
       return status.countUsers();
+    },
+
+    async chat(status) {
+      return status.getChat();
     },
   },
 };

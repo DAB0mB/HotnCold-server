@@ -77,26 +77,6 @@ const resolvers = {
 
       return me;
     },
-
-    async associateNotificationsToken(mutations, { token }, { me }) {
-      me.notificationsToken = token;
-      await me.save();
-
-      return true;
-    },
-
-    async dissociateNotificationsToken(mutations, args, { me }) {
-      const hasToken = !!me.notificationsToken;
-
-      if (!hasToken) {
-        return false;
-      }
-
-      me.notificationsToken = null;
-      await me.save();
-
-      return true;
-    },
   },
 
   User: {

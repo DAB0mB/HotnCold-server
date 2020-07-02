@@ -117,7 +117,7 @@ const resolvers = {
         chat = new Chat();
         chat.isTest = myContract.isTest;
         await chat.save();
-        await chat.addUsers([me, ...usersIds], {
+        await chat.addUsers([me, recipientId], {
           through: {
             isTest: myContract.isTest,
           },
@@ -141,6 +141,39 @@ const resolvers = {
       });
 
       return !!updateCount;
+    },
+
+    async toggleChatSubscription(mutation, { chatId }, { me, myContract }) {
+      const { Chat, ChatSubscription } = useModels();
+
+      const chat = await Chat.findOne({
+        where: { id: chatId },
+      });
+
+      if (!chat) {
+        throw Error('Chat not found!');
+      }
+
+      const [subscription] = await chat.getSubscriptions({
+        limit: 1,
+        where: { userId: me.id },
+      });
+
+      if (!subscription) {
+        await ChatSubscription.create({
+          chatId: chat.id,
+          userId: me.id,
+          isActive: true,
+          isTest: myContract.isTest,
+        });
+
+        return true;
+      }
+
+      subscription.isActive = !subscription.isActive;
+      await subscription.save();
+
+      return subscription.isActive;
     },
   },
 
@@ -220,7 +253,7 @@ const resolvers = {
     },
 
     async recipient(chat, args, { me }) {
-      if (chat.isThread) {
+      if (chat.recipient) {
         return chat.recipient;
       }
 
@@ -235,6 +268,16 @@ const resolvers = {
 
     participantsCount(chat) {
       return chat.countUsers();
+    },
+
+    async subscribed(chat, args, { me }) {
+      return !!await chat.countSubscriptions({
+        limit: 1,
+        where: {
+          userId: me.id,
+          isActive: true,
+        },
+      });
     },
   },
 };
