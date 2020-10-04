@@ -115,11 +115,15 @@ const mockData = {
 
       const status = {
         id: statusId,
+        published: true,
+        areaId,
+        chatId,
         text: 'Who wants to have a crabby patty?!',
         expiresAt: new Date(84 * (10 ** 14)),
         location: Sequelize.fn('ST_GeomFromText', `POINT(${coordinates.join(' ')})`),
-        areaId,
-        chatId,
+        images: [
+          'https://user-images.githubusercontent.com/7648874/95663761-79918f00-0b4a-11eb-896d-9e831f859dec.png'
+        ],
         ...base,
       };
 

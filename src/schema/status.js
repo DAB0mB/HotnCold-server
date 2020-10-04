@@ -3,14 +3,15 @@ import { gql } from 'apollo-server-express';
 export default gql `
   extend type Query {
     status(statusId: ID!): Status @auth
-    statuses(limit: Int!, anchor: ID): [Status]! @auth
+    statuses(userId: ID, limit: Int!, anchor: ID): [Status]! @auth
     statusChat(statusId: ID!): Chat @auth
     firstStatus: Status @auth
     areaStatuses(location: Vector2D!): [Status]! @auth
   }
 
   extend type Mutation {
-    createStatus(text: String!, location: Vector2D!): Status! @auth
+    createStatus(text: String!, images: [String]!, location: Vector2D!, published: Boolean): Status! @auth
+    publishStatus(statusId: ID!): Boolean! @auth
   }
 
   type Status {
@@ -20,6 +21,11 @@ export default gql `
     weight: Int!
     author: User!
     chat: Chat!
+    images: [String]
+    firstImage: String
+    thumb: String
+    avatar: String
+    published: Boolean!
     createdAt: DateTime!
   }
 `;

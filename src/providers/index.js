@@ -1,4 +1,5 @@
 export * from './cloudinary';
+export * from './db';
 export * from './firebase';
 export * from './mapbox';
 export * from './models';

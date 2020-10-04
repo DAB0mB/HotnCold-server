@@ -40,10 +40,20 @@ const resolvers = {
       return status;
     },
 
-    async statuses(query, { limit, anchor }, { me }) {
-      let anchorCreatedAt = new Date(0);
+    async statuses(query, { userId, limit, anchor }, { me }) {
+      const { User } = useModels();
+
+      const user = !userId ? me : await User.findOne({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw Error(`User with ID ${userId} not found`);
+      }
+
+      let anchorCreatedAt = new Date();
       if (anchor) {
-        const [status] = await me.getStatuses({
+        const [status] = await user.getStatuses({
           where: { id: anchor },
           attributes: ['createdAt'],
           limit: 1,
@@ -54,9 +64,15 @@ const resolvers = {
         }
       }
 
-      const statuses = await me.getStatuses({
+      const statuses = await user.getStatuses({
+        ...(userId ?({
+          through: {
+            where: { isAuthor: true },
+          }
+        }): {}),
         where: {
-          createdAt: { [Op.gt]: anchorCreatedAt }
+          createdAt: { [Op.lt]: anchorCreatedAt },
+          ...(userId !== me.id ? { published: true } : {}),
         },
         order: [['createdAt', 'DESC']],
         limit,
@@ -94,6 +110,7 @@ const resolvers = {
 
         const statuses = await Status.findAll({
           where: {
+            published: true,
             expiresAt: { [Op.gt]: new Date() },
             areaId: area.id,
             isMock: true,
@@ -115,8 +132,8 @@ const resolvers = {
   },
 
   Mutation: {
-    async createStatus(mutation, { text, location }, { me, myContract }) {
-      const { Area, Chat, Status } = useModels();
+    async createStatus(mutation, { text, images, location, published }, { me, myContract }) {
+      const { Area, Chat, Status, ChatSubscription } = useModels();
 
       const area = await Area.findOne({
         where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
@@ -133,14 +150,25 @@ const resolvers = {
         bumpedAt: new Date(),
       });
       await chat.save();
+
       await chat.addUser(me, {
         through: {
           isTest: myContract.isTest,
         },
       });
 
+      // Subscribe by default to created chats
+      await ChatSubscription.create({
+        chatId: chat.id,
+        userId: me.id,
+        isActive: true,
+        isTest: myContract.isTest,
+      });
+
       const status = new Status({
         text,
+        images,
+        published: !!published,
         areaId: area.id,
         chatId: chat.id,
         isTest: myContract.isTest,
@@ -159,6 +187,18 @@ const resolvers = {
       });
 
       return status;
+    },
+
+    async publishStatus(mutation, { statusId }) {
+      const { Status } = useModels();
+
+      const [updateCount] = await Status.update({
+        published: true,
+      }, {
+        where: { id: statusId },
+      });
+
+      return !!updateCount;
     },
   },
 
@@ -183,8 +223,28 @@ const resolvers = {
       return status.countUsers();
     },
 
+    images(status) {
+      return status.images || [];
+    },
+
+    firstImage(status) {
+      return status.images?.[0] || null;
+    },
+
+    thumb(status) {
+      return status.ensureThumb();
+    },
+
+    avatar(status) {
+      return status.ensureAvatar();
+    },
+
+    published(status) {
+      return !!status.published;
+    },
+
     async chat(status) {
-      return status.getChat();
+      return status.chat || status.getChat();
     },
   },
 };
