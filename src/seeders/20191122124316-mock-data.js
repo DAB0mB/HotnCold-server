@@ -75,6 +75,33 @@ const mockData = {
       });
     }
 
+    {
+      const area = areas.find(a => a.name == 'Portsmouth, New Hampshire, United States');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
+    {
+      const area = areas.find(a => a.name == 'Boston, Massachusetts, United States');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
+    {
+      const area = areas.find(a => a.name == 'Portland, Maine, United States');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
     const chats = [];
     const users = [];
     const statuses = [];
