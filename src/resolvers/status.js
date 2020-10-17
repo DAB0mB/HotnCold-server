@@ -120,19 +120,32 @@ const resolvers = {
         return [...myStatuses, ...statuses];
       }
 
-      return Status.findAll({
+      const myStatuses = await me.getStatuses({
         where: {
+          published: false,
           expiresAt: { [Op.gt]: new Date() },
           areaId: area.id,
           isTest: { [Op.or]: [false, null] },
           isMock: { [Op.or]: [false, null] },
         },
       });
+
+      const statuses = await Status.findAll({
+        where: {
+          published: true,
+          expiresAt: { [Op.gt]: new Date() },
+          areaId: area.id,
+          isTest: { [Op.or]: [false, null] },
+          isMock: { [Op.or]: [false, null] },
+        },
+      });
+
+      return [...myStatuses, ...statuses];
     },
   },
 
   Mutation: {
-    async createStatus(mutation, { text, images, location, published }, { me, myContract }) {
+    async createStatus(mutation, { text, images, location, published, isMeetup }, { me, myContract }) {
       const { Area, Chat, Status, ChatSubscription } = useModels();
 
       const area = await Area.findOne({
@@ -169,6 +182,7 @@ const resolvers = {
         text,
         images,
         published: !!published,
+        isMeetup: !!isMeetup,
         areaId: area.id,
         chatId: chat.id,
         isTest: myContract.isTest,
@@ -241,6 +255,10 @@ const resolvers = {
 
     published(status) {
       return !!status.published;
+    },
+
+    isMeetup(status) {
+      return !!status.isMeetup;
     },
 
     async chat(status) {

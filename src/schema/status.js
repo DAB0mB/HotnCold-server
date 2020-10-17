@@ -10,7 +10,7 @@ export default gql `
   }
 
   extend type Mutation {
-    createStatus(text: String!, images: [String]!, location: Vector2D!, published: Boolean): Status! @auth
+    createStatus(text: String!, images: [String]!, location: Vector2D!, published: Boolean, isMeetup: Boolean): Status! @auth
     publishStatus(statusId: ID!): Boolean! @auth
   }
 
@@ -26,6 +26,7 @@ export default gql `
     thumb: String
     avatar: String
     published: Boolean!
+    isMeetup: Boolean!
     createdAt: DateTime!
   }
 `;

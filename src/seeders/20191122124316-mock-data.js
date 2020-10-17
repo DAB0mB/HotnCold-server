@@ -143,6 +143,7 @@ const mockData = {
       const status = {
         id: statusId,
         published: true,
+        isMeetup: false,
         areaId,
         chatId,
         text: 'Who wants to have a crabby patty?!',

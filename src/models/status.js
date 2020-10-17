@@ -41,6 +41,10 @@ const status = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: () => false,
     },
+    isMeetup: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: () => false,
+    },
     isMock: {
       type: DataTypes.BOOLEAN,
       defaultValue: () => false,
