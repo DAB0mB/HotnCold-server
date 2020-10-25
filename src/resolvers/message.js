@@ -41,7 +41,11 @@ const resolvers = {
   },
 
   Mutation: {
-    async sendMessage(mutation, { chatId, text }, { me, myContract }) {
+    async sendMessage(mutation, { chatId, text, image }, { me, myContract }) {
+      if (!text && !image) {
+        throw Error('Either message.text or message.image must be provided');
+      }
+
       const { default: Resolvers } = require('.');
       const { Chat, ChatSubscription, Message, Status, User } = useModels();
       const firebase = useFirebase();
@@ -59,6 +63,7 @@ const resolvers = {
       // Create the message and associate it with me and target chat
       const message = new Message({
         text,
+        image,
         chatId,
         userId: me.id,
         isTest: myContract.isTest,
@@ -155,7 +160,7 @@ const resolvers = {
                   statusId: chat.status?.id,
                   chatId,
                 },
-                body: message.text, // TODO: Multiline?
+                body: message.text ? message.text : '📷 Image', // TODO: Multiline?
                 ...(chat.isThread ? {
                   largeIcon: await me.ensureAvatar(),
                   title: `${me.name} (thread)`,
@@ -171,6 +176,8 @@ const resolvers = {
       // Run in background
       // Send an echo message back after X amount of seconds
       (async function () {
+        if (!text) return;
+
         const match = text.toLowerCase().match(/^echo( *\d+)?$/);
 
         if (!match) return;

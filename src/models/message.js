@@ -9,7 +9,9 @@ const message = (sequelize, DataTypes) => {
     },
     text: {
       type: DataTypes.STRING,
-      allowNull: false,
+    },
+    image: {
+      type: DataTypes.STRING,
     },
     isTest: {
       type: DataTypes.BOOLEAN,
