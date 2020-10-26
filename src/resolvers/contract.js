@@ -46,10 +46,11 @@ const resolvers = {
       }
 
       const area = await Area.findByCountryCode(phone);
+      const areaPhone = area ? area.phone : Area.defaultPhone;
 
-      if (!area) {
-        throw Error('Country is not yet supported');
-      }
+      // if (!area) {
+      //   throw Error('Country is not yet supported');
+      // }
 
       let created;
       let contract;
@@ -75,14 +76,14 @@ const resolvers = {
       if (process.env.TWILIO_SKIP) {
         console.log({
           body: `Hot&Cold ${passcodePhrase}: ${passcode}`,
-          from: area.phone,
+          from: areaPhone,
           to: phone,
         });
       }
       else {
         await twilio.messages.create({
           body: `Hot&Cold ${passcodePhrase}: ${passcode}`,
-          from: area.phone,
+          from: areaPhone,
           to: phone,
         });
       }

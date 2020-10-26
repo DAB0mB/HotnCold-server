@@ -38,6 +38,8 @@ const area = (sequelize, DataTypes) => {
     },
   });
 
+  Area.defaultPhone = '+14157993599';
+
   Area.associate = (models) => {
     Area.hasMany(models.Status);
   };
