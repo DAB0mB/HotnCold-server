@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     areas(searchText: String!): [Area]! @auth
+    localAreaPlaces(location: Vector2D!, searchText: String!): FeatureCollection! @auth
   }
 
   type Area {

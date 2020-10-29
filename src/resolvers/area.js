@@ -1,6 +1,6 @@
 import Sequelize, { Op } from 'sequelize';
 
-import { useModels } from '../providers';
+import { useMapbox, useModels } from '../providers';
 
 const resolvers = {
   Query: {
@@ -15,6 +15,33 @@ const resolvers = {
         ),
         limit: 10,
       });
+    },
+
+    async localAreaPlaces(query, { location, searchText }) {
+      const { geocoding } = useMapbox();
+      const { Area } = useModels();
+
+      const area = await Area.findOne({
+        where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
+      });
+
+      const bbox = await area.getBBox();
+
+      if (!bbox) {
+        return {
+          type: 'FeatureCollection',
+          features: [],
+        };
+      }
+
+      const featureCollection = await geocoding.forwardGeocode({
+        query: searchText,
+        types: ['district', 'place', 'locality', 'neighborhood', 'address', 'poi', 'poi.landmark'],
+        limit: 15,
+        bbox,
+      }).send().then(res => res.body);
+
+      return featureCollection;
     },
   },
 

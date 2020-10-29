@@ -1,3 +1,4 @@
+import turfBbox from '@turf/bbox';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import uuid from 'uuid';
 
@@ -32,6 +33,13 @@ const area = (sequelize, DataTypes) => {
       type: DataTypes.GEOMETRY('MULTIPOLYGON'),
       allowNull: false,
     },
+    bbox: {
+      type: DataTypes.ARRAY(DataTypes.FLOAT),
+      allowNull: true,
+      validate: {
+        len: 4,
+      },
+    },
     center: {
       type: DataTypes.GEOMETRY('POINT'),
       allowNull: false,
@@ -54,6 +62,15 @@ const area = (sequelize, DataTypes) => {
         countryCode: jsPhone.countryCallingCode
       },
     });
+  };
+
+  Area.prototype.getBBox = async function () {
+    if (!this.bbox) {
+      this.bbox = turfBbox(this.polygon);
+      await this.save();
+    }
+
+    return this.bbox;
   };
 
   return Area;
