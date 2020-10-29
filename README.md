@@ -37,9 +37,11 @@ Define environment variables in `.env` file (NEVER COMMIT):
     FIREBASE_PRIVATE_KEY
     FIREBASE_DB_URL
     # How long a status chat is gonna live once created
-    CHAT_TTL
+    STATUS_TTL
     # How long will authentication token last (in seconds)
     AUTH_TTL
+    # An extra margin to subtract from queries which run against the status expiration date (ms). Higher value will result in more statuses.
+    STATUS_EXPR_MARGIN
     # *Optional: Server port. Defaults to 8000
     PORT
     # *Optional: Server host. Defaults to 0.0.0.0

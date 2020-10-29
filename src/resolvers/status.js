@@ -101,17 +101,20 @@ const resolvers = {
         return [];
       }
 
+      const exprMargin = Number(process.env.STATUS_EXPR_MARGIN || '0');
+      const exprDate = new Date(Date.now() - exprMargin);
+
       if (myContract.isTest) {
         const myStatuses = await me.getStatuses({
           where: {
-            expiresAt: { [Op.gt]: new Date() },
+            expiresAt: { [Op.gt]: exprDate },
           },
         });
 
         const statuses = await Status.findAll({
           where: {
             published: true,
-            expiresAt: { [Op.gt]: new Date() },
+            expiresAt: { [Op.gt]: exprDate },
             areaId: area.id,
             isMock: true,
           },
@@ -123,7 +126,7 @@ const resolvers = {
       const myStatuses = await me.getStatuses({
         where: {
           published: false,
-          expiresAt: { [Op.gt]: new Date() },
+          expiresAt: { [Op.gt]: exprDate },
           areaId: area.id,
           isTest: { [Op.or]: [false, null] },
           isMock: { [Op.or]: [false, null] },
@@ -133,7 +136,7 @@ const resolvers = {
       const statuses = await Status.findAll({
         where: {
           published: true,
-          expiresAt: { [Op.gt]: new Date() },
+          expiresAt: { [Op.gt]: exprDate },
           areaId: area.id,
           isTest: { [Op.or]: [false, null] },
           isMock: { [Op.or]: [false, null] },
