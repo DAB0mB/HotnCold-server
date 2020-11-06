@@ -247,6 +247,14 @@ const resolvers = {
     user(message, args, { loaders }) {
       return loaders.user.load(message.userId);
     },
+
+    pending() {
+      return false;
+    },
+
+    sent() {
+      return true;
+    },
   },
 };
 

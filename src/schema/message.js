@@ -18,6 +18,8 @@ export default gql`
     createdAt: DateTime!
     text: String
     image: String
+    sent: Boolean
+    pending: Boolean
     user: User!
   }
 `;
