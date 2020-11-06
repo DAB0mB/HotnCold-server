@@ -108,6 +108,7 @@ const resolvers = {
         const myStatuses = await me.getStatuses({
           where: {
             expiresAt: { [Op.gt]: exprDate },
+            isMock: false,
           },
         });
 
