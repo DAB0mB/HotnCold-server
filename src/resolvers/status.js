@@ -90,8 +90,8 @@ const resolvers = {
       return status || null;
     },
 
-    async areaStatuses(query, { location }, { me, myContract }) {
-      const { Area, Status } = useModels();
+    async areaStatuses(query, { location }, { db, me, myContract }) {
+      const { Status, Area } = useModels();
 
       const area = await Area.findOne({
         where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
@@ -104,47 +104,54 @@ const resolvers = {
       const exprMargin = Number(process.env.STATUS_EXPR_MARGIN || '0');
       const exprDate = new Date(Date.now() - exprMargin);
 
-      if (myContract.isTest) {
-        const myStatuses = await me.getStatuses({
-          where: {
-            expiresAt: { [Op.gt]: exprDate },
-            isMock: false,
-          },
-        });
+      const subQuery = myContract.isTest ? `
+        statuses_users."userId" = $(myId) OR
+        (statuses."isMock" = 't' AND statuses.published = 't')
+      ` : `
+        (statuses."isTest" = 'f' OR statuses."isTest" IS NULL) AND
+        (statuses."isMock" = 'f' OR statuses."isMock" IS NULL) AND (
+          statuses_users."userId" = $(myId) OR
+          statuses.published = 't'
+        )
+      `;
 
-        const statuses = await Status.findAll({
-          where: {
-            published: true,
-            expiresAt: { [Op.gt]: exprDate },
-            areaId: area.id,
-            isMock: true,
-          },
-        });
+      return db.map(`
+        SELECT statuses.*, row_to_json(users) as author
+        FROM (
+          SELECT statuses.*, statuses_users."authorId"
+          FROM (
+            SELECT statuses.*, ST_AsGeoJSON(statuses.location)::json as location, statuses_weights.weight
+            FROM statuses
+            INNER JOIN (
+              SELECT statuses_users."statusId", COUNT(DISTINCT statuses_users."userId") as weight
+              FROM statuses
+              INNER JOIN statuses_users
+              ON statuses_users."statusId" = statuses.id
+              WHERE (
+                "expiresAt" >= $(exprDate) AND
+                "areaId" = $(areaId) AND (${subQuery})
+              )
+              GROUP BY statuses_users."statusId"
+            ) AS statuses_weights
+            ON statuses_weights."statusId" = statuses.id
+          ) as statuses
+          INNER JOIN statuses_users
+          ON statuses_users."statusId" = statuses.id
+          WHERE statuses_users."isAuthor" = 't'
+        ) as statuses
+        INNER JOIN users
+        ON users.id = statuses."authorId";
+      `, {
+        exprDate,
+        areaId: area.id,
+        myId: me.id,
+      }, s => {
+        const status = new Status(s);
+        status.author = s.author;
+        status.weight = s.weight;
 
-        return [...myStatuses, ...statuses];
-      }
-
-      const myStatuses = await me.getStatuses({
-        where: {
-          published: false,
-          expiresAt: { [Op.gt]: exprDate },
-          areaId: area.id,
-          isTest: { [Op.or]: [false, null] },
-          isMock: { [Op.or]: [false, null] },
-        },
+        return status;
       });
-
-      const statuses = await Status.findAll({
-        where: {
-          published: true,
-          expiresAt: { [Op.gt]: exprDate },
-          areaId: area.id,
-          isTest: { [Op.or]: [false, null] },
-          isMock: { [Op.or]: [false, null] },
-        },
-      });
-
-      return [...myStatuses, ...statuses];
     },
   },
 
@@ -226,6 +233,12 @@ const resolvers = {
     },
 
     async author(status) {
+      const { User } = useModels();
+
+      if (status.author) {
+        return new User(status.author);
+      }
+
       const [user] = await status.getUsers({
         through: {
           where: {
@@ -238,7 +251,7 @@ const resolvers = {
     },
 
     weight(status) {
-      return status.countUsers();
+      return status.weight ? Number(status.weight) : status.countUsers();
     },
 
     images(status) {
