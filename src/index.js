@@ -5,12 +5,13 @@ import morgan from 'morgan';
 import http from 'http';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
+import asyncHandler from 'express-async-handler';
 
 import bootstrap from './bootstrap';
 import schemaDirectives from './directives';
 import * as middlewares from './middlewares';
 import { initLoaders } from './loaders';
-import { useModels } from './providers';
+import { useDb, useModels } from './providers';
 import resolvers from './resolvers';
 import rest from './rest';
 import schema from './schema';
@@ -22,6 +23,18 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(middlewares.me());
 app.use(rest);
+
+app.use(asyncHandler(async (req, res, next) => {
+  const db = useDb();
+
+  req.on('close', () => {
+    req.db.done();
+  });
+
+  req.db = await db.connect();
+
+  next();
+}));
 
 const server = new ApolloServer({
   introspection: true,
@@ -41,13 +54,30 @@ const server = new ApolloServer({
       message,
     };
   },
+  subscriptions: {
+    async onConnect(connectionParams) {
+      const db = useDb();
+
+      return {
+        ...connectionParams,
+        db: await db.connect(),
+      };
+    },
+    async onDisconnect(ws, context) {
+      const { db } = await context.initPromise;
+
+      db.done();
+    },
+  },
   context: async ({ req, res, connection }) => {
     const { Contract } = useModels();
 
     let me;
+    let db;
     let myContract;
     getMe:
     if (connection) {
+      db = connection.context.db;
       const authToken = get(connection, 'context.cookie.authToken');
 
       if (!authToken) break getMe;
@@ -60,14 +90,16 @@ const server = new ApolloServer({
     }
     else {
       me = req.me;
+      db = req.db;
       myContract = req.myContract;
     }
 
     return {
       req,
       res,
-      connection,
       me,
+      db,
+      connection,
       myContract,
       loaders: initLoaders(),
     };
