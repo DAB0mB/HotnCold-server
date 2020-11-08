@@ -77,13 +77,11 @@ const resolvers = {
         },
       });
 
-      if (!chat.isThread) {
-        users.forEach((user) => {
-          user.chats_users = {
-            unreadMessagesIds: [message.id].concat(user.chats_users.unreadMessagesIds).filter(Boolean),
-          };
-        });
-      }
+      users.forEach((user) => {
+        user.chats_users = {
+          unreadMessagesIds: [message.id].concat(user.chats_users.unreadMessagesIds).filter(Boolean),
+        };
+      });
 
       chat.bumpedAt = new Date();
       chat.isListed = true;

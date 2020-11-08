@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-express';
 
 export default gql `
   extend type Query {
-    status(statusId: ID!): Status @auth
+    status(statusId: ID, chatId: ID): Status @auth
     statuses(userId: ID, limit: Int!, anchor: ID): [Status]! @auth
     statusChat(statusId: ID!): Chat @auth
     firstStatus: Status @auth

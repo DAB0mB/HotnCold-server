@@ -11,33 +11,65 @@ const resolvers = {
       return status?.chat || null;
     },
 
-    async status(query, { statusId }) {
+    async status(query, { statusId, chatId }, { db }) {
       const { Status, Chat, User } = useModels();
 
-      const status = await Status.findOne({
-        include: [
-          {
-            model: User,
-            as: 'users',
-            through: {
-              where: { isAuthor: true },
-            },
-          },
-          {
-            model: Chat,
-            as: 'chat',
-          },
-        ],
-        where: { id: statusId },
-      });
+      if (chatId) {
+        const [status] = await db.map(`
+          SELECT statuses.*, ST_AsGeoJSON(statuses.location)::json as location, row_to_json(users) as author
+          FROM (
+            SELECT statuses.*, statuses_users."userId"
+            FROM (
+              SELECT statuses.*, row_to_json(chats) as chat
+              FROM statuses
+              INNER JOIN chats
+              ON chats.id = $(chatId)
+              WHERE chats.id = statuses."chatId"
+            ) AS statuses
+            INNER JOIN statuses_users
+            ON statuses_users."statusId" = statuses.id
+            WHERE "isAuthor" IS TRUE
+          ) AS statuses
+          INNER JOIN users
+          ON users.id = statuses."userId"
+        `, {
+          chatId,
+        }, (s) => {
+          const status = new Status(s);
+          status.chat = new Chat(s.chat);
+          status.chat.recipient = new User(s.author);
 
-      if (!status) {
-        return null;
+          return status;
+        });
+
+        return status;
       }
+      else {
+        const status = await Status.findOne({
+          include: [
+            {
+              model: User,
+              as: 'users',
+              through: {
+                where: { isAuthor: true },
+              },
+            },
+            {
+              model: Chat,
+              as: 'chat',
+            },
+          ],
+          where: { id: statusId },
+        });
 
-      status.chat.recipient = status.users[0];
+        if (!status) {
+          return null;
+        }
 
-      return status;
+        status.chat.recipient = status.users[0];
+
+        return status;
+      }
     },
 
     async statuses(query, { userId, limit, anchor }, { me }) {

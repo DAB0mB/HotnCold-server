@@ -3,8 +3,8 @@ import { gql } from 'apollo-server-express';
 export default gql`
   extend type Query {
     chat(chatId: ID!): Chat @auth
-    chats(limit: Int!, anchor: ID): [Chat]! @auth
-    firstChat: Chat @auth
+    chats(limit: Int!, anchor: ID, includeThreads: Boolean): [Chat]! @auth
+    firstChat(includeThreads: Boolean): Chat @auth
     participants(chatId: ID!, limit: Int!, anchor: ID): [User]! @auth
     firstParticipant(chatId: ID!): User @auth
   }
@@ -30,5 +30,6 @@ export default gql`
     participantsCount: Int!
     recipient: User!
     subscribed: Boolean!
+    isThread: Boolean!
   }
 `;
