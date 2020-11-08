@@ -118,7 +118,7 @@ const resolvers = {
       return db.map(`
         SELECT statuses.*, row_to_json(users) as author
         FROM (
-          SELECT statuses.*, statuses_users."authorId"
+          SELECT statuses.*, statuses_users."userId" as "authorId"
           FROM (
             SELECT statuses.*, ST_AsGeoJSON(statuses.location)::json as location, statuses_weights.weight
             FROM statuses

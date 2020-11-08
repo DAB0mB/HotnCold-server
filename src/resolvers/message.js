@@ -41,7 +41,7 @@ const resolvers = {
   },
 
   Mutation: {
-    async sendMessage(mutation, { chatId, text, image }, { me, myContract }) {
+    async sendMessage(mutation, { chatId, text, image }, { db, me, myContract }) {
       if (!text && !image) {
         throw Error('Either message.text or message.image must be provided');
       }
@@ -77,7 +77,6 @@ const resolvers = {
         },
       });
 
-      // For now, accumulate unread messages for private chats only
       if (!chat.isThread) {
         users.forEach((user) => {
           user.chats_users = {
@@ -124,13 +123,13 @@ const resolvers = {
 
       const newSubscriptions = users
         .filter((user) => {
-          return !subscriptions.find(s => s.userId == user.id);
+          return !subscriptions.some(s => s.userId == user.id);
         })
         .map((user) => {
           const chatSubscription = new ChatSubscription({
             chatId: chat.id,
             userId: user.id,
-            isActive: !chat.isThread,
+            isActive: true,
             isTest: myContract.isTest,
           });
 
@@ -139,11 +138,18 @@ const resolvers = {
           return chatSubscription;
         });
 
-      if (newSubscriptions.length) {
-        await chat.addSubscriptions(newSubscriptions);
+      await db.tx(t => {
+        const queries = newSubscriptions.map(sub => {
+          return t.none('INSERT INTO chats_subscriptions VALUES($(id), $(userId), $(chatId), $(isTest), $(isActive), $(createdAt), $(updatedAt))', {
+            ...sub.dataValues,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+        });
+        return t.batch(queries);
+      });
 
-        subscriptions.push(...newSubscriptions);
-      }
+      subscriptions.push(...newSubscriptions);
 
       subscriptions
         .filter(s => s.isActive)
@@ -160,10 +166,10 @@ const resolvers = {
                   statusId: chat.status?.id,
                   chatId,
                 },
-                body: message.text ? message.text : '📷 Image', // TODO: Multiline?
+                body: message.text ? message.text : '📷 Media', // TODO: Multiline?
                 ...(chat.isThread ? {
-                  largeIcon: await me.ensureAvatar(),
-                  title: `${me.name} (thread)`,
+                  largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
+                  title: `${me.name}'s status`,
                 } : {
                   largeIcon: await Resolvers.Chat.picture(chat, {}, { me: user }),
                   title: await Resolvers.Chat.title(chat, {}, { me: user }),
@@ -199,6 +205,7 @@ const resolvers = {
               chatId,
               text: 'echo',
             }, {
+              db,
               me: recipient,
               myContract: { isMock: true },
             });

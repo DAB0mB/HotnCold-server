@@ -154,20 +154,18 @@ const resolvers = {
         throw Error('Chat not found!');
       }
 
-      const [subscription] = await chat.getSubscriptions({
+      let [subscription] = await chat.getSubscriptions({
         limit: 1,
         where: { userId: me.id },
       });
 
       if (!subscription) {
-        await ChatSubscription.create({
+        subscription = new ChatSubscription({
           chatId: chat.id,
           userId: me.id,
           isActive: true,
           isTest: myContract.isTest,
         });
-
-        return true;
       }
 
       subscription.isActive = !subscription.isActive;
@@ -225,18 +223,27 @@ const resolvers = {
     },
 
     async picture(chat, args, { me }) {
-      if (chat.isThread) return null;
+      if (chat.isThread) {
+        const status = await chat.getStatus({
+          attributes: ['images']
+        });
 
-      const [recipient] = await chat.getUsers({
-        where: {
-          id: { [Op.ne]: me.id },
-        },
-        attributes: ['pictures']
-      });
+        if (!status) return null;
 
-      if (!recipient) return null;
+        return status.images[0];
+      }
+      else {
+        const [recipient] = await chat.getUsers({
+          where: {
+            id: { [Op.ne]: me.id },
+          },
+          attributes: ['pictures']
+        });
 
-      return recipient.pictures[0];
+        if (!recipient) return null;
+
+        return recipient.pictures[0];
+      }
     },
 
     async title(chat, args, { me }) {
