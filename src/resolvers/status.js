@@ -28,7 +28,7 @@ const resolvers = {
             ) AS statuses
             INNER JOIN statuses_users
             ON statuses_users."statusId" = statuses.id
-            WHERE "isAuthor" IS TRUE
+            WHERE statuses_users."isAuthor" IS TRUE
           ) AS statuses
           INNER JOIN users
           ON users.id = statuses."userId"
