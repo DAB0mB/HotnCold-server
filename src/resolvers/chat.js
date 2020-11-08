@@ -16,7 +16,7 @@ const resolvers = {
       return myChats[0] || null;
     },
 
-    async chats(query, { limit, anchor, includeThreads }, { me }) {
+    async chats(query, { limit, anchor, includeThreads }, { db, me }) {
       const { Chat } = useModels();
 
       let anchorBumpedAt = new Date();
@@ -31,7 +31,7 @@ const resolvers = {
         }
       }
 
-      return me.getChats({
+      const chats = await me.getChats({
         where: {
           bumpedAt: { [Op.lt]: anchorBumpedAt },
           isListed: true,
@@ -42,6 +42,12 @@ const resolvers = {
         order: [['bumpedAt', 'DESC']],
         limit,
       });
+
+      await Promise.all(chats.map(async (chat) => {
+        chat.recipient = await resolvers.Chat.recipient(chat, {}, { db, me });
+      }));
+
+      return chats;
     },
 
     async firstChat(query, { includeThreads }, { me }) {
@@ -274,9 +280,38 @@ const resolvers = {
       return recipient.name;
     },
 
-    async recipient(chat, args, { me }) {
+    async recipient(chat, args, { db, me }) {
+      const { User } = useModels();
+
       if (chat.recipient) {
         return chat.recipient;
+      }
+
+      if (chat.isThread) {
+        const [recipient] = await db.map(`
+          SELECT users.*
+          FROM (
+            SELECT statuses_users."userId"
+            FROM (
+              SELECT statuses.id
+              FROM statuses
+              INNER JOIN chats
+              ON chats.id = $(chatId)
+              WHERE chats.id = statuses."chatId"
+            ) AS statuses
+            INNER JOIN statuses_users
+            ON statuses_users."statusId" = statuses.id
+            WHERE statuses_users."isAuthor" IS TRUE
+          ) AS statuses
+          INNER JOIN users
+          ON users.id = statuses."userId"
+        `, {
+          chatId: chat.id,
+        }, (u) => {
+          return new User(u);
+        });
+
+        return recipient;
       }
 
       const users = await chat.getUsers({
