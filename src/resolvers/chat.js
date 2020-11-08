@@ -16,37 +16,41 @@ const resolvers = {
       return myChats[0] || null;
     },
 
-    async chats(query, { limit, anchor }, { me }) {
-      const { ChatUser } = useModels();
+    async chats(query, { limit, anchor, includeThreads }, { me }) {
+      const { Chat } = useModels();
 
       let anchorBumpedAt = new Date();
       if (anchor) {
-        const chatUser = await ChatUser.findOne({
-          where: { userId: me.id, chatId: anchor },
+        const chat = await Chat.findOne({
+          where: { id: anchor },
           attributes: ['bumpedAt'],
         });
 
-        if (chatUser) {
-          anchorBumpedAt = chatUser.bumpedAt;
+        if (chat) {
+          anchorBumpedAt = chat.bumpedAt;
         }
       }
 
       return me.getChats({
         where: {
-          isThread: { [Op.or]: [false, null] },
           bumpedAt: { [Op.lt]: anchorBumpedAt },
           isListed: true,
+          ...(includeThreads ? {} : {
+            isThread: { [Op.or]: [false, null] },
+          }),
         },
         order: [['bumpedAt', 'DESC']],
         limit,
       });
     },
 
-    async firstChat(query, args, { me }) {
+    async firstChat(query, { includeThreads }, { me }) {
       const [chat] = await me.getChats({
         where: {
-          isThread: { [Op.or]: [false, null] },
           isListed: true,
+          ...(includeThreads ? {} : {
+            isThread: { [Op.or]: [false, null] },
+          }),
         },
         order: [['bumpedAt', 'ASC']],
         limit: 1,
@@ -247,16 +251,27 @@ const resolvers = {
     },
 
     async title(chat, args, { me }) {
-      if (chat.isThread) return null;
+      let recipient = chat.recipient;
 
-      const users = await chat.getUsers({
-        where: {
-          id: { [Op.ne]: me.id },
-        },
-        attributes: ['name']
-      });
+      if (!recipient) {
+        const users = await chat.getUsers({
+          where: {
+            id: { [Op.ne]: me.id },
+          },
+          attributes: ['name']
+        });
 
-      return users.length && users[0].name;
+        recipient = users[0];
+      }
+
+
+      if (!recipient) return null;
+
+      if (chat.isThread) {
+        return recipient.name + '\'s status';
+      }
+
+      return recipient.name;
     },
 
     async recipient(chat, args, { me }) {
@@ -275,6 +290,10 @@ const resolvers = {
 
     participantsCount(chat) {
       return chat.countUsers();
+    },
+
+    isThread(chat) {
+      return !!chat.isThread;
     },
 
     async subscribed(chat, args, { me }) {
