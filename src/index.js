@@ -43,6 +43,8 @@ const server = new ApolloServer({
   resolvers,
   schemaDirectives,
   formatError: error => {
+    console.error(error);
+
     // remove the internal sequelize error message
     // leave only the important validation error
     const message = error.message
