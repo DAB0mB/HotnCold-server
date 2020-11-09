@@ -240,7 +240,7 @@ const resolvers = {
 
         if (!status) return null;
 
-        return status.images[0];
+        return status.images?.[0];
       }
       else {
         const [recipient] = await chat.getUsers({
