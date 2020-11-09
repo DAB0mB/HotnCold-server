@@ -31,5 +31,6 @@ export default gql`
     recipient: User!
     subscribed: Boolean!
     isThread: Boolean!
+    createdAt: DateTime!
   }
 `;
