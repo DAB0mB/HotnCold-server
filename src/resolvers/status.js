@@ -35,9 +35,9 @@ const resolvers = {
         `, {
           chatId,
         }, (s) => {
-          const status = new Status(s);
-          status.chat = new Chat(s.chat);
-          status.chat.recipient = new User(s.author);
+          const status = new Status(s, { isNewRecord: false }).set(s, { raw: true });
+          status.chat = new Chat(s.chat, { isNewRecord: false }).set(s.chat, { raw: true });
+          status.chat.recipient = new User(s.author, { isNewRecord: false }).set(s.author, { raw: true });
 
           return status;
         });
@@ -123,7 +123,7 @@ const resolvers = {
     },
 
     async areaStatuses(query, { location }, { db, me, myContract }) {
-      const { Status, Area } = useModels();
+      const { Status, User, Area } = useModels();
 
       const area = await Area.findOne({
         where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
@@ -137,7 +137,7 @@ const resolvers = {
       const exprDate = new Date(Date.now() - exprMargin);
 
       const subQuery = myContract.isTest ? `
-        statuses_users."userId" = $(myId) OR
+        (statuses_users."userId" = $(myId)) OR
         (statuses."isMock" = 't' AND statuses.published = 't')
       ` : `
         (statuses."isTest" = 'f' OR statuses."isTest" IS NULL) AND
@@ -178,8 +178,8 @@ const resolvers = {
         areaId: area.id,
         myId: me.id,
       }, s => {
-        const status = new Status(s);
-        status.author = s.author;
+        const status = new Status(s, { isNewRecord: false }).set(s, { raw: true });
+        status.author = new User(s.author, { isNewRecord: false }).set(s.author, { raw: true });
         status.weight = s.weight;
 
         return status;
@@ -265,10 +265,8 @@ const resolvers = {
     },
 
     async author(status) {
-      const { User } = useModels();
-
       if (status.author) {
-        return new User(status.author);
+        return status.author;
       }
 
       const [user] = await status.getUsers({

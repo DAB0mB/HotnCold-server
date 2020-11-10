@@ -66,9 +66,10 @@ const server = new ApolloServer({
       };
     },
     async onDisconnect(ws, context) {
+      // Sometimes initPromise will return true (???) there doesn't seem to be any leak
       const { db } = await context.initPromise;
 
-      db.done();
+      db?.done();
     },
   },
   context: async ({ req, res, connection }) => {
