@@ -308,7 +308,7 @@ const resolvers = {
         `, {
           chatId: chat.id,
         }, (u) => {
-          return new User(u);
+          return new User(u, { isNewRecord: false }).set(u, { raw: true });
         });
 
         return recipient;
