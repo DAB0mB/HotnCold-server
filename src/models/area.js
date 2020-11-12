@@ -1,5 +1,6 @@
 import turfBbox from '@turf/bbox';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import Sequelize from 'sequelize';
 import uuid from 'uuid';
 
 const area = (sequelize, DataTypes) => {
@@ -61,6 +62,12 @@ const area = (sequelize, DataTypes) => {
       where: {
         countryCode: jsPhone.countryCallingCode
       },
+    });
+  };
+
+  Area.findByLocation = (location) => {
+    return Area.findOne({
+      where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
     });
   };
 

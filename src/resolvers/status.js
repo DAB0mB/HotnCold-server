@@ -125,9 +125,7 @@ const resolvers = {
     async areaStatuses(query, { location }, { db, me, myContract }) {
       const { Status, User, Area } = useModels();
 
-      const area = await Area.findOne({
-        where: Sequelize.where(Sequelize.fn('ST_Contains', Sequelize.col('area.polygon'), Sequelize.fn('ST_MakePoint', ...location)), true),
-      });
+      const area = await Area.findByLocation(location);
 
       if (!area) {
         return [];
@@ -184,6 +182,75 @@ const resolvers = {
 
         return status;
       });
+    },
+
+    async areaStatusesList(query, { limit, anchor, location, root }, { db, me, myContract }) {
+      const { Status, User, Area } = useModels();
+
+      const area = await Area.findByLocation(location);
+
+      if (!area) {
+        return root ? null : [];
+      }
+
+      let anchorCreatedAt = new Date();
+      if (anchor) {
+        const status = await Status.findOne({ where: { id: anchor } });
+
+        if (status) {
+          anchorCreatedAt = status.createdAt;
+        }
+      }
+
+      const subQuery = myContract.isTest ? `
+        (statuses_users."userId" = $(myId)) OR
+        (statuses."isMock" IS TRUE AND statuses.published IS TRUE)
+      ` : `
+        (statuses."isTest" IS FALSE OR statuses."isTest" IS NULL) AND
+        (statuses."isMock" IS FALSE OR statuses."isMock" IS NULL) AND (
+          statuses_users."userId" = $(myId) OR
+          statuses.published IS TRUE
+        )
+      `;
+
+      const statuses = await db.map(`
+        SELECT statuses.*, row_to_json(users) as author
+        FROM (
+          SELECT statuses.*, ST_AsGeoJSON(statuses.location)::json as location, -1 as weight, statuses_users."userId" as "authorId"
+          FROM statuses
+          INNER JOIN statuses_users
+          ON statuses_users."statusId" = statuses.id
+          WHERE (
+            statuses."areaId" = $(areaId) AND
+            statuses_users."isAuthor" IS TRUE AND
+            (${subQuery}) ${root ? '' : 'AND statuses."createdAt" < $(anchor)'}
+          )
+          ORDER BY statuses."createdAt"
+          ${root ? 'ASC' : 'DESC'}
+          LIMIT $(limit)
+        ) as statuses
+        INNER JOIN users
+        ON users.id = statuses."authorId"
+        ORDER BY statuses."createdAt"
+        DESC;
+      `, {
+        areaId: area.id,
+        myId: me.id,
+        anchor: anchorCreatedAt,
+        limit: root ? 1 : limit,
+      }, s => {
+        const status = new Status(s, { isNewRecord: false }).set(s, { raw: true });
+        status.author = new User(s.author, { isNewRecord: false }).set(s.author, { raw: true });
+        status.weight = s.weight;
+
+        return status;
+      });
+
+      return root ? statuses[0] : statuses;
+    },
+
+    areaStatusesListRoot(query, { location }, context, info) {
+      return resolvers.Query.areaStatusesList(query, { limit: 1, location, root: true }, context, info);
     },
   },
 
