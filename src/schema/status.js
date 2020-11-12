@@ -7,6 +7,8 @@ export default gql `
     statusChat(statusId: ID!): Chat @auth
     firstStatus: Status @auth
     areaStatuses(location: Vector2D!): [Status]! @auth
+    areaStatusesList(location: Vector2D!, limit: Int!, anchor: ID): [Status]! @auth
+    areaStatusesListRoot(location: Vector2D!): Status @auth
   }
 
   extend type Mutation {
