@@ -4,6 +4,8 @@ import { Op } from 'sequelize';
 import { lazyLimit } from '../consts';
 import { useModels, usePubsub } from '../providers';
 
+const $fullChat = Symbol('fullChat');
+
 const resolvers = {
   Query: {
     async chat(query, { chatId }, { me }) {
@@ -126,12 +128,18 @@ const resolvers = {
       if (!chat) {
         chat = new Chat();
         chat.isTest = myContract.isTest;
-        await chat.save();
+
+        const t = await Chat.sequelize.transaction();
+
+        await chat.save({ transaction: t });
+
         await chat.addUsers([me, recipientId], {
           through: {
             isTest: myContract.isTest,
           },
-        });
+        }, { transaction: t });
+
+        await t.commit();
       }
 
       return chat;
@@ -187,10 +195,21 @@ const resolvers = {
 
   Subscription: {
     chatBumped: {
-      resolve({ chatBumped }) {
+      async resolve({ chatBumped }, args, context) {
         const { Chat } = useModels();
+        const { db, me } = context;
 
-        return new Chat(chatBumped);
+        const fullChat = context[$fullChat] = context[$fullChat] ?? await (() => {
+          return Chat.resolveFull(chatBumped.id, { db }).then((fullChat) => {
+            setImmediate(() => {
+              delete context[$fullChat];
+            });
+
+            return fullChat;
+          });
+        })();
+
+        return fullChat.relativeTo(me.id, { db });
       },
       subscribe: withFilter(
         () => usePubsub().asyncIterator('chatBumped'),
@@ -202,7 +221,8 @@ const resolvers = {
           chatBumped = new Chat(chatBumped);
 
           const [user] = await chatBumped.getUsers({
-            where: { id: me.id }
+            where: { id: me.id },
+            limit: 1,
           });
 
           if (!user) return false;
@@ -215,18 +235,22 @@ const resolvers = {
 
   Chat: {
     async unreadMessagesCount(chat, args, { me }) {
+      if ('unreadMessagesCount' in chat) return chat.unreadMessagesCount;
+
       const [user] = await chat.getUsers({
         where: { id: me.id },
       });
 
-      return user?.chats_users?.dataValues?.unreadMessagesIds?.length || 0;
+      return chat.unreadMessagesCount || user?.chats_users?.dataValues?.unreadMessagesIds?.length || 0;
     },
 
     recentMessages(chat) {
-      return chat.getMessages({ order: [['createdAt', 'DESC']], limit: lazyLimit });
+      return chat.recentMessages ?? chat.getMessages({ order: [['createdAt', 'DESC']], limit: lazyLimit });
     },
 
     async firstMessage(chat) {
+      if ('firstMessage' in chat) return chat.firstMessage;
+
       const messages = await chat.getMessages({ order: [['createdAt', 'ASC']], limit: 1 });
 
       return messages[0];
@@ -234,7 +258,7 @@ const resolvers = {
 
     async picture(chat, args, { me }) {
       if (chat.isThread) {
-        const status = await chat.getStatus({
+        const status = chat.status || await chat.getStatus({
           attributes: ['images']
         });
 
@@ -243,12 +267,12 @@ const resolvers = {
         return status.images?.[0];
       }
       else {
-        const [recipient] = await chat.getUsers({
+        const recipient = chat.recipient || (await chat.getUsers({
           where: {
             id: { [Op.ne]: me.id },
           },
           attributes: ['pictures']
-        });
+        }))[0];
 
         if (!recipient) return null;
 
@@ -258,6 +282,8 @@ const resolvers = {
 
     async title(chat, args, { me }) {
       let recipient = chat.recipient;
+
+      if (recipient === null) return null;
 
       if (!recipient) {
         const users = await chat.getUsers({
@@ -269,7 +295,6 @@ const resolvers = {
 
         recipient = users[0];
       }
-
 
       if (!recipient) return null;
 
@@ -324,7 +349,7 @@ const resolvers = {
     },
 
     participantsCount(chat) {
-      return chat.countUsers();
+      return chat.participantsCount ?? chat.countUsers();
     },
 
     isThread(chat) {
@@ -332,7 +357,7 @@ const resolvers = {
     },
 
     async subscribed(chat, args, { me }) {
-      return !!await chat.countSubscriptions({
+      return chat.subscribed ?? !!await chat.countSubscriptions({
         limit: 1,
         where: {
           userId: me.id,
