@@ -75,3 +75,24 @@ export const freeText = (text) => {
     .trim()
     .replace(/\n +\n/g, '\n\n');
 };
+
+export const fork = (obj) => {
+  if (!(obj instanceof Object)) {
+    return obj;
+  }
+
+  const clone = {};
+  const keys = [];
+  keys.push(...Object.getOwnPropertyNames(obj));
+  keys.push(...Object.getOwnPropertySymbols(obj));
+
+  for (const key of keys) {
+    const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+    Object.defineProperty(clone, key, descriptor);
+  }
+
+  const proto = Object.getPrototypeOf(obj);
+  Object.setPrototypeOf(clone, proto);
+
+  return clone;
+};
