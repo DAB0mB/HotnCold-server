@@ -126,6 +126,14 @@ const resolvers = {
 
       return contract;
     },
+
+    async addContractReferenceDetails(mutation, { email, referenceComment }, { myContract }) {
+      myContract.email = email;
+      myContract.referenceComment = referenceComment;
+      await myContract.save();
+
+      return myContract;
+    },
   },
 
   Contract: {
