@@ -12,6 +12,14 @@ const contract = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    referenceComment: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     passcode: {
       type: DataTypes.STRING,
       allowNull: false,
