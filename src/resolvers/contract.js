@@ -127,9 +127,9 @@ const resolvers = {
       return contract;
     },
 
-    async addContractReferenceDetails(mutation, { email, referenceComment }, { myContract }) {
-      myContract.email = email;
+    async addContractReferenceDetails(mutation, { referenceComment }, { myContract }) {
       myContract.referenceComment = referenceComment;
+      myContract.referenceSubmitted = true;
       await myContract.save();
 
       return myContract;
@@ -141,6 +141,10 @@ const resolvers = {
       if (contract.isTest) {
         return contract.passcode;
       }
+    },
+
+    referenceSubmitted(contract) {
+      return !!contract.referenceSubmitted;
     },
   },
 };
