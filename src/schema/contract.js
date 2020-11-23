@@ -8,7 +8,7 @@ export default gql`
   extend type Mutation {
     findOrCreateContract(phone: String!): Contract!
     verifyContract(contractId: ID!, passcode: String!): Contract!
-    addContractReferenceDetails(email: String!, referenceComment: String!): Contract!
+    addContractReferenceDetails(referenceComment: String!): Contract!
   }
 
   type Contract {
@@ -17,5 +17,6 @@ export default gql`
     isTest: Boolean
     signed: Boolean
     passcode: String
+    referenceSubmitted: Boolean!
   }
 `;

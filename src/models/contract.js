@@ -12,12 +12,12 @@ const contract = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: {
+    referenceComment: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    referenceComment: {
-      type: DataTypes.STRING,
+    referenceSubmitted: {
+      type: DataTypes.BOOLEAN,
       allowNull: true,
     },
     passcode: {

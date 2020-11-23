@@ -2,15 +2,15 @@ export default {
   up(queryInterface, Sequelize) {
     return queryInterface.sequelize.transaction((transaction) => {
       return Promise.all([
-        queryInterface.addColumn('contracts', 'email', {
-          type: Sequelize.ARRAY(Sequelize.STRING),
+        queryInterface.addColumn('contracts', 'referenceComment', {
+          type: Sequelize.STRING,
           allowNull: true,
         }, {
           transaction
         }),
 
-        queryInterface.addColumn('contracts', 'referenceComment', {
-          type: Sequelize.ARRAY(Sequelize.STRING),
+        queryInterface.addColumn('contracts', 'referenceSubmitted', {
+          type: Sequelize.BOOLEAN,
           allowNull: true,
         }, {
           transaction
@@ -22,11 +22,11 @@ export default {
   down(queryInterface) {
     return queryInterface.sequelize.transaction((transaction) => {
       return Promise.all([
-        queryInterface.removeColumn('contracts', 'email', {
+        queryInterface.removeColumn('contracts', 'referenceComment', {
           transaction
         }),
 
-        queryInterface.removeColumn('contracts', 'referenceComment', {
+        queryInterface.removeColumn('contracts', 'referenceSubmitted', {
           transaction
         }),
       ]);
