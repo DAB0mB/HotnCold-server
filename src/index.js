@@ -28,7 +28,7 @@ app.use(asyncHandler(async (req, res, next) => {
   const db = useDb();
 
   req.on('close', () => {
-    req.db.done();
+    req.db?.done();
   });
 
   req.db = await db.connect();
