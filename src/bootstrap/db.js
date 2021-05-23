@@ -9,7 +9,10 @@ const bootstrapDb = () => {
     query(e) {
       console.log('Executing (default):', freeText(e.query));
     },
-  })(process.env.DATABASE_URL);
+  })({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
 
   return provideDb(db);
 };
