@@ -102,6 +102,15 @@ const mockData = {
       });
     }
 
+    {
+      const area = areas.find(a => a.name == 'Sydney, New South Wales, Australia');
+
+      locations.push({
+        coordinates: area.center.coordinates,
+        areaId: area.id,
+      });
+    }
+
     const chats = [];
     const users = [];
     const statuses = [];
