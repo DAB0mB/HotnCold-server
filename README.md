@@ -1,5 +1,7 @@
 # Hot&Cold (Server)
 
+The backend for the social app [Hot&Cold](https://github.com/DAB0mB/HotnCold).
+
 ## Setup
 
 Configure the following services:
@@ -55,7 +57,9 @@ Install dependencies:
 
 In a new environment, migrate DB schema changes:
 
-    $ yarn sequelize db:migrate
+    $ yarn migrate
+
+Be sure to [define a polygon of your city of choice](https://github.com/DAB0mB/HotnCold-server/blob/master/src/seeders/20191122123942-create-areas.js) if you want it to be supported in the app.
 
 ## Dev
 
